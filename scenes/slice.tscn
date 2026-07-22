@@ -1,4 +1,4 @@
-[gd_scene load_steps=60 format=3]
+[gd_scene load_steps=62 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1"]
 [ext_resource type="Script" path="res://scripts/slice.gd" id="2"]
@@ -37,46 +37,46 @@ material = SubResource("floor_mat")
 size = Vector3(12, 1, 35)
 
 [sub_resource type="BoxShape3D" id="shape_p2"]
-size = Vector3(8, 1, 26)
+size = Vector3(8, 1, 22)
 
 [sub_resource type="BoxMesh" id="mesh_p2"]
 material = SubResource("floor_mat")
-size = Vector3(8, 1, 26)
+size = Vector3(8, 1, 22)
 
 [sub_resource type="BoxShape3D" id="shape_p3"]
-size = Vector3(8, 1, 20)
+size = Vector3(3, 1, 18)
 
 [sub_resource type="BoxMesh" id="mesh_p3"]
 material = SubResource("floor_mat")
-size = Vector3(8, 1, 20)
+size = Vector3(3, 1, 18)
 
 [sub_resource type="BoxShape3D" id="shape_p4"]
-size = Vector3(8, 1, 28)
+size = Vector3(8, 1, 24)
 
 [sub_resource type="BoxMesh" id="mesh_p4"]
 material = SubResource("floor_mat")
-size = Vector3(8, 1, 28)
+size = Vector3(8, 1, 24)
 
 [sub_resource type="BoxShape3D" id="shape_p5"]
-size = Vector3(8, 1, 24)
+size = Vector3(5, 1, 22)
 
 [sub_resource type="BoxMesh" id="mesh_p5"]
 material = SubResource("floor_mat")
-size = Vector3(8, 1, 24)
+size = Vector3(5, 1, 22)
 
 [sub_resource type="BoxShape3D" id="shape_p6"]
-size = Vector3(8, 1, 22)
+size = Vector3(5, 1, 22)
 
 [sub_resource type="BoxMesh" id="mesh_p6"]
 material = SubResource("floor_mat")
-size = Vector3(8, 1, 22)
+size = Vector3(5, 1, 22)
 
 [sub_resource type="BoxShape3D" id="shape_p7"]
-size = Vector3(10, 1, 40)
+size = Vector3(6, 1, 19)
 
 [sub_resource type="BoxMesh" id="mesh_p7"]
 material = SubResource("floor_mat")
-size = Vector3(10, 1, 40)
+size = Vector3(6, 1, 19)
 
 [sub_resource type="BoxShape3D" id="shape_s"]
 size = Vector3(6, 1, 8)
@@ -145,18 +145,25 @@ material = SubResource("stripe_mat")
 size = Vector3(0.1, 8, 0.6)
 
 [sub_resource type="BoxShape3D" id="shape_p8"]
-size = Vector3(8, 1, 30)
+size = Vector3(3, 1, 24)
 
 [sub_resource type="BoxMesh" id="mesh_p8"]
 material = SubResource("floor_mat")
-size = Vector3(8, 1, 30)
+size = Vector3(3, 1, 24)
 
 [sub_resource type="BoxShape3D" id="shape_p9"]
-size = Vector3(10, 1, 48)
+size = Vector3(6, 1, 44)
 
 [sub_resource type="BoxMesh" id="mesh_p9"]
 material = SubResource("floor_mat")
-size = Vector3(10, 1, 48)
+size = Vector3(6, 1, 44)
+
+[sub_resource type="BoxShape3D" id="shape_step"]
+size = Vector3(6, 1, 3)
+
+[sub_resource type="BoxMesh" id="mesh_step"]
+material = SubResource("floor_mat")
+size = Vector3(6, 1, 3)
 
 [sub_resource type="BoxShape3D" id="shape_wall_ext"]
 size = Vector3(1, 10, 80)
@@ -218,7 +225,7 @@ shape = SubResource("shape_p1")
 mesh = SubResource("mesh_p1")
 
 [node name="P2" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -46)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -47)
 
 [node name="Col" type="CollisionShape3D" parent="P2"]
 shape = SubResource("shape_p2")
@@ -227,7 +234,7 @@ shape = SubResource("shape_p2")
 mesh = SubResource("mesh_p2")
 
 [node name="P3" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -72)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -73)
 
 [node name="Col" type="CollisionShape3D" parent="P3"]
 shape = SubResource("shape_p3")
@@ -236,7 +243,7 @@ shape = SubResource("shape_p3")
 mesh = SubResource("mesh_p3")
 
 [node name="P4" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -99)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -100)
 
 [node name="Col" type="CollisionShape3D" parent="P4"]
 shape = SubResource("shape_p4")
@@ -245,7 +252,7 @@ shape = SubResource("shape_p4")
 mesh = SubResource("mesh_p4")
 
 [node name="P5" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -128)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -131)
 
 [node name="Col" type="CollisionShape3D" parent="P5"]
 shape = SubResource("shape_p5")
@@ -254,7 +261,7 @@ shape = SubResource("shape_p5")
 mesh = SubResource("mesh_p5")
 
 [node name="S1" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -146)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, -1, -147.5)
 
 [node name="Col" type="CollisionShape3D" parent="S1"]
 shape = SubResource("shape_s")
@@ -262,17 +269,35 @@ shape = SubResource("shape_s")
 [node name="Mesh" type="MeshInstance3D" parent="S1"]
 mesh = SubResource("mesh_s")
 
-[node name="S2" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -152)
+[node name="StepA" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3.2, -204.5)
 
-[node name="Col" type="CollisionShape3D" parent="S2"]
-shape = SubResource("shape_s")
+[node name="Col" type="CollisionShape3D" parent="StepA"]
+shape = SubResource("shape_step")
 
-[node name="Mesh" type="MeshInstance3D" parent="S2"]
-mesh = SubResource("mesh_s")
+[node name="Mesh" type="MeshInstance3D" parent="StepA"]
+mesh = SubResource("mesh_step")
+
+[node name="StepB" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.9, -210.5)
+
+[node name="Col" type="CollisionShape3D" parent="StepB"]
+shape = SubResource("shape_step")
+
+[node name="Mesh" type="MeshInstance3D" parent="StepB"]
+mesh = SubResource("mesh_step")
+
+[node name="StepC" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -216.5)
+
+[node name="Col" type="CollisionShape3D" parent="StepC"]
+shape = SubResource("shape_step")
+
+[node name="Mesh" type="MeshInstance3D" parent="StepC"]
+mesh = SubResource("mesh_step")
 
 [node name="P6" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -162)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.5, -164)
 
 [node name="Col" type="CollisionShape3D" parent="P6"]
 shape = SubResource("shape_p6")
@@ -281,7 +306,7 @@ shape = SubResource("shape_p6")
 mesh = SubResource("mesh_p6")
 
 [node name="P7" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -193)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4.5, -190.5)
 
 [node name="Col" type="CollisionShape3D" parent="P7"]
 shape = SubResource("shape_p7")
@@ -298,17 +323,8 @@ shape = SubResource("shape_v")
 [node name="Mesh" type="MeshInstance3D" parent="VaultBox1"]
 mesh = SubResource("mesh_v")
 
-[node name="VaultBox2" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -180)
-
-[node name="Col" type="CollisionShape3D" parent="VaultBox2"]
-shape = SubResource("shape_v")
-
-[node name="Mesh" type="MeshInstance3D" parent="VaultBox2"]
-mesh = SubResource("mesh_v")
-
 [node name="Wall" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 3, -84)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7, 3, -147.5)
 
 [node name="Col" type="CollisionShape3D" parent="Wall"]
 shape = SubResource("shape_w")
@@ -438,18 +454,6 @@ mesh = SubResource("mesh_stripe")
 
 [node name="Stripe_180" type="MeshInstance3D" parent="Stripes"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -180)
-mesh = SubResource("mesh_stripe")
-
-[node name="Stripe_190" type="MeshInstance3D" parent="Stripes"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -190)
-mesh = SubResource("mesh_stripe")
-
-[node name="Stripe_200" type="MeshInstance3D" parent="Stripes"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -200)
-mesh = SubResource("mesh_stripe")
-
-[node name="Stripe_210" type="MeshInstance3D" parent="Stripes"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -210)
 mesh = SubResource("mesh_stripe")
 
 [node name="Stripe_220" type="MeshInstance3D" parent="Stripes"]
@@ -656,16 +660,8 @@ mesh = SubResource("mesh_pillar")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 1, -162)
 mesh = SubResource("mesh_pillar")
 
-[node name="Pillar_L_190" type="MeshInstance3D" parent="SidePillars"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 1, -190)
-mesh = SubResource("mesh_pillar")
-
-[node name="Pillar_R_190" type="MeshInstance3D" parent="SidePillars"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 1, -190)
-mesh = SubResource("mesh_pillar")
-
 [node name="P8" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -231)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -236)
 
 [node name="Col" type="CollisionShape3D" parent="P8"]
 shape = SubResource("shape_p8")
@@ -674,7 +670,7 @@ shape = SubResource("shape_p8")
 mesh = SubResource("mesh_p8")
 
 [node name="P9" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -273)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -276)
 
 [node name="Col" type="CollisionShape3D" parent="P9"]
 shape = SubResource("shape_p9")
@@ -739,7 +735,7 @@ mesh = SubResource("mesh_locker")
 [node name="Desks" type="Node3D" parent="."]
 
 [node name="Desk1" type="StaticBody3D" parent="Desks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0.4, -258)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0.4, -228)
 
 [node name="Col" type="CollisionShape3D" parent="Desks/Desk1"]
 shape = SubResource("shape_desk")
@@ -748,7 +744,7 @@ shape = SubResource("shape_desk")
 mesh = SubResource("mesh_desk")
 
 [node name="Desk2" type="StaticBody3D" parent="Desks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0.4, -266)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 0.4, -234)
 
 [node name="Col" type="CollisionShape3D" parent="Desks/Desk2"]
 shape = SubResource("shape_desk")
@@ -757,7 +753,7 @@ shape = SubResource("shape_desk")
 mesh = SubResource("mesh_desk")
 
 [node name="Desk3" type="StaticBody3D" parent="Desks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0.4, -282)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0.4, -240)
 
 [node name="Col" type="CollisionShape3D" parent="Desks/Desk3"]
 shape = SubResource("shape_desk")
@@ -766,7 +762,7 @@ shape = SubResource("shape_desk")
 mesh = SubResource("mesh_desk")
 
 [node name="Desk4" type="StaticBody3D" parent="Desks"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0.4, -290)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 0.4, -245)
 
 [node name="Col" type="CollisionShape3D" parent="Desks/Desk4"]
 shape = SubResource("shape_desk")
