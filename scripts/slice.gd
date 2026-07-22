@@ -16,11 +16,18 @@ var catch_armed := true
 @onready var _void_wall: VoidWall = $VoidWall
 
 
+func _ready() -> void:
+	player_caught.connect(func() -> void:
+		($SwallowDirector as SwallowDirector).begin_swallow(self, _player))
+
+
 func player_progress() -> float:
 	return _path.curve.get_closest_offset(_path.to_local(_player.global_position))
 
 
 func _physics_process(delta: float) -> void:
+	if _player.frozen:
+		return
 	var progress := player_progress()
 	var dir_to_void := _horizontal_dir(_void_wall.global_position - _player.global_position)
 	var posture := Posture.evaluate(_player.camera_forward(), dir_to_void, _player.glancing)

@@ -1,8 +1,9 @@
-[gd_scene load_steps=19 format=3]
+[gd_scene load_steps=20 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1"]
 [ext_resource type="Script" path="res://scripts/slice.gd" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/void_wall.tscn" id="3"]
+[ext_resource type="Script" path="res://scripts/swallow_director.gd" id="4"]
 
 [sub_resource type="BoxShape3D" id="ground_shape"]
 size = Vector3(20, 1, 220)
@@ -261,3 +262,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 curve = SubResource("course_curve")
 
 [node name="VoidWall" parent="." instance=ExtResource("3")]
+
+[node name="SwallowDirector" type="CanvasLayer" parent="."]
+script = ExtResource("4")
+
+[node name="Black" type="ColorRect" parent="SwallowDirector"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0)
+mouse_filter = 2
