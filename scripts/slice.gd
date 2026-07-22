@@ -6,6 +6,7 @@ extends Node3D
 signal player_caught
 
 const MARKER_PROGRESSES: Array[float] = [0.0, 25.0, 50.0, 75.0, 100.0, 130.0, 160.0, 190.0]
+const FALL_Y := -6.0
 
 var course := CourseLogic.new(MARKER_PROGRESSES)
 var void_logic := VoidLogic.new(-20.0)
@@ -27,6 +28,9 @@ func player_progress() -> float:
 
 func _physics_process(delta: float) -> void:
 	if _player.frozen:
+		return
+	if _player.global_position.y < FALL_Y:
+		($SwallowDirector as SwallowDirector).begin_fall_reset(self, _player)
 		return
 	var progress := player_progress()
 	var dir_to_void := _horizontal_dir(_void_wall.global_position - _player.global_position)

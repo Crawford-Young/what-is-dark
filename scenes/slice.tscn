@@ -1,4 +1,4 @@
-[gd_scene load_steps=36 format=3]
+[gd_scene load_steps=44 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1"]
 [ext_resource type="Script" path="res://scripts/slice.gd" id="2"]
@@ -106,6 +106,34 @@ size = Vector3(8, 0.05, 0.5)
 [sub_resource type="BoxMesh" id="mesh_pillar"]
 material = SubResource("pillar_mat")
 size = Vector3(1, 2, 1)
+
+[sub_resource type="StandardMaterial3D" id="shell_mat"]
+albedo_color = Color(0.1, 0.1, 0.13, 1)
+
+[sub_resource type="BoxShape3D" id="shape_wall_shell"]
+size = Vector3(1, 10, 230)
+
+[sub_resource type="BoxMesh" id="mesh_wall_shell"]
+material = SubResource("shell_mat")
+size = Vector3(1, 10, 230)
+
+[sub_resource type="BoxShape3D" id="shape_ceil40"]
+size = Vector3(18, 1, 40)
+
+[sub_resource type="BoxMesh" id="mesh_ceil40"]
+material = SubResource("shell_mat")
+size = Vector3(18, 1, 40)
+
+[sub_resource type="BoxShape3D" id="shape_ceil30"]
+size = Vector3(18, 1, 30)
+
+[sub_resource type="BoxMesh" id="mesh_ceil30"]
+material = SubResource("shell_mat")
+size = Vector3(18, 1, 30)
+
+[sub_resource type="BoxMesh" id="mesh_wall_stripe"]
+material = SubResource("stripe_mat")
+size = Vector3(0.1, 8, 0.6)
 
 [sub_resource type="Curve3D" id="course_curve"]
 _data = {
@@ -233,6 +261,60 @@ shape = SubResource("shape_w")
 [node name="Mesh" type="MeshInstance3D" parent="Wall"]
 mesh = SubResource("mesh_w")
 
+[node name="ShellWallL" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 5, -105)
+
+[node name="Col" type="CollisionShape3D" parent="ShellWallL"]
+shape = SubResource("shape_wall_shell")
+
+[node name="Mesh" type="MeshInstance3D" parent="ShellWallL"]
+mesh = SubResource("mesh_wall_shell")
+
+[node name="ShellWallR" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 5, -105)
+
+[node name="Col" type="CollisionShape3D" parent="ShellWallR"]
+shape = SubResource("shape_wall_shell")
+
+[node name="Mesh" type="MeshInstance3D" parent="ShellWallR"]
+mesh = SubResource("mesh_wall_shell")
+
+[node name="CeilA" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, -25)
+
+[node name="Col" type="CollisionShape3D" parent="CeilA"]
+shape = SubResource("shape_ceil40")
+
+[node name="Mesh" type="MeshInstance3D" parent="CeilA"]
+mesh = SubResource("mesh_ceil40")
+
+[node name="CeilB" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, -95)
+
+[node name="Col" type="CollisionShape3D" parent="CeilB"]
+shape = SubResource("shape_ceil40")
+
+[node name="Mesh" type="MeshInstance3D" parent="CeilB"]
+mesh = SubResource("mesh_ceil40")
+
+[node name="CeilC" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, -165)
+
+[node name="Col" type="CollisionShape3D" parent="CeilC"]
+shape = SubResource("shape_ceil30")
+
+[node name="Mesh" type="MeshInstance3D" parent="CeilC"]
+mesh = SubResource("mesh_ceil30")
+
+[node name="CeilD" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, -205)
+
+[node name="Col" type="CollisionShape3D" parent="CeilD"]
+shape = SubResource("shape_ceil30")
+
+[node name="Mesh" type="MeshInstance3D" parent="CeilD"]
+mesh = SubResource("mesh_ceil30")
+
 [node name="Stripes" type="Node3D" parent="."]
 
 [node name="Stripe_000" type="MeshInstance3D" parent="Stripes"]
@@ -306,6 +388,104 @@ mesh = SubResource("mesh_stripe")
 [node name="Stripe_190" type="MeshInstance3D" parent="Stripes"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -190)
 mesh = SubResource("mesh_stripe")
+
+[node name="Stripe_200" type="MeshInstance3D" parent="Stripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -200)
+mesh = SubResource("mesh_stripe")
+
+[node name="Stripe_210" type="MeshInstance3D" parent="Stripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -210)
+mesh = SubResource("mesh_stripe")
+
+[node name="WallStripes" type="Node3D" parent="."]
+
+[node name="WS_L_010" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.45, 5, -10)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_R_010" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.45, 5, -10)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_L_030" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.45, 5, -30)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_R_030" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.45, 5, -30)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_L_050" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.45, 5, -50)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_R_050" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.45, 5, -50)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_L_070" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.45, 5, -70)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_R_070" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.45, 5, -70)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_L_090" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.45, 5, -90)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_R_090" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.45, 5, -90)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_L_110" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.45, 5, -110)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_R_110" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.45, 5, -110)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_L_130" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.45, 5, -130)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_R_130" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.45, 5, -130)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_L_150" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.45, 5, -150)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_R_150" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.45, 5, -150)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_L_170" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.45, 5, -170)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_R_170" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.45, 5, -170)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_L_190" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.45, 5, -190)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_R_190" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.45, 5, -190)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_L_210" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.45, 5, -210)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_R_210" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.45, 5, -210)
+mesh = SubResource("mesh_wall_stripe")
 
 [node name="SidePillars" type="Node3D" parent="."]
 

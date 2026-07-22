@@ -7,6 +7,9 @@ const FADE_OUT := 0.6
 const HOLD := 2.5
 const FADE_IN := 0.8
 const SETBACK_MARKERS := 1
+const FALL_FADE_OUT := 0.12
+const FALL_FADE_IN := 0.18
+const FALL_VOID_GAP := 6.0
 
 @onready var _black: ColorRect = $Black
 
@@ -19,6 +22,29 @@ func begin_swallow(slice: Slice, player: Player) -> void:
 	tween.tween_callback(_respawn.bind(slice, player))
 	tween.tween_property(_black, "color:a", 0.0, FADE_IN)
 	tween.tween_callback(_release.bind(slice, player))
+
+
+func begin_fall_reset(slice: Slice, player: Player) -> void:
+	if player.frozen:
+		return
+	player.frozen = true
+	var tween := create_tween()
+	tween.tween_property(_black, "color:a", 1.0, FALL_FADE_OUT)
+	tween.tween_callback(_fall_respawn.bind(slice, player))
+	tween.tween_property(_black, "color:a", 0.0, FALL_FADE_IN)
+	tween.tween_callback(_release_fall.bind(player))
+
+
+func _fall_respawn(slice: Slice, player: Player) -> void:
+	var idx := maxi(slice.course.nearest_passed_marker(slice.player_progress()), 0)
+	var offset: float = slice.course.marker_progresses[idx]
+	player.teleport(slice.respawn_position(idx), slice.course_direction_at(offset))
+	slice.void_logic.limit_behind(offset, FALL_VOID_GAP)
+	slice.sync_void_wall()
+
+
+func _release_fall(player: Player) -> void:
+	player.frozen = false
 
 
 func _respawn(slice: Slice, player: Player) -> void:

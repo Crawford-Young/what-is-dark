@@ -2,13 +2,13 @@ class_name Player
 extends CharacterBody3D
 ## Node layer: reads input + raycasts, delegates all math to logic scripts.
 
-const RUN_SPEED := 8.0
-const GROUND_ACCEL := 60.0
-const AIR_ACCEL := 15.0
-const GRAVITY := 18.0
-const JUMP_SPEED := 7.0
+const RUN_SPEED := 11.0
+const GROUND_ACCEL := 80.0
+const AIR_ACCEL := 25.0
+const GRAVITY := 20.0
+const JUMP_SPEED := 8.5
 const MOUSE_SENS := 0.002
-const GLANCE_TURN_SPEED := 14.0
+const GLANCE_TURN_SPEED := 18.0
 
 var frozen := false
 var glancing := false

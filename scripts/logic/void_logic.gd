@@ -4,11 +4,11 @@ extends RefCounted
 ## posture-sensitive — fastest at your back, slow when watched, never zero.
 
 const CREEP_SPEEDS := {
-	Posture.AWAY: 4.0,
-	Posture.GLANCING: 1.5,
-	Posture.FACING: 0.5,
+	Posture.AWAY: 6.0,
+	Posture.GLANCING: 2.2,
+	Posture.FACING: 0.7,
 }
-const RESET_GAP := 12.0
+const RESET_GAP := 18.0
 
 var progress: float = 0.0
 
@@ -27,3 +27,7 @@ func has_caught(player_progress: float) -> bool:
 
 func reset_behind(marker_progress: float) -> void:
 	progress = marker_progress - RESET_GAP
+
+
+func limit_behind(marker_progress: float, gap: float) -> void:
+	progress = minf(progress, marker_progress - gap)
