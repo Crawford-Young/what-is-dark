@@ -26,4 +26,4 @@ func has_caught(player_progress: float) -> bool:
 
 
 func reset_behind(marker_progress: float) -> void:
-	progress = maxf(marker_progress - RESET_GAP, 0.0)
+	progress = marker_progress - RESET_GAP

@@ -26,6 +26,7 @@ func _respawn(slice: Slice, player: Player) -> void:
 	var offset: float = slice.course.marker_progresses[idx]
 	player.teleport(slice.respawn_position(idx), slice.course_direction_at(offset))
 	slice.void_logic.reset_behind(offset)
+	slice.sync_void_wall()
 
 
 func _release(slice: Slice, player: Player) -> void:

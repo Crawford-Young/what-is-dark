@@ -38,6 +38,10 @@ func _physics_process(delta: float) -> void:
 		player_caught.emit()
 
 
+func sync_void_wall() -> void:
+	_void_wall.place_on_path(_path, void_logic.progress)
+
+
 func respawn_position(marker_index: int) -> Vector3:
 	var offset := course.marker_progresses[marker_index]
 	return _path.to_global(_path.curve.sample_baked(offset)) + Vector3.UP

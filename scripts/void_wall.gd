@@ -9,6 +9,9 @@ func place_on_path(path: Path3D, void_progress: float) -> void:
 	var offset := clampf(void_progress, 0.0, curve.get_baked_length())
 	var pos := path.to_global(curve.sample_baked(offset))
 	var ahead := path.to_global(curve.sample_baked(minf(offset + 1.0, curve.get_baked_length())))
+	var dir := (ahead - pos).normalized() if not pos.is_equal_approx(ahead) else Vector3.FORWARD
+	if void_progress < 0.0:
+		pos += dir * void_progress
 	global_position = pos
 	if not pos.is_equal_approx(ahead):
-		look_at(ahead, Vector3.UP)
+		look_at(pos + dir, Vector3.UP)

@@ -24,7 +24,7 @@ func test_reset_behind_leaves_gap() -> void:
 	assert_almost_eq(v.progress, 13.0, 0.0001)
 
 
-func test_reset_behind_floors_at_zero() -> void:
+func test_reset_behind_goes_negative_at_first_marker() -> void:
 	var v := VoidLogic.new(50.0)
-	v.reset_behind(5.0)
-	assert_almost_eq(v.progress, 0.0, 0.0001)
+	v.reset_behind(0.0)
+	assert_almost_eq(v.progress, -12.0, 0.0001)
