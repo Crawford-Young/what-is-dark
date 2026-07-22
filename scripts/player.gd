@@ -46,15 +46,37 @@ func _physics_process(delta: float) -> void:
 
 	var input_2d := Input.get_vector(&"move_left", &"move_right", &"move_forward", &"move_back")
 	var wish_dir := (transform.basis * Vector3(input_2d.x, 0.0, input_2d.y))
+	var forward_speed := -(transform.basis.inverse() * velocity).z
 
-	var accel := GROUND_ACCEL if is_on_floor() else AIR_ACCEL
-	velocity = MoveMath.accel_horizontal(velocity, wish_dir, RUN_SPEED, accel, delta)
-	if not is_on_floor():
-		velocity = MoveMath.apply_gravity(velocity, GRAVITY, delta)
-	elif Input.is_action_just_pressed(&"jump"):
-		velocity = MoveMath.jump(velocity, JUMP_SPEED)
+	var wall_normal := _wall_normal()
+	var on_wall := wall_normal != Vector3.ZERO
+
+	if WallrunLogic.can_wallrun(is_on_floor(), on_wall, forward_speed):
+		velocity = WallrunLogic.wallrun_velocity(velocity, wall_normal, delta)
+		if Input.is_action_just_pressed(&"jump"):
+			velocity = WallrunLogic.walljump_velocity(velocity, wall_normal)
+	else:
+		var accel := GROUND_ACCEL if is_on_floor() else AIR_ACCEL
+		velocity = MoveMath.accel_horizontal(velocity, wish_dir, RUN_SPEED, accel, delta)
+		if not is_on_floor():
+			velocity = MoveMath.apply_gravity(velocity, GRAVITY, delta)
+		elif Input.is_action_just_pressed(&"jump"):
+			var low_blocked: bool = $RayVaultLow.is_colliding()
+			var high_clear: bool = not $RayVaultHigh.is_colliding()
+			if VaultLogic.can_vault(low_blocked, high_clear, forward_speed):
+				velocity = VaultLogic.vault_velocity(velocity, 6.0)
+			else:
+				velocity = MoveMath.jump(velocity, JUMP_SPEED)
 
 	move_and_slide()
+
+
+func _wall_normal() -> Vector3:
+	if $RayWallLeft.is_colliding():
+		return $RayWallLeft.get_collision_normal()
+	if $RayWallRight.is_colliding():
+		return $RayWallRight.get_collision_normal()
+	return Vector3.ZERO
 
 
 func camera_forward() -> Vector3:
