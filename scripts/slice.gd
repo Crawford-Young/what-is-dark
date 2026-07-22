@@ -7,9 +7,11 @@ signal player_caught
 
 const MARKER_PROGRESSES: Array[float] = [0.0, 25.0, 50.0, 75.0, 100.0, 130.0, 160.0, 190.0]
 const FALL_Y := -6.0
+const VOID_START := -20.0
 
 var course := CourseLogic.new(MARKER_PROGRESSES)
-var void_logic := VoidLogic.new(-20.0)
+var void_logic := VoidLogic.new(VOID_START)
+var loop_logic := LoopLogic.new()
 var catch_armed := true
 
 @onready var _player: Player = $Player
@@ -40,6 +42,8 @@ func _physics_process(delta: float) -> void:
 	if catch_armed and void_logic.has_caught(progress):
 		catch_armed = false
 		player_caught.emit()
+	if not _player.frozen and LoopLogic.has_crossed_door(progress):
+		($SwallowDirector as SwallowDirector).begin_loop(self, _player)
 
 
 func sync_void_wall() -> void:
@@ -61,3 +65,10 @@ func course_direction_at(offset: float) -> Vector3:
 func _horizontal_dir(v: Vector3) -> Vector3:
 	var flat := Vector3(v.x, 0.0, v.z)
 	return flat.normalized() if flat.length_squared() > 0.000001 else Vector3.FORWARD
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not OS.is_debug_build():
+		return
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_L:
+		($SwallowDirector as SwallowDirector).begin_loop(self, _player)

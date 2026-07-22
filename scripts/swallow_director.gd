@@ -10,8 +10,13 @@ const SETBACK_MARKERS := 1
 const FALL_FADE_OUT := 0.12
 const FALL_FADE_IN := 0.18
 const FALL_VOID_GAP := 6.0
+const LOOP_FLASH_OUT := 0.15
+const LOOP_FLASH_IN := 0.3
 
 @onready var _black: ColorRect = $Black
+@onready var _white: ColorRect = $White
+
+var _loop_active := false
 
 
 func begin_swallow(slice: Slice, player: Player) -> void:
@@ -58,3 +63,28 @@ func _respawn(slice: Slice, player: Player) -> void:
 func _release(slice: Slice, player: Player) -> void:
 	player.frozen = false
 	slice.catch_armed = true
+
+
+func begin_loop(slice: Slice, player: Player) -> void:
+	if _loop_active or player.frozen:
+		return
+	_loop_active = true
+	var tween := create_tween()
+	tween.tween_property(_white, "color:a", 1.0, LOOP_FLASH_OUT)
+	tween.tween_callback(_loop_respawn.bind(slice, player))
+	tween.tween_property(_white, "color:a", 0.0, LOOP_FLASH_IN)
+	tween.tween_callback(_end_loop)
+
+
+func _loop_respawn(slice: Slice, player: Player) -> void:
+	player.shift_to(slice.respawn_position(0))
+	slice.loop_logic.advance_loop()
+	var loop := slice.loop_logic.loop_count
+	player.accel_scale = ErosionLogic.accel_multiplier(loop)
+	player.landing_retention = ErosionLogic.landing_retention(loop)
+	slice.void_logic.progress = Slice.VOID_START
+	slice.sync_void_wall()
+
+
+func _end_loop() -> void:
+	_loop_active = false
