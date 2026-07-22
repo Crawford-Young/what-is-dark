@@ -77,6 +77,8 @@ func begin_loop(slice: Slice, player: Player) -> void:
 
 
 func _loop_respawn(slice: Slice, player: Player) -> void:
+	if player.frozen:
+		return
 	player.shift_to(slice.respawn_position(0))
 	slice.loop_logic.advance_loop()
 	var loop := slice.loop_logic.loop_count
