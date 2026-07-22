@@ -5,7 +5,12 @@ extends Node3D
 
 signal player_caught
 
-const MARKER_PROGRESSES: Array[float] = [0.0, 25.0, 50.0, 75.0, 100.0, 130.0, 160.0, 190.0]
+const MARKER_PROGRESSES: Array[float] = [
+	0.0, 25.0, 50.0, 75.0, 100.0, 130.0, 160.0, 190.0,
+	230.0, 270.0,
+	310.0, 350.0, 390.0, 430.0, 470.0, 510.0, 550.0, 590.0,
+	630.0, 670.0, 710.0, 750.0, 790.0, 830.0, 870.0,
+]
 const FALL_Y := -6.0
 const VOID_START := -20.0
 
