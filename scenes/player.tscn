@@ -19,14 +19,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
 [node name="Camera" type="Camera3D" parent="Head"]
 fov = 90.0
 
-[node name="RayVaultLow" type="RayCast3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
-target_position = Vector3(0, 0, -0.9)
-
-[node name="RayVaultHigh" type="RayCast3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.55, 0)
-target_position = Vector3(0, 0, -0.9)
-
 [node name="RayWallLeft" type="RayCast3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
 target_position = Vector3(-0.7, 0, 0)

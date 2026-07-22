@@ -61,12 +61,7 @@ func _physics_process(delta: float) -> void:
 		if not is_on_floor():
 			velocity = MoveMath.apply_gravity(velocity, GRAVITY, delta)
 		elif Input.is_action_just_pressed(&"jump"):
-			var low_blocked: bool = $RayVaultLow.is_colliding()
-			var high_clear: bool = not $RayVaultHigh.is_colliding()
-			if VaultLogic.can_vault(low_blocked, high_clear, forward_speed):
-				velocity = VaultLogic.vault_velocity(velocity, 6.0)
-			else:
-				velocity = MoveMath.jump(velocity, JUMP_SPEED)
+			velocity = MoveMath.jump(velocity, JUMP_SPEED)
 
 	move_and_slide()
 
