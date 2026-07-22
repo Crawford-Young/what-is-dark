@@ -1,4 +1,4 @@
-[gd_scene load_steps=44 format=3]
+[gd_scene load_steps=60 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1"]
 [ext_resource type="Script" path="res://scripts/slice.gd" id="2"]
@@ -110,11 +110,20 @@ size = Vector3(1, 2, 1)
 [sub_resource type="StandardMaterial3D" id="shell_mat"]
 albedo_color = Color(0.1, 0.1, 0.13, 1)
 
+[sub_resource type="StandardMaterial3D" id="shame_mat"]
+albedo_color = Color(0.42, 0.47, 0.43, 1)
+
+[sub_resource type="StandardMaterial3D" id="locker_mat"]
+albedo_color = Color(0.35, 0.4, 0.37, 1)
+
+[sub_resource type="StandardMaterial3D" id="desk_mat"]
+albedo_color = Color(0.32, 0.26, 0.2, 1)
+
 [sub_resource type="BoxShape3D" id="shape_wall_shell"]
 size = Vector3(1, 10, 230)
 
 [sub_resource type="BoxMesh" id="mesh_wall_shell"]
-material = SubResource("shell_mat")
+material = SubResource("shame_mat")
 size = Vector3(1, 10, 230)
 
 [sub_resource type="BoxShape3D" id="shape_ceil40"]
@@ -135,9 +144,55 @@ size = Vector3(18, 1, 30)
 material = SubResource("stripe_mat")
 size = Vector3(0.1, 8, 0.6)
 
+[sub_resource type="BoxShape3D" id="shape_p8"]
+size = Vector3(8, 1, 30)
+
+[sub_resource type="BoxMesh" id="mesh_p8"]
+material = SubResource("floor_mat")
+size = Vector3(8, 1, 30)
+
+[sub_resource type="BoxShape3D" id="shape_p9"]
+size = Vector3(10, 1, 48)
+
+[sub_resource type="BoxMesh" id="mesh_p9"]
+material = SubResource("floor_mat")
+size = Vector3(10, 1, 48)
+
+[sub_resource type="BoxShape3D" id="shape_wall_ext"]
+size = Vector3(1, 10, 80)
+
+[sub_resource type="BoxMesh" id="mesh_wall_ext"]
+material = SubResource("shame_mat")
+size = Vector3(1, 10, 80)
+
+[sub_resource type="BoxMesh" id="mesh_locker"]
+material = SubResource("locker_mat")
+size = Vector3(0.5, 2, 10)
+
+[sub_resource type="BoxShape3D" id="shape_desk"]
+size = Vector3(1.2, 0.8, 0.8)
+
+[sub_resource type="BoxMesh" id="mesh_desk"]
+material = SubResource("desk_mat")
+size = Vector3(1.2, 0.8, 0.8)
+
+[sub_resource type="BoxShape3D" id="shape_door_pillar"]
+size = Vector3(0.6, 4, 0.6)
+
+[sub_resource type="BoxMesh" id="mesh_door_pillar"]
+material = SubResource("shell_mat")
+size = Vector3(0.6, 4, 0.6)
+
+[sub_resource type="BoxShape3D" id="shape_door_lintel"]
+size = Vector3(5, 0.4, 0.6)
+
+[sub_resource type="BoxMesh" id="mesh_door_lintel"]
+material = SubResource("shell_mat")
+size = Vector3(5, 0.4, 0.6)
+
 [sub_resource type="Curve3D" id="course_curve"]
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -200),
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -900),
 "tilts": PackedFloat32Array(0, 0),
 "closed": false
 }
@@ -397,6 +452,38 @@ mesh = SubResource("mesh_stripe")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -210)
 mesh = SubResource("mesh_stripe")
 
+[node name="Stripe_220" type="MeshInstance3D" parent="Stripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -220)
+mesh = SubResource("mesh_stripe")
+
+[node name="Stripe_230" type="MeshInstance3D" parent="Stripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -230)
+mesh = SubResource("mesh_stripe")
+
+[node name="Stripe_240" type="MeshInstance3D" parent="Stripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -240)
+mesh = SubResource("mesh_stripe")
+
+[node name="Stripe_250" type="MeshInstance3D" parent="Stripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -250)
+mesh = SubResource("mesh_stripe")
+
+[node name="Stripe_260" type="MeshInstance3D" parent="Stripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -260)
+mesh = SubResource("mesh_stripe")
+
+[node name="Stripe_270" type="MeshInstance3D" parent="Stripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -270)
+mesh = SubResource("mesh_stripe")
+
+[node name="Stripe_280" type="MeshInstance3D" parent="Stripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -280)
+mesh = SubResource("mesh_stripe")
+
+[node name="Stripe_290" type="MeshInstance3D" parent="Stripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -290)
+mesh = SubResource("mesh_stripe")
+
 [node name="WallStripes" type="Node3D" parent="."]
 
 [node name="WS_L_010" type="MeshInstance3D" parent="WallStripes"]
@@ -487,6 +574,38 @@ mesh = SubResource("mesh_wall_stripe")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.45, 5, -210)
 mesh = SubResource("mesh_wall_stripe")
 
+[node name="WS_L_230" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.45, 5, -230)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_R_230" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.45, 5, -230)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_L_250" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.45, 5, -250)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_R_250" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.45, 5, -250)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_L_270" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.45, 5, -270)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_R_270" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.45, 5, -270)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_L_290" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.45, 5, -290)
+mesh = SubResource("mesh_wall_stripe")
+
+[node name="WS_R_290" type="MeshInstance3D" parent="WallStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.45, 5, -290)
+mesh = SubResource("mesh_wall_stripe")
+
 [node name="SidePillars" type="Node3D" parent="."]
 
 [node name="Pillar_L_010" type="MeshInstance3D" parent="SidePillars"]
@@ -544,6 +663,165 @@ mesh = SubResource("mesh_pillar")
 [node name="Pillar_R_190" type="MeshInstance3D" parent="SidePillars"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 1, -190)
 mesh = SubResource("mesh_pillar")
+
+[node name="P8" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -231)
+
+[node name="Col" type="CollisionShape3D" parent="P8"]
+shape = SubResource("shape_p8")
+
+[node name="Mesh" type="MeshInstance3D" parent="P8"]
+mesh = SubResource("mesh_p8")
+
+[node name="P9" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -273)
+
+[node name="Col" type="CollisionShape3D" parent="P9"]
+shape = SubResource("shape_p9")
+
+[node name="Mesh" type="MeshInstance3D" parent="P9"]
+mesh = SubResource("mesh_p9")
+
+[node name="ShellWallExtL" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 5, -260)
+
+[node name="Col" type="CollisionShape3D" parent="ShellWallExtL"]
+shape = SubResource("shape_wall_ext")
+
+[node name="Mesh" type="MeshInstance3D" parent="ShellWallExtL"]
+mesh = SubResource("mesh_wall_ext")
+
+[node name="ShellWallExtR" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 5, -260)
+
+[node name="Col" type="CollisionShape3D" parent="ShellWallExtR"]
+shape = SubResource("shape_wall_ext")
+
+[node name="Mesh" type="MeshInstance3D" parent="ShellWallExtR"]
+mesh = SubResource("mesh_wall_ext")
+
+[node name="CeilE" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, -240)
+
+[node name="Col" type="CollisionShape3D" parent="CeilE"]
+shape = SubResource("shape_ceil40")
+
+[node name="Mesh" type="MeshInstance3D" parent="CeilE"]
+mesh = SubResource("mesh_ceil40")
+
+[node name="CeilF" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, -280)
+
+[node name="Col" type="CollisionShape3D" parent="CeilF"]
+shape = SubResource("shape_ceil40")
+
+[node name="Mesh" type="MeshInstance3D" parent="CeilF"]
+mesh = SubResource("mesh_ceil40")
+
+[node name="Lockers" type="Node3D" parent="."]
+
+[node name="LockerL1" type="MeshInstance3D" parent="Lockers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 1, -227)
+mesh = SubResource("mesh_locker")
+
+[node name="LockerR1" type="MeshInstance3D" parent="Lockers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 1, -227)
+mesh = SubResource("mesh_locker")
+
+[node name="LockerL2" type="MeshInstance3D" parent="Lockers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 1, -240)
+mesh = SubResource("mesh_locker")
+
+[node name="LockerR2" type="MeshInstance3D" parent="Lockers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 1, -240)
+mesh = SubResource("mesh_locker")
+
+[node name="Desks" type="Node3D" parent="."]
+
+[node name="Desk1" type="StaticBody3D" parent="Desks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0.4, -258)
+
+[node name="Col" type="CollisionShape3D" parent="Desks/Desk1"]
+shape = SubResource("shape_desk")
+
+[node name="Mesh" type="MeshInstance3D" parent="Desks/Desk1"]
+mesh = SubResource("mesh_desk")
+
+[node name="Desk2" type="StaticBody3D" parent="Desks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0.4, -266)
+
+[node name="Col" type="CollisionShape3D" parent="Desks/Desk2"]
+shape = SubResource("shape_desk")
+
+[node name="Mesh" type="MeshInstance3D" parent="Desks/Desk2"]
+mesh = SubResource("mesh_desk")
+
+[node name="Desk3" type="StaticBody3D" parent="Desks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0.4, -282)
+
+[node name="Col" type="CollisionShape3D" parent="Desks/Desk3"]
+shape = SubResource("shape_desk")
+
+[node name="Mesh" type="MeshInstance3D" parent="Desks/Desk3"]
+mesh = SubResource("mesh_desk")
+
+[node name="Desk4" type="StaticBody3D" parent="Desks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0.4, -290)
+
+[node name="Col" type="CollisionShape3D" parent="Desks/Desk4"]
+shape = SubResource("shape_desk")
+
+[node name="Mesh" type="MeshInstance3D" parent="Desks/Desk4"]
+mesh = SubResource("mesh_desk")
+
+[node name="DoorFrame" type="Node3D" parent="."]
+
+[node name="DoorPillarL" type="StaticBody3D" parent="DoorFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2, 2, -300)
+
+[node name="Col" type="CollisionShape3D" parent="DoorFrame/DoorPillarL"]
+shape = SubResource("shape_door_pillar")
+
+[node name="Mesh" type="MeshInstance3D" parent="DoorFrame/DoorPillarL"]
+mesh = SubResource("mesh_door_pillar")
+
+[node name="DoorPillarR" type="StaticBody3D" parent="DoorFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 2, -300)
+
+[node name="Col" type="CollisionShape3D" parent="DoorFrame/DoorPillarR"]
+shape = SubResource("shape_door_pillar")
+
+[node name="Mesh" type="MeshInstance3D" parent="DoorFrame/DoorPillarR"]
+mesh = SubResource("mesh_door_pillar")
+
+[node name="DoorLintel" type="StaticBody3D" parent="DoorFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.2, -300)
+
+[node name="Col" type="CollisionShape3D" parent="DoorFrame/DoorLintel"]
+shape = SubResource("shape_door_lintel")
+
+[node name="Mesh" type="MeshInstance3D" parent="DoorFrame/DoorLintel"]
+mesh = SubResource("mesh_door_lintel")
+
+[node name="ShameLights" type="Node3D" parent="."]
+
+[node name="ShameLight1" type="OmniLight3D" parent="ShameLights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, -100)
+light_color = Color(0.8, 0.9, 1, 1)
+light_energy = 2.0
+omni_range = 45.0
+
+[node name="ShameLight2" type="OmniLight3D" parent="ShameLights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, -200)
+light_color = Color(0.8, 0.9, 1, 1)
+light_energy = 2.0
+omni_range = 45.0
+
+[node name="ShameLight3" type="OmniLight3D" parent="ShameLights"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, -280)
+light_color = Color(0.8, 0.9, 1, 1)
+light_energy = 2.0
+omni_range = 45.0
 
 [node name="Player" parent="." instance=ExtResource("1")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
