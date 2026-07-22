@@ -93,3 +93,7 @@ func teleport(pos: Vector3, face_dir: Vector3) -> void:
 	rotation.y = _yaw
 	_pitch = 0.0
 	_glance_amount = 0.0
+
+
+func shift_to(pos: Vector3) -> void:
+	global_position = pos
