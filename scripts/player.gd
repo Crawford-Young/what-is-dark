@@ -13,6 +13,11 @@ const GLANCE_TURN_SPEED := 18.0
 var frozen := false
 var glancing := false
 
+var accel_scale := 1.0
+var landing_retention := 1.0
+
+var _was_airborne := false
+
 var _yaw := 0.0
 var _pitch := 0.0
 var _glance_amount := 0.0
@@ -56,7 +61,7 @@ func _physics_process(delta: float) -> void:
 		if Input.is_action_just_pressed(&"jump"):
 			velocity = WallrunLogic.walljump_velocity(velocity, wall_normal)
 	else:
-		var accel := GROUND_ACCEL if is_on_floor() else AIR_ACCEL
+		var accel := (GROUND_ACCEL if is_on_floor() else AIR_ACCEL) * accel_scale
 		velocity = MoveMath.accel_horizontal(velocity, wish_dir, RUN_SPEED, accel, delta)
 		if not is_on_floor():
 			velocity = MoveMath.apply_gravity(velocity, GRAVITY, delta)
@@ -64,6 +69,9 @@ func _physics_process(delta: float) -> void:
 			velocity = MoveMath.jump(velocity, JUMP_SPEED)
 
 	move_and_slide()
+	if is_on_floor() and _was_airborne:
+		velocity = MoveMath.land(velocity, landing_retention)
+	_was_airborne = not is_on_floor()
 
 
 func _wall_normal() -> Vector3:

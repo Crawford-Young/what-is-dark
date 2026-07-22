@@ -18,3 +18,7 @@ static func apply_gravity(velocity: Vector3, gravity: float, delta: float) -> Ve
 
 static func jump(velocity: Vector3, jump_speed: float) -> Vector3:
 	return Vector3(velocity.x, jump_speed, velocity.z)
+
+
+static func land(velocity: Vector3, retention: float) -> Vector3:
+	return Vector3(velocity.x * retention, velocity.y, velocity.z * retention)

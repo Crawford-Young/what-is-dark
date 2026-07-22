@@ -29,3 +29,15 @@ func test_gravity_reduces_y() -> void:
 func test_jump_sets_y_keeps_horizontal() -> void:
 	var v := MoveMath.jump(Vector3(3, -2, -5), 7.0)
 	assert_true(v.is_equal_approx(Vector3(3, 7.0, -5)))
+
+
+func test_land_bleeds_horizontal_keeps_vertical() -> void:
+	var v := MoveMath.land(Vector3(10.0, -3.0, -10.0), 0.8)
+	assert_almost_eq(v.x, 8.0, 0.0001)
+	assert_almost_eq(v.y, -3.0, 0.0001)
+	assert_almost_eq(v.z, -8.0, 0.0001)
+
+
+func test_land_full_retention_is_identity() -> void:
+	var v := MoveMath.land(Vector3(7.0, 2.0, -4.0), 1.0)
+	assert_eq(v, Vector3(7.0, 2.0, -4.0))
