@@ -13,7 +13,8 @@ const FRICTION := 4.0  ## surf-server sv_friction (CS2 matchmaking default is 5.
 const STOP_SPEED := 3.5
 const GROUND_ACCEL := 5.5
 const AIR_ACCEL := 150.0  ## surf/bhop community-server value (CS2 matchmaking uses 12 — near-zero strafe gain by design)
-const AIR_CAP := 1.32
+const AIR_CAP := 0.75  ## gravity-consistent scale: 0.57 * 20/15.24 ≈ 0.75 — restores CS2's ~3:1
+## gravity-slide vs strafe-hold ratio on 50° faces (the speed-scaled 1.32 pinned riders to ramps)
 const OVERBOUNCE := 1.0
 
 
