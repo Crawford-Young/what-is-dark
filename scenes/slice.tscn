@@ -1,4 +1,4 @@
-[gd_scene load_steps=94 format=3]
+[gd_scene load_steps=101 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1"]
 [ext_resource type="Script" path="res://scripts/slice.gd" id="2"]
@@ -225,54 +225,78 @@ size = Vector3(14, 1, 40)
 material = SubResource("grief_floor_mat")
 size = Vector3(14, 1, 40)
 
-[sub_resource type="BoxShape3D" id="shape_g2"]
-size = Vector3(12, 1, 34)
+[sub_resource type="StandardMaterial3D" id="grief_ride_mat"]
+albedo_color = Color(0.5, 0.8, 0.85, 1)
 
-[sub_resource type="BoxMesh" id="mesh_g2"]
+[sub_resource type="BoxShape3D" id="shape_p350"]
+size = Vector3(3, 1, 8)
+
+[sub_resource type="BoxMesh" id="mesh_p350"]
 material = SubResource("grief_floor_mat")
-size = Vector3(12, 1, 34)
+size = Vector3(3, 1, 8)
 
-[sub_resource type="BoxShape3D" id="shape_g3"]
-size = Vector3(16, 1, 52)
+[sub_resource type="BoxShape3D" id="shape_p390"]
+size = Vector3(10, 1, 28)
 
-[sub_resource type="BoxMesh" id="mesh_g3"]
+[sub_resource type="BoxMesh" id="mesh_p390"]
 material = SubResource("grief_floor_mat")
-size = Vector3(16, 1, 52)
+size = Vector3(10, 1, 28)
 
-[sub_resource type="BoxShape3D" id="shape_g4"]
-size = Vector3(10, 1, 40)
+[sub_resource type="BoxShape3D" id="shape_strip37"]
+size = Vector3(3, 1, 7)
 
-[sub_resource type="BoxMesh" id="mesh_g4"]
+[sub_resource type="BoxMesh" id="mesh_strip37"]
 material = SubResource("grief_floor_mat")
-size = Vector3(10, 1, 40)
+size = Vector3(3, 1, 7)
 
-[sub_resource type="BoxShape3D" id="shape_griser"]
-size = Vector3(6, 1, 7)
+[sub_resource type="BoxShape3D" id="shape_p430"]
+size = Vector3(9, 1, 20)
 
-[sub_resource type="BoxMesh" id="mesh_griser"]
+[sub_resource type="BoxMesh" id="mesh_p430"]
 material = SubResource("grief_floor_mat")
-size = Vector3(6, 1, 7)
+size = Vector3(9, 1, 20)
 
-[sub_resource type="BoxShape3D" id="shape_gland"]
-size = Vector3(12, 1, 26)
+[sub_resource type="BoxShape3D" id="shape_doorplat"]
+size = Vector3(11, 1, 37)
 
-[sub_resource type="BoxMesh" id="mesh_gland"]
+[sub_resource type="BoxMesh" id="mesh_doorplat"]
 material = SubResource("grief_floor_mat")
-size = Vector3(12, 1, 26)
+size = Vector3(11, 1, 37)
 
-[sub_resource type="BoxShape3D" id="shape_g5"]
-size = Vector3(14, 1, 35)
+[sub_resource type="BoxShape3D" id="shape_ledge"]
+size = Vector3(6, 1, 10)
 
-[sub_resource type="BoxMesh" id="mesh_g5"]
+[sub_resource type="BoxMesh" id="mesh_ledge"]
 material = SubResource("grief_floor_mat")
-size = Vector3(14, 1, 35)
+size = Vector3(6, 1, 10)
 
-[sub_resource type="BoxShape3D" id="shape_g6"]
-size = Vector3(10, 1, 17)
+[sub_resource type="BoxShape3D" id="shape_p550"]
+size = Vector3(12, 1, 33)
 
-[sub_resource type="BoxMesh" id="mesh_g6"]
+[sub_resource type="BoxMesh" id="mesh_p550"]
 material = SubResource("grief_floor_mat")
-size = Vector3(10, 1, 17)
+size = Vector3(12, 1, 33)
+
+[sub_resource type="BoxShape3D" id="shape_p590"]
+size = Vector3(12, 1, 24)
+
+[sub_resource type="BoxMesh" id="mesh_p590"]
+material = SubResource("grief_floor_mat")
+size = Vector3(12, 1, 24)
+
+[sub_resource type="BoxShape3D" id="shape_gride"]
+size = Vector3(0.4, 9, 14)
+
+[sub_resource type="BoxMesh" id="mesh_gride"]
+material = SubResource("grief_ride_mat")
+size = Vector3(0.4, 9, 14)
+
+[sub_resource type="BoxShape3D" id="shape_gclimb"]
+size = Vector3(0.4, 10, 10)
+
+[sub_resource type="BoxMesh" id="mesh_gclimb"]
+material = SubResource("grief_ride_mat")
+size = Vector3(0.4, 10, 10)
 
 [sub_resource type="BoxShape3D" id="shape_gwall"]
 size = Vector3(1, 10, 300)
@@ -942,77 +966,124 @@ shape = SubResource("shape_g1")
 [node name="Mesh" type="MeshInstance3D" parent="GriefPlatforms/G1"]
 mesh = SubResource("mesh_g1")
 
-[node name="G2" type="StaticBody3D" parent="GriefPlatforms"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -364)
+[node name="Pad350" type="StaticBody3D" parent="GriefPlatforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -353.3)
 
-[node name="Col" type="CollisionShape3D" parent="GriefPlatforms/G2"]
-shape = SubResource("shape_g2")
+[node name="Col" type="CollisionShape3D" parent="GriefPlatforms/Pad350"]
+shape = SubResource("shape_p350")
 
-[node name="Mesh" type="MeshInstance3D" parent="GriefPlatforms/G2"]
-mesh = SubResource("mesh_g2")
+[node name="Mesh" type="MeshInstance3D" parent="GriefPlatforms/Pad350"]
+mesh = SubResource("mesh_p350")
 
-[node name="G3" type="StaticBody3D" parent="GriefPlatforms"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.5, -413)
+[node name="Pad390" type="StaticBody3D" parent="GriefPlatforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.5, -386)
 
-[node name="Col" type="CollisionShape3D" parent="GriefPlatforms/G3"]
-shape = SubResource("shape_g3")
+[node name="Col" type="CollisionShape3D" parent="GriefPlatforms/Pad390"]
+shape = SubResource("shape_p390")
 
-[node name="Mesh" type="MeshInstance3D" parent="GriefPlatforms/G3"]
-mesh = SubResource("mesh_g3")
+[node name="Mesh" type="MeshInstance3D" parent="GriefPlatforms/Pad390"]
+mesh = SubResource("mesh_p390")
 
-[node name="G4" type="StaticBody3D" parent="GriefPlatforms"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.5, -465)
+[node name="Pad430Strip" type="StaticBody3D" parent="GriefPlatforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.5, -411.8)
 
-[node name="Col" type="CollisionShape3D" parent="GriefPlatforms/G4"]
-shape = SubResource("shape_g4")
+[node name="Col" type="CollisionShape3D" parent="GriefPlatforms/Pad430Strip"]
+shape = SubResource("shape_strip37")
 
-[node name="Mesh" type="MeshInstance3D" parent="GriefPlatforms/G4"]
-mesh = SubResource("mesh_g4")
+[node name="Mesh" type="MeshInstance3D" parent="GriefPlatforms/Pad430Strip"]
+mesh = SubResource("mesh_strip37")
 
-[node name="R1" type="StaticBody3D" parent="GriefPlatforms"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -492.5)
+[node name="Pad430Main" type="StaticBody3D" parent="GriefPlatforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.5, -425)
 
-[node name="Col" type="CollisionShape3D" parent="GriefPlatforms/R1"]
-shape = SubResource("shape_griser")
+[node name="Col" type="CollisionShape3D" parent="GriefPlatforms/Pad430Main"]
+shape = SubResource("shape_p430")
 
-[node name="Mesh" type="MeshInstance3D" parent="GriefPlatforms/R1"]
-mesh = SubResource("mesh_griser")
+[node name="Mesh" type="MeshInstance3D" parent="GriefPlatforms/Pad430Main"]
+mesh = SubResource("mesh_p430")
 
-[node name="R2" type="StaticBody3D" parent="GriefPlatforms"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -502.5)
+[node name="DoorPlat" type="StaticBody3D" parent="GriefPlatforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.5, -461.5)
 
-[node name="Col" type="CollisionShape3D" parent="GriefPlatforms/R2"]
-shape = SubResource("shape_griser")
+[node name="Col" type="CollisionShape3D" parent="GriefPlatforms/DoorPlat"]
+shape = SubResource("shape_doorplat")
 
-[node name="Mesh" type="MeshInstance3D" parent="GriefPlatforms/R2"]
-mesh = SubResource("mesh_griser")
+[node name="Mesh" type="MeshInstance3D" parent="GriefPlatforms/DoorPlat"]
+mesh = SubResource("mesh_doorplat")
 
-[node name="GLanding" type="StaticBody3D" parent="GriefPlatforms"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -521)
+[node name="LedgeTop" type="StaticBody3D" parent="GriefPlatforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -494)
 
-[node name="Col" type="CollisionShape3D" parent="GriefPlatforms/GLanding"]
-shape = SubResource("shape_gland")
+[node name="Col" type="CollisionShape3D" parent="GriefPlatforms/LedgeTop"]
+shape = SubResource("shape_ledge")
 
-[node name="Mesh" type="MeshInstance3D" parent="GriefPlatforms/GLanding"]
-mesh = SubResource("mesh_gland")
+[node name="Mesh" type="MeshInstance3D" parent="GriefPlatforms/LedgeTop"]
+mesh = SubResource("mesh_ledge")
 
-[node name="G5" type="StaticBody3D" parent="GriefPlatforms"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.5, -559)
+[node name="Pad510" type="StaticBody3D" parent="GriefPlatforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2, -513)
 
-[node name="Col" type="CollisionShape3D" parent="GriefPlatforms/G5"]
-shape = SubResource("shape_g5")
+[node name="Col" type="CollisionShape3D" parent="GriefPlatforms/Pad510"]
+shape = SubResource("shape_p350")
 
-[node name="Mesh" type="MeshInstance3D" parent="GriefPlatforms/G5"]
-mesh = SubResource("mesh_g5")
+[node name="Mesh" type="MeshInstance3D" parent="GriefPlatforms/Pad510"]
+mesh = SubResource("mesh_p350")
 
-[node name="G6" type="StaticBody3D" parent="GriefPlatforms"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -591)
+[node name="Pad550Strip" type="StaticBody3D" parent="GriefPlatforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2, -529)
 
-[node name="Col" type="CollisionShape3D" parent="GriefPlatforms/G6"]
-shape = SubResource("shape_g6")
+[node name="Col" type="CollisionShape3D" parent="GriefPlatforms/Pad550Strip"]
+shape = SubResource("shape_strip37")
 
-[node name="Mesh" type="MeshInstance3D" parent="GriefPlatforms/G6"]
-mesh = SubResource("mesh_g6")
+[node name="Mesh" type="MeshInstance3D" parent="GriefPlatforms/Pad550Strip"]
+mesh = SubResource("mesh_strip37")
+
+[node name="Pad550Main" type="StaticBody3D" parent="GriefPlatforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2, -548)
+
+[node name="Col" type="CollisionShape3D" parent="GriefPlatforms/Pad550Main"]
+shape = SubResource("shape_p550")
+
+[node name="Mesh" type="MeshInstance3D" parent="GriefPlatforms/Pad550Main"]
+mesh = SubResource("mesh_p550")
+
+[node name="Pad590" type="StaticBody3D" parent="GriefPlatforms"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -590)
+
+[node name="Col" type="CollisionShape3D" parent="GriefPlatforms/Pad590"]
+shape = SubResource("shape_p590")
+
+[node name="Mesh" type="MeshInstance3D" parent="GriefPlatforms/Pad590"]
+mesh = SubResource("mesh_p590")
+
+[node name="GriefWalls" type="Node3D" parent="."]
+
+[node name="WallRideA" type="StaticBody3D" parent="GriefWalls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1, 2.5, -365)
+
+[node name="Col" type="CollisionShape3D" parent="GriefWalls/WallRideA"]
+shape = SubResource("shape_gride")
+
+[node name="Mesh" type="MeshInstance3D" parent="GriefWalls/WallRideA"]
+mesh = SubResource("mesh_gride")
+
+[node name="WallClimbFace" type="StaticBody3D" parent="GriefWalls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1, 4, -484)
+
+[node name="Col" type="CollisionShape3D" parent="GriefWalls/WallClimbFace"]
+shape = SubResource("shape_gclimb")
+
+[node name="Mesh" type="MeshInstance3D" parent="GriefWalls/WallClimbFace"]
+mesh = SubResource("mesh_gclimb")
+
+[node name="WallRideC" type="StaticBody3D" parent="GriefWalls"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.1, 2.5, -571)
+
+[node name="Col" type="CollisionShape3D" parent="GriefWalls/WallRideC"]
+shape = SubResource("shape_gride")
+
+[node name="Mesh" type="MeshInstance3D" parent="GriefWalls/WallRideC"]
+mesh = SubResource("mesh_gride")
 
 [node name="GriefShell" type="Node3D" parent="."]
 
@@ -1545,7 +1616,7 @@ mesh = SubResource("mesh_door_lintel")
 [node name="GriefChairs" type="Node3D" parent="."]
 
 [node name="Chair_1" type="StaticBody3D" parent="GriefChairs"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -1.55, -402)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -0.55, -380)
 
 [node name="Col" type="CollisionShape3D" parent="GriefChairs/Chair_1"]
 shape = SubResource("shape_chair")
@@ -1554,7 +1625,7 @@ shape = SubResource("shape_chair")
 mesh = SubResource("mesh_chair")
 
 [node name="Chair_2" type="StaticBody3D" parent="GriefChairs"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, -1.55, -402)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, -0.55, -380)
 
 [node name="Col" type="CollisionShape3D" parent="GriefChairs/Chair_2"]
 shape = SubResource("shape_chair")
@@ -1563,7 +1634,7 @@ shape = SubResource("shape_chair")
 mesh = SubResource("mesh_chair")
 
 [node name="Chair_3" type="StaticBody3D" parent="GriefChairs"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, -1.55, -402)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, -0.55, -380)
 
 [node name="Col" type="CollisionShape3D" parent="GriefChairs/Chair_3"]
 shape = SubResource("shape_chair")
@@ -1572,7 +1643,7 @@ shape = SubResource("shape_chair")
 mesh = SubResource("mesh_chair")
 
 [node name="Chair_4" type="StaticBody3D" parent="GriefChairs"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, -1.55, -402)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, -0.55, -380)
 
 [node name="Col" type="CollisionShape3D" parent="GriefChairs/Chair_4"]
 shape = SubResource("shape_chair")
@@ -1581,7 +1652,7 @@ shape = SubResource("shape_chair")
 mesh = SubResource("mesh_chair")
 
 [node name="Chair_5" type="StaticBody3D" parent="GriefChairs"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -1.55, -412)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -0.55, -388)
 
 [node name="Col" type="CollisionShape3D" parent="GriefChairs/Chair_5"]
 shape = SubResource("shape_chair")
@@ -1590,7 +1661,7 @@ shape = SubResource("shape_chair")
 mesh = SubResource("mesh_chair")
 
 [node name="Chair_6" type="StaticBody3D" parent="GriefChairs"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, -1.55, -412)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, -0.55, -388)
 
 [node name="Col" type="CollisionShape3D" parent="GriefChairs/Chair_6"]
 shape = SubResource("shape_chair")
@@ -1599,7 +1670,7 @@ shape = SubResource("shape_chair")
 mesh = SubResource("mesh_chair")
 
 [node name="Chair_7" type="StaticBody3D" parent="GriefChairs"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, -1.55, -412)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, -0.55, -388)
 
 [node name="Col" type="CollisionShape3D" parent="GriefChairs/Chair_7"]
 shape = SubResource("shape_chair")
@@ -1608,7 +1679,7 @@ shape = SubResource("shape_chair")
 mesh = SubResource("mesh_chair")
 
 [node name="Chair_8" type="StaticBody3D" parent="GriefChairs"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, -1.55, -412)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, -0.55, -388)
 
 [node name="Col" type="CollisionShape3D" parent="GriefChairs/Chair_8"]
 shape = SubResource("shape_chair")
@@ -1617,7 +1688,7 @@ shape = SubResource("shape_chair")
 mesh = SubResource("mesh_chair")
 
 [node name="Chair_9" type="StaticBody3D" parent="GriefChairs"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -1.55, -422)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -0.55, -396)
 
 [node name="Col" type="CollisionShape3D" parent="GriefChairs/Chair_9"]
 shape = SubResource("shape_chair")
@@ -1626,7 +1697,7 @@ shape = SubResource("shape_chair")
 mesh = SubResource("mesh_chair")
 
 [node name="Chair_10" type="StaticBody3D" parent="GriefChairs"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, -1.55, -422)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, -0.55, -396)
 
 [node name="Col" type="CollisionShape3D" parent="GriefChairs/Chair_10"]
 shape = SubResource("shape_chair")
@@ -1635,7 +1706,7 @@ shape = SubResource("shape_chair")
 mesh = SubResource("mesh_chair")
 
 [node name="Chair_11" type="StaticBody3D" parent="GriefChairs"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, -1.55, -422)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, -0.55, -396)
 
 [node name="Col" type="CollisionShape3D" parent="GriefChairs/Chair_11"]
 shape = SubResource("shape_chair")
@@ -1644,7 +1715,7 @@ shape = SubResource("shape_chair")
 mesh = SubResource("mesh_chair")
 
 [node name="Chair_12" type="StaticBody3D" parent="GriefChairs"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, -1.55, -422)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, -0.55, -396)
 
 [node name="Col" type="CollisionShape3D" parent="GriefChairs/Chair_12"]
 shape = SubResource("shape_chair")
@@ -1653,7 +1724,7 @@ shape = SubResource("shape_chair")
 mesh = SubResource("mesh_chair")
 
 [node name="Chair_13" type="StaticBody3D" parent="GriefChairs"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -0.55, -552)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -1.05, -548)
 
 [node name="Col" type="CollisionShape3D" parent="GriefChairs/Chair_13"]
 shape = SubResource("shape_chair")
@@ -1662,7 +1733,7 @@ shape = SubResource("shape_chair")
 mesh = SubResource("mesh_chair")
 
 [node name="Chair_14" type="StaticBody3D" parent="GriefChairs"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, -0.55, -552)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, -1.05, -548)
 
 [node name="Col" type="CollisionShape3D" parent="GriefChairs/Chair_14"]
 shape = SubResource("shape_chair")
@@ -1671,7 +1742,7 @@ shape = SubResource("shape_chair")
 mesh = SubResource("mesh_chair")
 
 [node name="Chair_15" type="StaticBody3D" parent="GriefChairs"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, -0.55, -552)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, -1.05, -548)
 
 [node name="Col" type="CollisionShape3D" parent="GriefChairs/Chair_15"]
 shape = SubResource("shape_chair")
@@ -1680,7 +1751,7 @@ shape = SubResource("shape_chair")
 mesh = SubResource("mesh_chair")
 
 [node name="Chair_16" type="StaticBody3D" parent="GriefChairs"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, -0.55, -552)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, -1.05, -548)
 
 [node name="Col" type="CollisionShape3D" parent="GriefChairs/Chair_16"]
 shape = SubResource("shape_chair")
@@ -1689,7 +1760,7 @@ shape = SubResource("shape_chair")
 mesh = SubResource("mesh_chair")
 
 [node name="Chair_17" type="StaticBody3D" parent="GriefChairs"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -0.55, -566)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -1.05, -558)
 
 [node name="Col" type="CollisionShape3D" parent="GriefChairs/Chair_17"]
 shape = SubResource("shape_chair")
@@ -1698,7 +1769,7 @@ shape = SubResource("shape_chair")
 mesh = SubResource("mesh_chair")
 
 [node name="Chair_18" type="StaticBody3D" parent="GriefChairs"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, -0.55, -566)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.5, -1.05, -558)
 
 [node name="Col" type="CollisionShape3D" parent="GriefChairs/Chair_18"]
 shape = SubResource("shape_chair")
@@ -1707,7 +1778,7 @@ shape = SubResource("shape_chair")
 mesh = SubResource("mesh_chair")
 
 [node name="Chair_19" type="StaticBody3D" parent="GriefChairs"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, -0.55, -566)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5, -1.05, -558)
 
 [node name="Col" type="CollisionShape3D" parent="GriefChairs/Chair_19"]
 shape = SubResource("shape_chair")
@@ -1716,7 +1787,7 @@ shape = SubResource("shape_chair")
 mesh = SubResource("mesh_chair")
 
 [node name="Chair_20" type="StaticBody3D" parent="GriefChairs"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, -0.55, -566)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, -1.05, -558)
 
 [node name="Col" type="CollisionShape3D" parent="GriefChairs/Chair_20"]
 shape = SubResource("shape_chair")
@@ -1820,40 +1891,28 @@ mesh = SubResource("mesh_stripe")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -340)
 mesh = SubResource("mesh_stripe")
 
-[node name="GStripe_350" type="MeshInstance3D" parent="GriefStripes"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -350)
-mesh = SubResource("mesh_stripe")
-
-[node name="GStripe_360" type="MeshInstance3D" parent="GriefStripes"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -360)
-mesh = SubResource("mesh_stripe")
-
-[node name="GStripe_370" type="MeshInstance3D" parent="GriefStripes"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -370)
-mesh = SubResource("mesh_stripe")
-
 [node name="GStripe_380" type="MeshInstance3D" parent="GriefStripes"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -380)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.97, -380)
 mesh = SubResource("mesh_stripe")
 
 [node name="GStripe_390" type="MeshInstance3D" parent="GriefStripes"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.97, -390)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.97, -390)
 mesh = SubResource("mesh_stripe")
 
 [node name="GStripe_400" type="MeshInstance3D" parent="GriefStripes"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.97, -400)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.97, -400)
 mesh = SubResource("mesh_stripe")
 
 [node name="GStripe_410" type="MeshInstance3D" parent="GriefStripes"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.97, -410)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.97, -410)
 mesh = SubResource("mesh_stripe")
 
 [node name="GStripe_420" type="MeshInstance3D" parent="GriefStripes"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.97, -420)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.97, -420)
 mesh = SubResource("mesh_stripe")
 
 [node name="GStripe_430" type="MeshInstance3D" parent="GriefStripes"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.97, -430)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.97, -430)
 mesh = SubResource("mesh_stripe")
 
 [node name="GStripe_450" type="MeshInstance3D" parent="GriefStripes"]
@@ -1872,32 +1931,28 @@ mesh = SubResource("mesh_stripe")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.97, -480)
 mesh = SubResource("mesh_stripe")
 
-[node name="GStripe_510" type="MeshInstance3D" parent="GriefStripes"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -510)
-mesh = SubResource("mesh_stripe")
-
-[node name="GStripe_520" type="MeshInstance3D" parent="GriefStripes"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -520)
-mesh = SubResource("mesh_stripe")
-
-[node name="GStripe_530" type="MeshInstance3D" parent="GriefStripes"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -530)
+[node name="GStripe_540" type="MeshInstance3D" parent="GriefStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.47, -540)
 mesh = SubResource("mesh_stripe")
 
 [node name="GStripe_550" type="MeshInstance3D" parent="GriefStripes"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.97, -550)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.47, -550)
 mesh = SubResource("mesh_stripe")
 
 [node name="GStripe_560" type="MeshInstance3D" parent="GriefStripes"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.97, -560)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.47, -560)
 mesh = SubResource("mesh_stripe")
 
-[node name="GStripe_570" type="MeshInstance3D" parent="GriefStripes"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.97, -570)
+[node name="GStripe_580" type="MeshInstance3D" parent="GriefStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -580)
 mesh = SubResource("mesh_stripe")
 
 [node name="GStripe_590" type="MeshInstance3D" parent="GriefStripes"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -590)
+mesh = SubResource("mesh_stripe")
+
+[node name="GStripe_600" type="MeshInstance3D" parent="GriefStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -600)
 mesh = SubResource("mesh_stripe")
 
 [node name="Player" parent="." instance=ExtResource("1")]
