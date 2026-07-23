@@ -250,11 +250,11 @@ material = SubResource("grief_floor_mat")
 size = Vector3(2.5, 1, 8)
 
 [sub_resource type="BoxShape3D" id="shape_p390"]
-size = Vector3(10, 1, 27)
+size = Vector3(10, 1, 38)
 
 [sub_resource type="BoxMesh" id="mesh_p390"]
 material = SubResource("grief_floor_mat")
-size = Vector3(10, 1, 27)
+size = Vector3(10, 1, 38)
 
 [sub_resource type="BoxShape3D" id="shape_strip37"]
 size = Vector3(2.5, 1, 7)
@@ -264,11 +264,11 @@ material = SubResource("grief_floor_mat")
 size = Vector3(2.5, 1, 7)
 
 [sub_resource type="BoxShape3D" id="shape_p430"]
-size = Vector3(9, 1, 20)
+size = Vector3(9, 1, 9)
 
 [sub_resource type="BoxMesh" id="mesh_p430"]
 material = SubResource("grief_floor_mat")
-size = Vector3(9, 1, 20)
+size = Vector3(9, 1, 9)
 
 [sub_resource type="BoxShape3D" id="shape_doorplat"]
 size = Vector3(11, 1, 37)
@@ -1015,7 +1015,7 @@ shape = SubResource("shape_p350")
 mesh = SubResource("mesh_p350")
 
 [node name="Pad390" type="StaticBody3D" parent="GriefPlatforms"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.5, -385.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.5, -391)
 
 [node name="Col" type="CollisionShape3D" parent="GriefPlatforms/Pad390"]
 shape = SubResource("shape_p390")
@@ -1024,7 +1024,7 @@ shape = SubResource("shape_p390")
 mesh = SubResource("mesh_p390")
 
 [node name="Pad430Main" type="StaticBody3D" parent="GriefPlatforms"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.5, -425)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.5, -430.5)
 
 [node name="Col" type="CollisionShape3D" parent="GriefPlatforms/Pad430Main"]
 shape = SubResource("shape_p430")
@@ -1134,7 +1134,7 @@ shape = SubResource("shape_grideseg")
 mesh = SubResource("mesh_grideseg")
 
 [node name="CorridorZ2L" type="StaticBody3D" parent="GriefWalls"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.7, 2, -407)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.7, 2, -418)
 
 [node name="Col" type="CollisionShape3D" parent="GriefWalls/CorridorZ2L"]
 shape = SubResource("shape_corridor")
@@ -1143,7 +1143,7 @@ shape = SubResource("shape_corridor")
 mesh = SubResource("mesh_corridor_z2")
 
 [node name="CorridorZ2R" type="StaticBody3D" parent="GriefWalls"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7, 2, -407)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7, 2, -418)
 
 [node name="Col" type="CollisionShape3D" parent="GriefWalls/CorridorZ2R"]
 shape = SubResource("shape_corridor")
@@ -1965,8 +1965,8 @@ mesh = SubResource("mesh_stripe")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.97, -390)
 mesh = SubResource("mesh_stripe")
 
-[node name="GStripe_420" type="MeshInstance3D" parent="GriefStripes"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.97, -420)
+[node name="GStripe_400" type="MeshInstance3D" parent="GriefStripes"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.97, -400)
 mesh = SubResource("mesh_stripe")
 
 [node name="GStripe_430" type="MeshInstance3D" parent="GriefStripes"]
