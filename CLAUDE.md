@@ -36,4 +36,4 @@
 
 ## Design constraint
 
-"Speedrunning feel" is a standing course-design constraint: fast, hard, contained. Wall-run routes are optional, never mandatory. No auto-vault unless the geometry is stair-like.
+"Speedrunning feel" is a standing course-design constraint: fast, hard, contained. HARD is commitment-first (user ruling 2026-07-22): gaps near the reach ceiling, precision landings, clear only at full execution — never margin-first "safely makeable" bands. Wall ride/jump is a MANDATORY core traversal verb (user ruling 2026-07-22, supersedes the earlier optional-only rule): zones contain wall-only sections (rides, climbs, wall-to-wall corridors), placed between markers (frozen respawn y=1 keeps marker floors low). Shell/boundary walls stay broken ≤25 m (rib/recess/gap) so the wall-jump chain (measured 196 m/24 m) never yields a free zone skip; designed wall sections are exempt but bounded ≤25 m. No auto-vault unless the geometry is stair-like.
