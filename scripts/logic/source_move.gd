@@ -7,7 +7,7 @@ extends RefCounted
 const RUN_SPEED := 4.76
 const GRAVITY := 15.24
 const JUMP_SPEED := 5.75
-const FRICTION := 5.2
+const FRICTION := 4.0  ## surf-server sv_friction (CS2 matchmaking default is 5.2)
 const STOP_SPEED := 1.52
 const GROUND_ACCEL := 5.5
 const AIR_ACCEL := 150.0  ## surf/bhop community-server value (CS2 matchmaking uses 12 — near-zero strafe gain by design)

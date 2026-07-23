@@ -4,20 +4,20 @@ extends GutTest
 # --- apply_friction ---
 
 func test_friction_decays_speed_above_stopspeed() -> void:
-	# speed 4 > STOP_SPEED: drop = 4 * 5.2 * 0.1 = 2.08 -> 1.92
+	# speed 4 > STOP_SPEED: drop = 4 * 4.0 * 0.1 = 1.6 -> 2.4
 	var v := SourceMove.apply_friction(Vector3(4, 0, 0), 0.1)
-	assert_true(v.is_equal_approx(Vector3(1.92, 0, 0)))
+	assert_true(v.is_equal_approx(Vector3(2.4, 0, 0)))
 
 
 func test_friction_uses_stopspeed_floor_below_it() -> void:
-	# speed 1 < STOP_SPEED 1.52: drop = 1.52 * 5.2 * 0.1 = 0.7904 -> 0.2096
+	# speed 1 < STOP_SPEED 1.52: drop = 1.52 * 4.0 * 0.1 = 0.608 -> 0.392
 	var v := SourceMove.apply_friction(Vector3(1, 0, 0), 0.1)
-	assert_almost_eq(v.x, 0.2096, 0.0001)
+	assert_almost_eq(v.x, 0.392, 0.0001)
 	assert_almost_eq(v.z, 0.0, 0.0001)
 
 
 func test_friction_clamps_to_zero_when_drop_exceeds_speed() -> void:
-	# drop = 1.52 * 5.2 * 0.2 = 1.5808 > 0.5
+	# drop = 1.52 * 4.0 * 0.2 = 1.216 > 0.5
 	var v := SourceMove.apply_friction(Vector3(0.5, 0, 0), 0.2)
 	assert_true(v.is_equal_approx(Vector3.ZERO))
 
@@ -29,9 +29,9 @@ func test_friction_zeroes_sub_hundredth_speeds() -> void:
 
 
 func test_friction_preserves_vertical() -> void:
-	# horiz speed 3: drop = 3 * 5.2 * 0.1 = 1.56 -> 1.44; y untouched
+	# horiz speed 3: drop = 3 * 4.0 * 0.1 = 1.2 -> 1.8; y untouched
 	var v := SourceMove.apply_friction(Vector3(3, 7, 0), 0.1)
-	assert_true(v.is_equal_approx(Vector3(1.44, 7, 0)))
+	assert_true(v.is_equal_approx(Vector3(1.8, 7, 0)))
 
 
 # --- accelerate ---
@@ -55,7 +55,7 @@ func test_accelerate_noop_when_current_exceeds_wishspeed() -> void:
 
 func test_air_strafe_gains_past_cap_via_perpendicular_add() -> void:
 	# THE mechanic: moving -z at 10, wish pure -x. current = dot = 0 -> add 0.57
-	# accelspeed = 12 * 0.57 * 0.1 = 0.684 -> clamped to 0.57
+	# accelspeed = 150 * 0.57 * 0.1 = 8.55 -> clamped to 0.57
 	var v := SourceMove.accelerate(Vector3(0, 0, -10), Vector3(-1, 0, 0), minf(SourceMove.RUN_SPEED, SourceMove.AIR_CAP), SourceMove.AIR_ACCEL, 0.1)
 	assert_true(v.is_equal_approx(Vector3(-0.57, 0, -10)))
 	assert_gt(Vector3(v.x, 0, v.z).length(), 10.0)
