@@ -1,17 +1,19 @@
 class_name SourceMove
 extends RefCounted
-## Source-engine movement math (CS2 constants, 1 Hammer unit = 0.01905 m).
+## Source movement math — game-scaled hybrid (Source mechanics at what-is-dark scale:
+## run/jump/gravity = main game's player.gd values; STOP_SPEED and AIR_CAP scaled x2.31
+## from CS2's originals; CS2-converted originals in git history).
 ## Caller's per-tick order: grounded -> [auto-hop ? jump : friction] -> accelerate(ground);
 ## airborne -> accelerate(air, wish_speed = minf(RUN_SPEED, AIR_CAP)) -> gravity. Then move_and_slide.
 
-const RUN_SPEED := 4.76
-const GRAVITY := 15.24
-const JUMP_SPEED := 5.75
+const RUN_SPEED := 11.0
+const GRAVITY := 20.0
+const JUMP_SPEED := 8.5
 const FRICTION := 4.0  ## surf-server sv_friction (CS2 matchmaking default is 5.2)
-const STOP_SPEED := 1.52
+const STOP_SPEED := 3.5
 const GROUND_ACCEL := 5.5
 const AIR_ACCEL := 150.0  ## surf/bhop community-server value (CS2 matchmaking uses 12 — near-zero strafe gain by design)
-const AIR_CAP := 0.57
+const AIR_CAP := 1.32
 const OVERBOUNCE := 1.0
 
 
