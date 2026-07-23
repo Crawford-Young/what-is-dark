@@ -8,6 +8,10 @@ run:
 edit:
     "{{godot}}" --path . -e
 
+# run the wall-jump measurement lab
+lab:
+    "{{godot}}" --path . scenes/wall_lab.tscn
+
 # headless unit tests
 test:
     "{{godot}}" --headless --path . -s addons/gut/gut_cmdln.gd -gconfig=.gutconfig.json
