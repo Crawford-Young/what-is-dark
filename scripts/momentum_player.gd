@@ -47,6 +47,10 @@ func _physics_process(delta: float) -> void:
 		velocity = SourceMove.apply_gravity(velocity, delta)
 
 	move_and_slide()
+	for i in get_slide_collision_count():
+		var normal := get_slide_collision(i).get_normal()
+		if normal.dot(Vector3.UP) < 0.7:  # steeper than floor_max_angle → surf surface
+			velocity = SourceMove.clip_velocity(velocity, normal)
 
 
 func teleport(pos: Vector3, face_dir: Vector3) -> void:

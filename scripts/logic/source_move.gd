@@ -10,7 +10,7 @@ const JUMP_SPEED := 5.75
 const FRICTION := 5.2
 const STOP_SPEED := 1.52
 const GROUND_ACCEL := 5.5
-const AIR_ACCEL := 12.0
+const AIR_ACCEL := 150.0  ## surf/bhop community-server value (CS2 matchmaking uses 12 — near-zero strafe gain by design)
 const AIR_CAP := 0.57
 const OVERBOUNCE := 1.0
 
