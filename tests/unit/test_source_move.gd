@@ -86,6 +86,37 @@ func test_clip_leaves_parallel_motion_unchanged() -> void:
 	assert_true(v.is_equal_approx(Vector3(1, 0, 0)))
 
 
+# --- clip_multi ---
+
+func test_clip_multi_single_normal_delegates_to_clip() -> void:
+	# Same case as the 45-degree single-plane test, routed through clip_multi.
+	var n := Vector3(-sqrt(2) / 2, sqrt(2) / 2, 0)
+	var normals: Array[Vector3] = [n]
+	var v := SourceMove.clip_multi(Vector3(0, -10, 0), normals)
+	assert_true(v.is_equal_approx(Vector3(-5, -5, 0)))
+
+
+func test_clip_multi_valley_crease_preserves_along_pipe_component() -> void:
+	# Half-pipe V: n1 = left-wall inner normal, n2 = right-wall inner normal (50-degree faces).
+	# v (0,-10,-5): dot n1 = -6.43 < 0 -> clip -> v1 = (4.925,-5.866,-5);
+	# v1.dot(n2) = -7.545 < 0 -> clip -> v2 = (-0.855,-1.015,-5);
+	# v2.dot(n1) = -1.31 < -0.001 -> crease fires: crease = n1 x n2 = (0,0,1) (normalized);
+	# result = crease * v2.dot(crease) = (0,0,-5) -- only the along-pipe component survives.
+	var n1 := Vector3(sin(deg_to_rad(50.0)), cos(deg_to_rad(50.0)), 0)
+	var n2 := Vector3(-sin(deg_to_rad(50.0)), cos(deg_to_rad(50.0)), 0)
+	var normals: Array[Vector3] = [n1, n2]
+	var v := SourceMove.clip_multi(Vector3(0, -10, -5), normals)
+	assert_almost_eq(v.x, 0.0, 0.0001)
+	assert_almost_eq(v.y, 0.0, 0.0001)
+	assert_almost_eq(v.z, -5.0, 0.0001)
+
+
+func test_clip_multi_noop_when_not_moving_into_any_plane() -> void:
+	var normals: Array[Vector3] = [Vector3.UP]
+	var v := SourceMove.clip_multi(Vector3(1, 0, 0), normals)
+	assert_true(v.is_equal_approx(Vector3(1, 0, 0)))
+
+
 # --- jump / gravity ---
 
 func test_jump_replaces_y_keeps_horizontal() -> void:

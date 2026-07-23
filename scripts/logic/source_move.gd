@@ -42,6 +42,23 @@ static func clip_velocity(velocity: Vector3, normal: Vector3) -> Vector3:
 	return velocity - normal * velocity.dot(normal) * OVERBOUNCE
 
 
+## Source TryPlayerMove multi-plane semantics — clip each opposing plane; if still moving into
+## a clipped plane pair, slide along their crease (intersection line).
+static func clip_multi(velocity: Vector3, normals: Array[Vector3]) -> Vector3:
+	for n in normals:
+		if velocity.dot(n) < 0.0:
+			velocity = clip_velocity(velocity, n)
+	if normals.size() >= 2:
+		for i in normals.size():
+			for j in range(i + 1, normals.size()):
+				if velocity.dot(normals[i]) < -0.001 or velocity.dot(normals[j]) < -0.001:
+					var crease := normals[i].cross(normals[j])
+					if crease.length_squared() > 0.000001:
+						crease = crease.normalized()
+						velocity = crease * velocity.dot(crease)
+	return velocity
+
+
 static func jump(velocity: Vector3) -> Vector3:
 	return Vector3(velocity.x, JUMP_SPEED, velocity.z)
 

@@ -5,9 +5,10 @@ extends Node3D
 const STATIONS := [
 	{"label": "1 BHOP", "spawn": Vector3(0, 1.0, 5.0)},
 	{"label": "2 STRAFE", "spawn": Vector3(40, 1.0, 0.0)},
-	{"label": "3 SURF", "spawn": Vector3(64, 33, 12)},
+	{"label": "3 SURF", "spawn": Vector3(61, 33, 12)},
 ]
 const SURF_RAMP_ANGLE := 50.0  ## both valley faces share this angle (> floor_max_angle 45)
+const VALLEY_FLAT_HALF_WIDTH := 3.0  ## flat-bottom gap: real pipes have transitions, not a sharp V
 
 var _station := 0
 var _peak_speed := 0.0
@@ -80,12 +81,16 @@ func _build_strafe_field() -> void:
 
 
 func _build_surf_run() -> void:
-	# Half-pipe valley: two huge panels tilted TOWARD each other (U shape). Bottom edges meet
-	# exactly at (90, 1, z); outboard top edges at x = 90±25.71, y ≈ 31.64. Momentum carved down
-	# one face carries the rider up the other — the canonical surf valley element.
+	# Half-pipe valley: two huge panels tilted TOWARD each other (U shape), flat-bottomed —
+	# a sharp V is hostile geometry (the crease pins riders dead), real pipes have transitions.
+	# Bottom edges land at x = 90∓3, y = 1 (VALLEY_FLAT_HALF_WIDTH outboard of the old sharp
+	# meeting point); outboard top edges at x = 90±28.71, y ≈ 31.64. Momentum carved down one
+	# face carries the rider up the other — the canonical surf valley element.
 	_valley_pair(-40.0, SURF_RAMP_ANGLE, 1.0, 20.0, 120.0)
-	# Drop-in platform: top y 32, just outboard of the left face's top edge (≈64.3, 31.6).
-	_add_box(Vector3(64, 31.5, 14), Vector3(8, 1, 8), 0.0, Color(0.5, 0.4, 0.3))
+	# Flush floor strip between the two bottom edges: x 87..93, top y 1, full valley length.
+	_add_box(Vector3(90, 0.5, -40), Vector3(6, 1, 120), 0.0, Color(0.45, 0.3, 0.5))
+	# Drop-in platform: top y 32, just outboard of the left face's top edge (≈61.3, 31.6).
+	_add_box(Vector3(61, 31.5, 14), Vector3(8, 1, 8), 0.0, Color(0.5, 0.4, 0.3))
 	# Pit: top y -12, spans x 60..120, z 50..-104 (shortened from -110 to avoid overlapping runout).
 	_add_box(Vector3(90, -12.5, -27), Vector3(60, 1, 154), 0.0, Color(0.08, 0.06, 0.08))
 	# Catch runout: top y -4, spans z -104..-148. Rider carried out of the valley lands here (finish zone).
@@ -96,7 +101,7 @@ func _valley_pair(z_center: float, angle_deg: float, floor_y: float, half_width:
 	var a := deg_to_rad(angle_deg)
 	for side in [-1.0, 1.0]:
 		var center := Vector3(
-			90.0 + side * half_width * cos(a),
+			90.0 + side * (VALLEY_FLAT_HALF_WIDTH + half_width * cos(a)),
 			floor_y + half_width * sin(a),
 			z_center)
 		_add_box(center, Vector3(half_width * 2.0, 0.5, length), side * angle_deg, Color(0.45, 0.3, 0.5))
