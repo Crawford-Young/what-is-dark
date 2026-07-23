@@ -5,10 +5,12 @@ extends Node3D
 const STATIONS := [
 	{"label": "1 BHOP", "spawn": Vector3(0, 1.0, 5.0)},
 	{"label": "2 STRAFE", "spawn": Vector3(40, 1.0, 0.0)},
-	{"label": "3 SURF", "spawn": Vector3(57.5, 44.4, 12)},
+	{"label": "3 SURF", "spawn": Vector3(90, 48, 24)},
 ]
-const SURF_RAMP_ANGLE := 58.0  ## both valley faces share this angle (> floor_max_angle 45)
-const VALLEY_FLAT_HALF_WIDTH := 3.0  ## flat-bottom gap: real pipes have transitions, not a sharp V
+const SURF_RAMP_ANGLE := 51.34  ## Momentum Mod 5:4-slope community build standard; descending
+## stage — real surf maps never touch anything flat, speed comes from the descent itself
+const KICKER_ANGLE := 50.0  ## up-kicker face angle (separate from the ramp angle); dot(UP) =
+## cos(50) ≈ 0.643 < 0.7 — steep enough to launch, not walk
 
 var _station := 0
 var _peak_speed := 0.0
@@ -81,30 +83,57 @@ func _build_strafe_field() -> void:
 
 
 func _build_surf_run() -> void:
-	# Half-pipe valley: two huge, steep panels tilted TOWARD each other (U shape), flat-bottomed —
-	# a sharp V is hostile geometry (the crease pins riders dead), real pipes have transitions.
-	# Bottom edges land at x = 90∓3, y = 1 (VALLEY_FLAT_HALF_WIDTH outboard of the sharp meeting
-	# point — this identity holds at any angle); outboard top edges at x = 90±29.50, y ≈ 43.40.
-	# Momentum carved down one face carries the rider up the other — the canonical surf valley element.
-	_valley_pair(-40.0, SURF_RAMP_ANGLE, 1.0, 25.0, 120.0)
-	# Flush floor strip between the two bottom edges: x 87..93, top y 1, full valley length.
-	_add_box(Vector3(90, 0.5, -40), Vector3(6, 1, 120), 0.0, Color(0.45, 0.3, 0.5))
-	# Drop-in platform: top y 43.4, flush-ish with the left face's top edge (≈60.5, 43.4).
-	_add_box(Vector3(57.5, 42.9, 14), Vector3(8, 1, 8), 0.0, Color(0.5, 0.4, 0.3))
-	# Pit: top y -12, spans x 58..122, z 50..-104 (shortened from -110 to avoid overlapping runout).
-	_add_box(Vector3(90, -12.5, -27), Vector3(64, 1, 154), 0.0, Color(0.08, 0.06, 0.08))
-	# Catch runout: top y -4, spans z -104..-148. Rider carried out of the valley lands here (finish zone).
-	_add_box(Vector3(90, -4.5, -126), Vector3(30, 1, 44), 0.0, Color(0.2, 0.2, 0.24))
+	# Utopia-style descending stage: 3 ramps ridden on their OUTER faces (peak-pair convention),
+	# each lower than the last, with 20 m air-transfer gaps between them — the descent itself is
+	# the speed source, nothing flat is ever touched until the final pit/landing.
+	# Start platform: top y 47; player runs off -z edge onto ramp 1's peak region (peak_y 46, z 20).
+	_add_box(Vector3(90, 46.5, 26), Vector3(8, 1, 8), 0.0, Color(0.5, 0.4, 0.3))
+	# Ramp 1: peak_y 46, z span 20..-60. Bottom edges y ≈ 33.51 at x ≈ 90±9.995.
+	_ramp_pair(-20.0, SURF_RAMP_ANGLE, 46.0, 8.0, 80.0)
+	# Ramp 2: peak_y 28, z span -80..-160 (20 m transfer gap after R1). Bottom edges y ≈ 15.51.
+	_ramp_pair(-120.0, SURF_RAMP_ANGLE, 28.0, 8.0, 80.0)
+	# Ramp 3: peak_y 10, z span -180..-260 (20 m transfer gap after R2). Bottom edges y ≈ -2.49
+	# (hangs above the pit region — fine, no walkable-surface conflict).
+	_ramp_pair(-220.0, SURF_RAMP_ANGLE, 10.0, 8.0, 80.0)
+	# Up-kicker: rotation.x = +KICKER_ANGLE — verified from basis math (local-Z-extent point under
+	# X-rotation maps to world offset (0, -sin(theta)*z0, cos(theta)*z0)); ONLY +50 reproduces the
+	# stated edges, surface normal (0, cos50, sin50) tips up toward the rider approaching in -z.
+	# Bottom edge (90,1,-278), top edge (90,17.86,-292.14): rider off R3 clips up the rising face.
+	_add_box_x(Vector3(90, 9.43, -285.07), Vector3(12, 0.5, 22), KICKER_ANGLE, Color(0.9, 0.3, 0.3))
+	# Landing platform: top y 8, spans z -305..-355.
+	_add_box(Vector3(90, 7.5, -330), Vector3(24, 1, 50), 0.0, Color(0.5, 0.4, 0.3))
+	# Pit: top y -12, spans x 65..115, z 45..-355. Touching it = obvious fail -> R reset.
+	_add_box(Vector3(90, -12.5, -155), Vector3(50, 1, 400), 0.0, Color(0.08, 0.06, 0.08))
 
 
-func _valley_pair(z_center: float, angle_deg: float, floor_y: float, half_width: float, length: float) -> void:
+func _ramp_pair(z_center: float, angle_deg: float, peak_y: float, half_width: float, length: float) -> void:
 	var a := deg_to_rad(angle_deg)
 	for side in [-1.0, 1.0]:
 		var center := Vector3(
-			90.0 + side * (VALLEY_FLAT_HALF_WIDTH + half_width * cos(a)),
-			floor_y + half_width * sin(a),
+			90.0 + side * half_width * cos(a),
+			peak_y - half_width * sin(a),
 			z_center)
-		_add_box(center, Vector3(half_width * 2.0, 0.5, length), side * angle_deg, Color(0.45, 0.3, 0.5))
+		_add_box(center, Vector3(half_width * 2.0, 0.5, length), -side * angle_deg, Color(0.45, 0.3, 0.5))
+
+
+func _add_box_x(pos: Vector3, size: Vector3, rot_x_deg: float, color: Color) -> void:
+	var body := StaticBody3D.new()
+	body.position = pos
+	body.rotation.x = deg_to_rad(rot_x_deg)
+	var col := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = size
+	col.shape = shape
+	body.add_child(col)
+	var mesh := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = size
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = color
+	box.material = mat
+	mesh.mesh = box
+	body.add_child(mesh)
+	$Geometry.add_child(body)
 
 
 func _add_box(pos: Vector3, size: Vector3, rot_z_deg: float, color: Color) -> void:

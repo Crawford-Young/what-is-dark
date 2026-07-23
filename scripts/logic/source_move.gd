@@ -7,11 +7,9 @@ extends RefCounted
 ## airborne -> accelerate(air, wish_speed = minf(RUN_SPEED, AIR_CAP)) -> gravity. Then move_and_slide.
 
 const RUN_SPEED := 11.0
-const GRAVITY := 26.0  ## down-ramp build rate: accel along face = g*sin(a); 20 matched the main
-## game but built too slow for surf feel
-const JUMP_SPEED := 9.7  ## jump-height parity preserved: 9.7^2/(2*26) ≈ 1.81 m, same as the main
-## game's 8.5^2/40. NOTE: lab gravity now DIVERGES from main game player.gd — adoption-time
-## decision recorded 2026-07-23
+const GRAVITY := 20.0  ## game parity restored: descent-based map structure supplies the build
+## rate, not a gravity tuning lever — the surf ecosystem never tunes gravity (research 2026-07-23)
+const JUMP_SPEED := 8.5  ## game parity restored alongside GRAVITY (see above)
 const FRICTION := 4.0  ## surf-server sv_friction (CS2 matchmaking default is 5.2)
 const STOP_SPEED := 3.5
 const GROUND_ACCEL := 5.5
