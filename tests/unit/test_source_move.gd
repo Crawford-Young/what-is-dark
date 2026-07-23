@@ -55,10 +55,10 @@ func test_accelerate_noop_when_current_exceeds_wishspeed() -> void:
 
 
 func test_air_strafe_gains_past_cap_via_perpendicular_add() -> void:
-	# THE mechanic: moving -z at 10, wish pure -x. current = dot = 0 -> add 1.32
-	# accelspeed = 150 * 1.32 * 0.1 = 19.8 -> clamped to 1.32
+	# THE mechanic: moving -z at 10, wish pure -x. current = dot = 0 -> add 0.75
+	# accelspeed = 150 * 0.75 * 0.1 = 11.25 -> clamped to 0.75
 	var v := SourceMove.accelerate(Vector3(0, 0, -10), Vector3(-1, 0, 0), minf(SourceMove.RUN_SPEED, SourceMove.AIR_CAP), SourceMove.AIR_ACCEL, 0.1)
-	assert_true(v.is_equal_approx(Vector3(-1.32, 0, -10)))
+	assert_true(v.is_equal_approx(Vector3(-0.75, 0, -10)))
 	assert_gt(Vector3(v.x, 0, v.z).length(), 10.0)
 
 
