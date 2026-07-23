@@ -15,3 +15,7 @@ test:
 # import assets headlessly (after adding new assets)
 import:
     "{{godot}}" --headless --path . --import
+
+# run the momentum lab (Source-movement evaluation)
+momentum-lab:
+    "{{godot}}" --path . scenes/momentum_lab.tscn
