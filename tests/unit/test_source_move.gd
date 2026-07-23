@@ -121,10 +121,10 @@ func test_clip_multi_noop_when_not_moving_into_any_plane() -> void:
 
 func test_jump_replaces_y_keeps_horizontal() -> void:
 	var v := SourceMove.jump(Vector3(3, -2, -5))
-	assert_true(v.is_equal_approx(Vector3(3, 9.7, -5)))
+	assert_true(v.is_equal_approx(Vector3(3, 8.5, -5)))
 
 
 func test_gravity_reduces_y() -> void:
-	# 0 - GRAVITY(26.0) * 0.5 = -13.0
+	# 0 - GRAVITY(20.0) * 0.5 = -10.0
 	var v := SourceMove.apply_gravity(Vector3(1, 0, 2), 0.5)
-	assert_true(v.is_equal_approx(Vector3(1, -13.0, 2)))
+	assert_true(v.is_equal_approx(Vector3(1, -10.0, 2)))
