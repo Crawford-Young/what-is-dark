@@ -1021,7 +1021,7 @@ shape = SubResource("shape_ledge")
 mesh = SubResource("mesh_ledge")
 
 [node name="Pad510" type="StaticBody3D" parent="GriefPlatforms"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2, -513)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2, -513.5)
 
 [node name="Col" type="CollisionShape3D" parent="GriefPlatforms/Pad510"]
 shape = SubResource("shape_p350")
