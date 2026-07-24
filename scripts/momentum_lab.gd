@@ -95,13 +95,15 @@ func _build_surf_run() -> void:
 	# Ramp 3: peak_y 10, z span -180..-260 (20 m transfer gap after R2). Bottom edges y ≈ -2.49
 	# (hangs above the pit region — fine, no walkable-surface conflict).
 	_ramp_pair(-220.0, SURF_RAMP_ANGLE, 10.0, 8.0, 80.0)
-	# Up-kicker: rotation.x = +KICKER_ANGLE — verified from basis math (local-Z-extent point under
-	# X-rotation maps to world offset (0, -sin(theta)*z0, cos(theta)*z0)); ONLY +50 reproduces the
-	# stated edges, surface normal (0, cos50, sin50) tips up toward the rider approaching in -z.
-	# Bottom edge (90,1,-278), top edge (90,17.86,-292.14): rider off R3 clips up the rising face.
-	_add_box_x(Vector3(90, 9.43, -285.07), Vector3(12, 0.5, 22), KICKER_ANGLE, Color(0.9, 0.3, 0.3))
-	# Landing platform: top y 8, spans z -305..-355.
-	_add_box(Vector3(90, 7.5, -330), Vector3(24, 1, 50), 0.0, Color(0.5, 0.4, 0.3))
+	# Up-kicker: short redirect tap (real kickers aren't long climbs) — rotation.x = +KICKER_ANGLE,
+	# verified from basis math (local-Z-extent point under X-rotation maps to world offset
+	# (0, -sin(theta)*z0, cos(theta)*z0)); ONLY +50 reproduces the stated edges, surface normal
+	# (0, cos50, sin50) tips up toward the rider approaching in -z.
+	# Bottom edge (90,1,-278), top edge ≈ (90,7.13,-283.14): rider off R3 clips up the rising face.
+	_add_box_x(Vector3(90, 4.06, -280.57), Vector3(12, 0.5, 8), KICKER_ANGLE, Color(0.9, 0.3, 0.3))
+	# Landing platform: top y 4, spans z -285..-355 — catches the full launch-speed range off the
+	# shortened kicker (verified ballistics: entry 25/35/45 m/s all land within this span).
+	_add_box(Vector3(90, 3.5, -320), Vector3(24, 1, 70), 0.0, Color(0.5, 0.4, 0.3))
 	# Pit: top y -12, spans x 65..115, z 45..-355. Touching it = obvious fail -> R reset.
 	_add_box(Vector3(90, -12.5, -155), Vector3(50, 1, 400), 0.0, Color(0.08, 0.06, 0.08))
 
