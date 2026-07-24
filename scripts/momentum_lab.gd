@@ -96,18 +96,15 @@ func _build_surf_run() -> void:
 	# Ramp 3: peak_y 37.8, z span -220..-320 (20 m transfer gap after R2). Bottom edges y ≈ 22.18
 	# (transfer relation preserved: next peak = previous bottom edge - 5.5, same 20 m gaps).
 	_ramp_pair(-270.0, SURF_RAMP_ANGLE, 37.8, 10.0, 100.0)
-	# Up-kicker: relocated to catch R3's exit (bottom edge y 22.18 at z -320, vy ~ -5..-8).
-	# Verified catch band (g=20 ballistics, exit speeds 32-48 m/s x vy -5/-6.5/-8): solid through
-	# 32-40 m/s; marginal-low near 32 (steep vy misses); risks overshooting the top edge at 45-48
-	# m/s with shallow vy (flies over, e.g. 48 m/s @ vy-5 lands y~9.6, past the 7.13 top edge).
-	# A +/-8m z search found no placement clearly better (best alt only 10/15 vs this position's
-	# 9/15 hits across the test grid, trading misses at one end for the other) -- kept as given.
-	# Bottom edge (90,1,-356), top edge (90,7.13,-361.14).
-	_add_box_x(Vector3(90, 4.06, -358.57), Vector3(12, 0.5, 8), KICKER_ANGLE, Color(0.9, 0.3, 0.3))
-	# Landing platform: top y 4, spans z -362..-442.
-	_add_box(Vector3(90, 3.5, -402), Vector3(24, 1, 80), 0.0, Color(0.5, 0.4, 0.3))
-	# Pit: top y -12, spans x 65..115, z 50..-460. Touching it = obvious fail -> R reset.
-	_add_box(Vector3(90, -12.5, -205), Vector3(50, 1, 510), 0.0, Color(0.08, 0.06, 0.08))
+	# Up-kicker: raised + moved close to R3's exit (only 8 m past it, was 36 m) so mid-speed riders
+	# arrive shallow, not near-perpendicular -- clip retention depends on how parallel the arrival
+	# is to the face, not just landing inside the band (see report's post-clip energy table).
+	# Bottom edge (90,12,-328), top edge (90,22.72,-337.00).
+	_add_box_x(Vector3(90, 17.36, -332.50), Vector3(12, 0.5, 14), KICKER_ANGLE, Color(0.9, 0.3, 0.3))
+	# Landing platform: top y 4, spans z -340..-420.
+	_add_box(Vector3(90, 3.5, -380), Vector3(24, 1, 80), 0.0, Color(0.5, 0.4, 0.3))
+	# Pit: top y -12, spans x 65..115, z 50..-430. Touching it = obvious fail -> R reset.
+	_add_box(Vector3(90, -12.5, -190), Vector3(50, 1, 480), 0.0, Color(0.08, 0.06, 0.08))
 
 
 func _ramp_pair(z_center: float, angle_deg: float, peak_y: float, half_width: float, length: float) -> void:
