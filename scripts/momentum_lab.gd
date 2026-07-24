@@ -101,8 +101,9 @@ func _build_surf_run() -> void:
 	# is to the face, not just landing inside the band (see report's post-clip energy table).
 	# Bottom edge (90,12,-328), top edge (90,22.72,-337.00).
 	_add_box_x(Vector3(90, 17.36, -332.50), Vector3(12, 0.5, 14), KICKER_ANGLE, Color(0.9, 0.3, 0.3))
-	# Landing platform: top y 4, spans z -340..-420.
-	_add_box(Vector3(90, 3.5, -380), Vector3(24, 1, 80), 0.0, Color(0.5, 0.4, 0.3))
+	# Landing platform: top y 4, spans z -336..-420 (near edge pulled in 4 m so the
+	# slowest/steepest kicker exit lands the edge instead of pitting 1.25 m short).
+	_add_box(Vector3(90, 3.5, -378), Vector3(24, 1, 84), 0.0, Color(0.5, 0.4, 0.3))
 	# Pit: top y -12, spans x 65..115, z 50..-430. Touching it = obvious fail -> R reset.
 	_add_box(Vector3(90, -12.5, -190), Vector3(50, 1, 480), 0.0, Color(0.08, 0.06, 0.08))
 
