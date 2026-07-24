@@ -11,8 +11,9 @@
 
 ## Layout
 
-- Pure gameplay math lives in `RefCounted` scripts under `scripts/logic/` (`move_math.gd`, `wallrun_logic.gd`, `void_logic.gd`, `posture.gd`, `course_logic.gd`) — full TDD, 100% coverage expectation.
-- Node scripts (`scripts/player.gd`, `scripts/slice.gd`, `scripts/swallow_director.gd`, `scripts/void_wall.gd`) wire input/scene-tree only and delegate all math to `scripts/logic/`.
+- Pure gameplay math lives in `RefCounted` scripts under `scripts/logic/` (`move_math.gd`, `wallrun_logic.gd`, `void_logic.gd`, `posture.gd`, `course_logic.gd`, plus lab-only `source_move.gd`, `yaw_drain.gd`) — full TDD, 100% coverage expectation.
+- Node scripts (`scripts/player.gd`, `scripts/slice.gd`, `scripts/swallow_director.gd`, `scripts/void_wall.gd`, lab-only `scripts/momentum_player.gd`/`momentum_lab.gd`) wire input/scene-tree only and delegate all math to `scripts/logic/`.
+- **Momentum lab** (`scenes/momentum_lab.tscn`, `just momentum-lab`): Source-movement evaluation env, verdict ADOPT 2026-07-24. Lab constants live ONLY in `scripts/logic/source_move.gd` (top-of-file); two deliberate CS2-parity breaks are user-locked there (`JUMP_SPEED` airtime parity, `AIR_CAP` 1.5 = 2× turn window). Main-game movement (`scripts/player.gd`) stays byte-untouched by lab work.
 - **No coverage gate on node scripts/scenes.** Stated explicitly so this is never mistaken for an oversight — see games-domain CLAUDE.md, scene/node tests are smoke-level only.
 
 ## Test command
@@ -27,6 +28,7 @@
 ## Tuning-constant locations
 
 - `scripts/player.gd` — `RUN_SPEED`, `JUMP_SPEED`, `GRAVITY`, `GROUND_ACCEL`/`AIR_ACCEL`, `GLANCE_TURN_SPEED`, `MOUSE_SENS`
+- `scripts/logic/source_move.gd` — ALL momentum-lab constants (`RUN_SPEED`, `GRAVITY`, `JUMP_SPEED`, `FRICTION`, `STOP_SPEED`, `GROUND_ACCEL`, `AIR_ACCEL`, `AIR_CAP`, `OVERBOUNCE`); changing one requires deliberate test-expectation updates in `tests/unit/test_source_move.gd` — never loosen tolerances
 - `scripts/logic/wallrun_logic.gd` — `MIN_FORWARD_SPEED`, `SINK_RATE`, `SINK_CAP`, `PUSH_AWAY_SPEED`, `PUSH_UP_SPEED`
 - `scripts/logic/void_logic.gd` — `CREEP_SPEEDS` (per posture), `RESET_GAP`
 - `scripts/swallow_director.gd` — `FADE_OUT`/`HOLD`/`FADE_IN` (swallow), `SETBACK_MARKERS`, `FALL_FADE_OUT`/`FALL_FADE_IN`/`FALL_VOID_GAP` (fall reset)
