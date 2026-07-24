@@ -28,8 +28,7 @@ func _ready() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
-		var raw_delta: float = -event.relative.x * MOUSE_SENS
-		_yaw_drain.add_delta(raw_delta)
+		_yaw_drain.add_delta(-event.relative.x * MOUSE_SENS)
 		_pitch = clampf(_pitch - event.relative.y * MOUSE_SENS, -1.2, 1.2)
 	if event.is_action_pressed(&"ui_cancel"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
