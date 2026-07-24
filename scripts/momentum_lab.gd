@@ -99,8 +99,11 @@ func _build_surf_run() -> void:
 	# Up-kicker: raised + moved close to R3's exit (only 8 m past it, was 36 m) so mid-speed riders
 	# arrive shallow, not near-perpendicular -- clip retention depends on how parallel the arrival
 	# is to the face, not just landing inside the band (see report's post-clip energy table).
-	# Bottom edge (90,12,-328), top edge (90,22.72,-337.00).
-	_add_box_x(Vector3(90, 17.36, -332.50), Vector3(12, 0.5, 14), KICKER_ANGLE, Color(0.9, 0.3, 0.3))
+	# Bottom edge (90,12,-328), top edge (90,18.89,-333.79). Face kept SHORT (9 m):
+	# mid-speed pops (post-clip ~12 m/s) must contact near the top or they stall on
+	# the climb and slide back (probe: 14 m face stalled a 35 m/s entry 0.7 m short);
+	# 40+ m/s arrivals fly just over the top edge and carry straight to the platform.
+	_add_box_x(Vector3(90, 15.45, -330.89), Vector3(12, 0.5, 9), KICKER_ANGLE, Color(0.9, 0.3, 0.3))
 	# Landing platform: top y 4, spans z -336..-420 (near edge pulled in 4 m so the
 	# slowest/steepest kicker exit lands the edge instead of pitting 1.25 m short).
 	_add_box(Vector3(90, 3.5, -378), Vector3(24, 1, 84), 0.0, Color(0.5, 0.4, 0.3))
