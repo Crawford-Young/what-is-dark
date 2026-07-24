@@ -18,9 +18,6 @@ var _yaw_drain := YawDrain.new()  ## drains render-rate mouse yaw across physics
 
 @onready var _head: Node3D = $Head
 
-## DEBUG PROBE — remove before gates (R13 strafe-telemetry investigation)
-var _strafe_recorder := StrafeRecorder.new()
-
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -32,23 +29,14 @@ func _ready() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		var raw_delta: float = -event.relative.x * MOUSE_SENS
-		# DEBUG PROBE — remove before gates: raw (pre-drain) mouse yaw delta, for R13.
-		_strafe_recorder.record_mouse_event(Time.get_ticks_usec(), rad_to_deg(raw_delta))
 		_yaw_drain.add_delta(raw_delta)
 		_pitch = clampf(_pitch - event.relative.y * MOUSE_SENS, -1.2, 1.2)
 	if event.is_action_pressed(&"ui_cancel"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	# DEBUG PROBE — remove before gates: P dumps the strafe telemetry ring buffer to CSV.
-	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_P:
-		_strafe_recorder.dump()
 
 
 func _physics_process(delta: float) -> void:
-	# DEBUG PROBE — remove before gates: pre-tick velocity, read-only, never written back.
-	var pre_tick_velocity := velocity
-
-	var dyaw := _yaw_drain.drain_tick()
-	_yaw += dyaw
+	_yaw += _yaw_drain.drain_tick()
 	rotation.y = _yaw
 	_head.rotation.x = _pitch
 
@@ -57,13 +45,6 @@ func _physics_process(delta: float) -> void:
 	wish_dir.y = 0.0
 	if wish_dir.length_squared() > 0.000001:
 		wish_dir = wish_dir.normalized()
-
-	# DEBUG PROBE — remove before gates: angle between this tick's wish_dir and the PRE-tick
-	# horizontal velocity -- matches the sync-window "brake when >90 deg off velocity" check.
-	var pre_horiz := Vector3(pre_tick_velocity.x, 0.0, pre_tick_velocity.z)
-	var angle_deg := 999.0
-	if wish_dir.length_squared() > 0.000001 and pre_horiz.length_squared() > 0.000001:
-		angle_deg = rad_to_deg(acos(clampf(wish_dir.dot(pre_horiz.normalized()), -1.0, 1.0)))
 
 	var air_wish_speed := minf(SourceMove.RUN_SPEED, SourceMove.AIR_CAP)
 	if is_on_floor() and Input.is_action_pressed(&"jump"):
@@ -89,12 +70,6 @@ func _physics_process(delta: float) -> void:
 		# steep walls (anti-climb) instead of sliding along the plane. Recompute
 		# from the pre-slide velocity with Source clip semantics.
 		velocity = SourceMove.clip_multi(pre_slide_velocity, steep)
-
-	# DEBUG PROBE — remove before gates: per-tick telemetry, read-only, recorded LAST so it
-	# reflects this tick's final resulting state.
-	_strafe_recorder.record_tick(rad_to_deg(_yaw), rad_to_deg(dyaw),
-		Vector2(velocity.x, velocity.z).length(), velocity.y, is_on_floor(),
-		input_2d.x, input_2d.y, angle_deg)
 
 
 func teleport(pos: Vector3, face_dir: Vector3) -> void:
