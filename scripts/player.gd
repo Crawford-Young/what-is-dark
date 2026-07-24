@@ -1,39 +1,41 @@
 class_name Player
 extends CharacterBody3D
 ## Node layer: reads input + raycasts, delegates all math to logic scripts.
+## Source movement core (momentum lab, ADOPTED 2026-07-24): YawDrain-buffered
+## yaw, auto-hop on held jump, pre-slide surf clip on steep contacts.
 
-const RUN_SPEED := 11.0
-const GROUND_ACCEL := 80.0
-const AIR_ACCEL := 25.0
-const GRAVITY := 20.0
-const JUMP_SPEED := 8.5
 const MOUSE_SENS := 0.002
 const GLANCE_TURN_SPEED := 18.0
+const FLOOR_LIMIT_DEG := 38.0  ## lab-parity classification boundary: steeper than
+## this = wall (surfable in 3b). Every existing lap floor is flat (normal y = 1.0),
+## so nothing reclassifies; 38° must hold so future pitched ramps read as walls.
 
 var frozen := false
 var glancing := false
-
 var accel_scale := 1.0
-var landing_retention := 1.0
-
-var _was_airborne := false
 
 var _yaw := 0.0
 var _pitch := 0.0
 var _glance_amount := 0.0
+var _yaw_drain := YawDrain.new()  ## drains render-rate mouse yaw across physics
+## ticks in a bounded window; camera facing uses the same smoothed yaw as the
+## wish direction (single rotation path — see YawDrain docstring)
 
 @onready var _head: Node3D = $Head
 
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	floor_snap_length = 0.0
+	wall_min_slide_angle = 0.0
+	floor_max_angle = deg_to_rad(FLOOR_LIMIT_DEG)
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if frozen:
 		return
 	if event is InputEventMouseMotion:
-		_yaw -= event.relative.x * MOUSE_SENS
+		_yaw_drain.add_delta(-event.relative.x * MOUSE_SENS)
 		_pitch = clampf(_pitch - event.relative.y * MOUSE_SENS, -1.2, 1.2)
 	if event.is_action_pressed(&"ui_cancel"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -42,37 +44,52 @@ func _unhandled_input(event: InputEvent) -> void:
 func _physics_process(delta: float) -> void:
 	if frozen:
 		return
+	_yaw += _yaw_drain.drain_tick()
+	rotation.y = _yaw
 	glancing = Input.is_action_pressed(&"glance")
 	_glance_amount = move_toward(_glance_amount, PI if glancing else 0.0, GLANCE_TURN_SPEED * delta)
-
-	rotation.y = _yaw
 	_head.rotation.y = _glance_amount
 	_head.rotation.x = _pitch if not glancing else -_pitch
 
 	var input_2d := Input.get_vector(&"move_left", &"move_right", &"move_forward", &"move_back")
-	var wish_dir := (transform.basis * Vector3(input_2d.x, 0.0, input_2d.y))
+	var wish_dir := transform.basis * Vector3(input_2d.x, 0.0, input_2d.y)
+	wish_dir.y = 0.0
+	if wish_dir.length_squared() > 0.000001:
+		wish_dir = wish_dir.normalized()
 	var forward_speed := -(transform.basis.inverse() * velocity).z
 
 	var wall_normal := _wall_normal()
 	var on_wall := wall_normal != Vector3.ZERO
+	var air_wish_speed := minf(SourceMove.RUN_SPEED, SourceMove.AIR_CAP)
 
 	if WallrunLogic.can_wallrun(is_on_floor(), on_wall, forward_speed):
-		velocity = MoveMath.apply_gravity(velocity, GRAVITY, delta)
+		velocity = SourceMove.apply_gravity(velocity, delta)
 		velocity = WallrunLogic.ride_velocity(velocity, wall_normal)
 		if Input.is_action_just_pressed(&"jump"):
 			velocity = WallrunLogic.kick_velocity(velocity, wall_normal)
+	elif is_on_floor() and Input.is_action_pressed(&"jump"):
+		# Auto-hop: jump fires on the landing frame, friction never bites.
+		velocity = SourceMove.jump(velocity)
+		velocity = SourceMove.accelerate(velocity, wish_dir, air_wish_speed, SourceMove.AIR_ACCEL * accel_scale, delta)
+	elif is_on_floor():
+		velocity = SourceMove.apply_friction(velocity, delta)
+		velocity = SourceMove.accelerate(velocity, wish_dir, SourceMove.RUN_SPEED, SourceMove.GROUND_ACCEL * accel_scale, delta)
 	else:
-		var accel := (GROUND_ACCEL if is_on_floor() else AIR_ACCEL) * accel_scale
-		velocity = MoveMath.accel_horizontal(velocity, wish_dir, RUN_SPEED, accel, delta)
-		if not is_on_floor():
-			velocity = MoveMath.apply_gravity(velocity, GRAVITY, delta)
-		elif Input.is_action_just_pressed(&"jump"):
-			velocity = MoveMath.jump(velocity, JUMP_SPEED)
+		velocity = SourceMove.accelerate(velocity, wish_dir, air_wish_speed, SourceMove.AIR_ACCEL * accel_scale, delta)
+		velocity = SourceMove.apply_gravity(velocity, delta)
 
+	var pre_slide_velocity := velocity
 	move_and_slide()
-	if is_on_floor() and _was_airborne:
-		velocity = MoveMath.land(velocity, landing_retention)
-	_was_airborne = not is_on_floor()
+	var steep: Array[Vector3] = []
+	for i in get_slide_collision_count():
+		var normal := get_slide_collision(i).get_normal()
+		if normal.dot(Vector3.UP) < cos(deg_to_rad(FLOOR_LIMIT_DEG)):  # steeper than floor_max_angle
+			steep.append(normal)
+	if steep.size() > 0 and not is_on_floor():
+		# Godot GROUNDED move_and_slide deletes horizontal-into-wall velocity on
+		# steep walls (anti-climb). Recompute from the pre-slide velocity with
+		# Source clip semantics (lab lesson, 9822c47).
+		velocity = SourceMove.clip_multi(pre_slide_velocity, steep)
 
 
 func _wall_normal() -> Vector3:
@@ -94,6 +111,7 @@ func teleport(pos: Vector3, face_dir: Vector3) -> void:
 	rotation.y = _yaw
 	_pitch = 0.0
 	_glance_amount = 0.0
+	_yaw_drain.reset()
 
 
 func shift_to(pos: Vector3) -> void:
