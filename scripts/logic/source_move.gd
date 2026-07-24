@@ -7,15 +7,18 @@ extends RefCounted
 ## airborne -> accelerate(air, wish_speed = minf(RUN_SPEED, AIR_CAP)) -> gravity. Then move_and_slide.
 
 const RUN_SPEED := 11.0
-const GRAVITY := 20.0  ## game parity restored: descent-based map structure supplies the build
-## rate, not a gravity tuning lever — the surf ecosystem never tunes gravity (research 2026-07-23)
-const JUMP_SPEED := 8.5  ## game parity restored alongside GRAVITY (see above)
+const GRAVITY := 35.2  ## ratio match — along-face accel / run speed = 35.2*sin(51.34)/11 ≈
+## 2.5/s = CS2's relative downhill gain (15.24*sin51.34/4.76); 20 was game parity but halved
+## the felt punch (20*sin51.34/11 ≈ 1.42/s) — third user ask closed the question (2026-07-23)
+const JUMP_SPEED := 11.28  ## jump-height parity held: 11.28^2/(2*35.2) ≈ 1.81 m, same as the
+## game's 8.5^2/(2*20) — raised alongside GRAVITY so hang-time/height feel is unchanged
 const FRICTION := 4.0  ## surf-server sv_friction (CS2 matchmaking default is 5.2)
 const STOP_SPEED := 3.5
 const GROUND_ACCEL := 5.5
 const AIR_ACCEL := 150.0  ## surf/bhop community-server value (CS2 matchmaking uses 12 — near-zero strafe gain by design)
-const AIR_CAP := 0.75  ## gravity-consistent scale: 0.57 * 20/15.24 ≈ 0.75 — restores CS2's ~3:1
-## gravity-slide vs strafe-hold ratio on 50° faces (the speed-scaled 1.32 pinned riders to ramps)
+const AIR_CAP := 0.75  ## unchanged under the GRAVITY ratio-match: per-tick hold-vs-slide ratio
+## at 120 Hz = 0.75 / (35.2*sin51.34/120) ≈ 3.3:1, vs CS2's 0.57/(15.24*sin51.34/64) ≈ 3.1:1 —
+## already matched; scaling this with GRAVITY would recreate the R4 pin-to-ramp bug
 const OVERBOUNCE := 1.0
 
 

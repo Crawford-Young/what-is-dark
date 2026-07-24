@@ -147,10 +147,10 @@ func test_clip_multi_bitidentical_duplicates() -> void:
 
 func test_jump_replaces_y_keeps_horizontal() -> void:
 	var v := SourceMove.jump(Vector3(3, -2, -5))
-	assert_true(v.is_equal_approx(Vector3(3, 8.5, -5)))
+	assert_true(v.is_equal_approx(Vector3(3, 11.28, -5)))
 
 
 func test_gravity_reduces_y() -> void:
-	# 0 - GRAVITY(20.0) * 0.5 = -10.0
+	# 0 - GRAVITY(35.2) * 0.5 = -17.6
 	var v := SourceMove.apply_gravity(Vector3(1, 0, 2), 0.5)
-	assert_true(v.is_equal_approx(Vector3(1, -10.0, 2)))
+	assert_true(v.is_equal_approx(Vector3(1, -17.6, 2)))
