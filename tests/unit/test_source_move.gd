@@ -117,6 +117,32 @@ func test_clip_multi_noop_when_not_moving_into_any_plane() -> void:
 	assert_true(v.is_equal_approx(Vector3(1, 0, 0)))
 
 
+func test_clip_multi_dedupes_same_plane_contacts() -> void:
+	# Up-kicker (X-rotated panel): move_and_slide reports two float-noise-perturbed samples of
+	# the SAME face normal. Undeduped, their near-zero cross normalizes to an arbitrary tangent
+	# and velocity collapses onto it (observed bug: forward -z speed flips POSITIVE, rider
+	# reverses into the pit). Deduped, this must reduce to one plain single-plane clip.
+	var n := Vector3(0.0, cos(deg_to_rad(50.0)), sin(deg_to_rad(50.0)))
+	var n_perturbed := Vector3(0.0, 0.6423, 0.766453).normalized()
+	assert_gt(n.dot(n_perturbed), 0.999, "perturbed sample must read as the same plane")
+	var velocity := Vector3(0.0, -11.83, -29.0)
+	var normals: Array[Vector3] = [n, n_perturbed]
+	var v := SourceMove.clip_multi(velocity, normals)
+	var single := SourceMove.clip_velocity(velocity, n)
+	assert_almost_eq(v.x, single.x, 0.001)
+	assert_almost_eq(v.y, single.y, 0.001)
+	assert_almost_eq(v.z, single.z, 0.001)
+	assert_lt(v.z, 0.0, "forward (-z) motion must stay forward, not reflect into the pit")
+
+
+func test_clip_multi_bitidentical_duplicates() -> void:
+	# Ordinary ramp case: move_and_slide reports the exact same normal twice for one face.
+	var n := Vector3(-sqrt(2) / 2, sqrt(2) / 2, 0)
+	var normals: Array[Vector3] = [n, n]
+	var v := SourceMove.clip_multi(Vector3(0, -10, 0), normals)
+	assert_true(v.is_equal_approx(Vector3(-5, -5, 0)))
+
+
 # --- jump / gravity ---
 
 func test_jump_replaces_y_keeps_horizontal() -> void:
