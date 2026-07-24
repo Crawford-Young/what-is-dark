@@ -10,8 +10,11 @@ const RUN_SPEED := 11.0
 const GRAVITY := 35.2  ## ratio match — along-face accel / run speed = 35.2*sin(51.34)/11 ≈
 ## 2.5/s = CS2's relative downhill gain (15.24*sin51.34/4.76); 20 was game parity but halved
 ## the felt punch (20*sin51.34/11 ≈ 1.42/s) — third user ask closed the question (2026-07-23)
-const JUMP_SPEED := 11.28  ## jump-height parity held: 11.28^2/(2*35.2) ≈ 1.81 m, same as the
-## game's 8.5^2/(2*20) — raised alongside GRAVITY so hang-time/height feel is unchanged
+const JUMP_SPEED := 13.29  ## airtime match over height parity: airtime = 2*13.29/35.2 ≈ 0.755s
+## = CS's flat-jump airtime (301.99u/800), giving air-strafe a full 360° turn window in one hop
+## (was 0.641s / ~300° max at 11.28). DELIBERATE height-parity break: jump height rises 1.81 ->
+## 2.51 m (13.29^2/(2*35.2)) — user-approved tradeoff (R12d). Lab-scope only; main game's
+## scripts/player.gd JUMP_SPEED is untouched.
 const FRICTION := 4.0  ## surf-server sv_friction (CS2 matchmaking default is 5.2)
 const STOP_SPEED := 3.5
 const GROUND_ACCEL := 5.5
