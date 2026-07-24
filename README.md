@@ -15,6 +15,16 @@ Phase 1 vertical slice complete:
 - Quick fall reset — falling off the course fades out/in and resets you near your last passed marker
 - 200 m greybox course with shell containment
 
+## Momentum lab (Source-movement evaluation — ADOPTED)
+
+Isolated evaluation of CS2-style Source movement (bhop + surf), verdict **ADOPT** (2026-07-24) — Source movement will drive a Phase-3 zone-redesign project cycle. Lab only; the main game's `scripts/player.gd` movement is untouched.
+
+- `scripts/logic/source_move.gd` — pure Source math (friction, accelerate, air cap, plane clip incl. crease `clip_multi`, jump, gravity), full TDD; all tunables top-of-file
+- `scripts/logic/yaw_drain.gd` — render-rate mouse yaw buffered across physics ticks (fixes render-rate strafe staleness)
+- `scripts/momentum_player.gd` + `scenes/momentum_player.tscn` — lab player (auto-hop on held jump, surf clip after `move_and_slide`)
+- `scripts/momentum_lab.gd` + `scenes/momentum_lab.tscn` — greybox stations (bhop runway, strafe field, surf stage) + HUD; keys 1/2/3 teleport between stations, R resets
+- Lab constants deliberately break CS2 parity in two user-approved places: `JUMP_SPEED` (airtime parity at game gravity) and `AIR_CAP` 1.5 (2× air-turn window) — Phase-3 spec decides whether these carry into the game
+
 ## Controls
 
 Derived from `project.godot` `[input]` and `scripts/player.gd`.
@@ -34,3 +44,4 @@ Wall-running has no dedicated bind — running into a side wall while airborne a
 - `just edit` — open the Godot editor
 - `just test` — headless GUT unit tests
 - `just import` — import assets headlessly (after adding new assets, or after any `.tscn` edit)
+- `just momentum-lab` — run the momentum lab scene directly
