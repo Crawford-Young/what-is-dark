@@ -5,10 +5,12 @@ extends Node3D
 const STATIONS := [
 	{"label": "1 BHOP", "spawn": Vector3(0, 1.0, 5.0)},
 	{"label": "2 STRAFE", "spawn": Vector3(40, 1.0, 0.0)},
-	{"label": "3 SURF", "spawn": Vector3(90, 119.5, 24)},
+	{"label": "3 SURF", "spawn": Vector3(90, 113.5, 24)},
 ]
 const SURF_RAMP_ANGLE := 51.34  ## Momentum Mod 5:4-slope community build standard; descending
 ## stage — real surf maps never touch anything flat, speed comes from the descent itself
+const SPINE_PITCH := 12.0  ## descending-rail pitch; forward along-spine gravity gain =
+## g*sin(12) ≈ 7.3 m/s²
 const KICKER_ANGLE := 50.0  ## up-kicker face angle (separate from the ramp angle); dot(UP) =
 ## cos(50) ≈ 0.643 < 0.7 — steep enough to launch, not walk
 
@@ -83,21 +85,23 @@ func _build_strafe_field() -> void:
 
 
 func _build_surf_run() -> void:
-	# Utopia-style descending stage: 3 ramps ridden on their OUTER faces (peak-pair convention),
-	# each lower than the last, with 20 m air-transfer gaps between them — the descent itself is
-	# the speed source, nothing flat is ever touched until the final pit/landing.
-	# Scaled up for a higher speed ceiling (physics/control constants untouched — geometry only).
-	# Faces widened 20 m -> 36 m (hw 10 -> 18) for a longer descent per ramp; bottom-edge chain
-	# and transfer relation preserved (next peak = previous bottom edge - 5.5, same 20 m gaps).
-	# Start platform: top y 118.5; player runs off -z edge onto ramp 1's peak region (peak_y 117.53, z 20).
-	_add_box(Vector3(90, 118.0, 26), Vector3(8, 1, 8), 0.0, Color(0.5, 0.4, 0.3))
-	# Ramp 1: peak_y 117.53, z span 20..-80. Bottom edges y ≈ 89.41 at x ≈ 90±22.49.
-	_ramp_pair(-30.0, SURF_RAMP_ANGLE, 117.53, 18.0, 100.0)
-	# Ramp 2: peak_y 83.91, z span -100..-200 (20 m transfer gap after R1). Bottom edges y ≈ 55.80.
-	_ramp_pair(-150.0, SURF_RAMP_ANGLE, 83.91, 18.0, 100.0)
-	# Ramp 3: peak_y 50.30, z span -220..-320 (20 m transfer gap after R2). Bottom edges y ≈ 22.18
-	# (R3 bottom edge preserved from the pre-widen stage so the kicker/landing chain is untouched).
-	_ramp_pair(-270.0, SURF_RAMP_ANGLE, 50.30, 18.0, 100.0)
+	# Utopia-style descending stage: 3 rail-pitched ramps, each lower than the last, with 20 m
+	# world-z air-transfer gaps between them. Every spine pitches SPINE_PITCH down along -z (a
+	# compound X+Z rotation per panel: Z-roll gives the two-sided ramp cross-section, X-pitch
+	# tilts the whole rolled rail) so gravity feeds FORWARD speed along the direction of travel,
+	# orthogonal to an into-hill A/D hold — holding lateral position and gaining speed coexist.
+	# Transfers are now end-of-rail forward flights (fly off the low/-z end into the next ramp's
+	# start), not lateral fall-off through a face's bottom edge.
+	# Start platform: top y 112.5; player runs off -z edge onto R1's start peak (90, 111.50, 20).
+	_add_box(Vector3(90, 112.0, 26), Vector3(8, 1, 8), 0.0, Color(0.5, 0.4, 0.3))
+	# Ramp 1: peak line start (90,111.50,20) -> end (90,90.71,-77.81); peak mid (90,101.105,-28.905).
+	_ramp_pair(-28.905, SURF_RAMP_ANGLE, 101.105, 18.0, 100.0)
+	# Ramp 2: peak line start (90,85.21,-97.81) -> end (90,64.42,-195.62) (20 m gap after R1);
+	# peak mid (90,74.815,-146.715). Start peak = R1's end peak - 5.5 (transfer relation preserved).
+	_ramp_pair(-146.715, SURF_RAMP_ANGLE, 74.815, 18.0, 100.0)
+	# Ramp 3: peak line start (90,58.92,-215.62) -> end (90,38.13,-313.43) (20 m gap after R2);
+	# peak mid (90,48.525,-264.525). Start peak = R2's end peak - 5.5.
+	_ramp_pair(-264.525, SURF_RAMP_ANGLE, 48.525, 18.0, 100.0)
 	# Up-kicker: raised + moved close to R3's exit (only 8 m past it, was 36 m) so mid-speed riders
 	# arrive shallow, not near-perpendicular -- clip retention depends on how parallel the arrival
 	# is to the face, not just landing inside the band (see report's post-clip energy table).
@@ -114,20 +118,48 @@ func _build_surf_run() -> void:
 	_add_box(Vector3(90, -12.5, -190), Vector3(80, 1, 480), 0.0, Color(0.08, 0.06, 0.08))
 
 
-func _ramp_pair(z_center: float, angle_deg: float, peak_y: float, half_width: float, length: float) -> void:
+## peak_mid_z/peak_mid_y are the world coordinates of the peak LINE's midpoint (x=90); each
+## panel's spine pitches SPINE_PITCH down along -z, so the peak-to-center offset picks up a
+## z-component (hw*sin(a)*sin(phi)) alongside the usual x/y roll offset.
+func _ramp_pair(peak_mid_z: float, angle_deg: float, peak_mid_y: float, half_width: float, length: float) -> void:
 	var a := deg_to_rad(angle_deg)
+	var phi := deg_to_rad(SPINE_PITCH)
 	for side in [-1.0, 1.0]:
 		var center := Vector3(
 			90.0 + side * half_width * cos(a),
-			peak_y - half_width * sin(a),
-			z_center)
-		_add_box(center, Vector3(half_width * 2.0, 0.5, length), -side * angle_deg, Color(0.45, 0.3, 0.5))
+			peak_mid_y - half_width * sin(a) * cos(phi),
+			peak_mid_z + half_width * sin(a) * sin(phi))
+		_add_box_xz(center, Vector3(half_width * 2.0, 0.5, length),
+			-SPINE_PITCH, -side * angle_deg, Color(0.45, 0.3, 0.5))
 
 
 func _add_box_x(pos: Vector3, size: Vector3, rot_x_deg: float, color: Color) -> void:
 	var body := StaticBody3D.new()
 	body.position = pos
 	body.rotation.x = deg_to_rad(rot_x_deg)
+	var col := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = size
+	col.shape = shape
+	body.add_child(col)
+	var mesh := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = size
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = color
+	box.material = mat
+	mesh.mesh = box
+	body.add_child(mesh)
+	$Geometry.add_child(body)
+
+
+## Compound X+Z rotation builder (Godot's default Euler order YXZ ⇒ Basis = Rx*Rz applied to a
+## local vector — Z (face roll) applies first, then X (whole-rail pitch)). Used for pitched
+## surf-ramp panels; kept separate from _add_box/_add_box_x so those two stay byte-identical.
+func _add_box_xz(pos: Vector3, size: Vector3, rot_x_deg: float, rot_z_deg: float, color: Color) -> void:
+	var body := StaticBody3D.new()
+	body.position = pos
+	body.rotation = Vector3(deg_to_rad(rot_x_deg), 0.0, deg_to_rad(rot_z_deg))
 	var col := CollisionShape3D.new()
 	var shape := BoxShape3D.new()
 	shape.size = size
