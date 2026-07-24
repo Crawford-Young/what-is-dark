@@ -1,25 +1,27 @@
 class_name WallrunLogic
 extends RefCounted
-## Wall-run = airborne slide along a side wall with gentle capped sink.
+## Wall-run = momentum-preserving ride along a side wall (Phase 3a spec §3):
+## surf semantics on a vertical surface. Along-wall speed is frictionless
+## (caller applies gravity; ride clips + caps sink); the kick keeps carried
+## horizontal speed and redirects it instead of resetting to fixed values.
 
 const MIN_FORWARD_SPEED := 4.0
-const SINK_RATE := 1.5
 const SINK_CAP := -2.0
 const PUSH_AWAY_SPEED := 6.0
-const PUSH_UP_SPEED := 6.5
+const WALL_JUMP_VY := 8.63  ## phase-1's 1.06 m rise reproduced at GRAVITY 35.2
 
 
 static func can_wallrun(on_floor: bool, has_wall: bool, forward_speed: float) -> bool:
 	return not on_floor and has_wall and forward_speed > MIN_FORWARD_SPEED
 
 
-static func wallrun_velocity(velocity: Vector3, wall_normal: Vector3, delta: float) -> Vector3:
-	var v := velocity.slide(wall_normal)
-	v.y = maxf(velocity.y - SINK_RATE * delta, SINK_CAP)
+static func ride_velocity(velocity: Vector3, wall_normal: Vector3) -> Vector3:
+	var v := SourceMove.clip_velocity(velocity, wall_normal)
+	v.y = maxf(v.y, SINK_CAP)
 	return v
 
 
-static func walljump_velocity(velocity: Vector3, wall_normal: Vector3) -> Vector3:
+static func kick_velocity(velocity: Vector3, wall_normal: Vector3) -> Vector3:
 	var v := velocity + wall_normal * PUSH_AWAY_SPEED
-	v.y = PUSH_UP_SPEED
+	v.y = maxf(v.y, WALL_JUMP_VY)
 	return v

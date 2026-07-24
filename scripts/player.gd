@@ -57,9 +57,10 @@ func _physics_process(delta: float) -> void:
 	var on_wall := wall_normal != Vector3.ZERO
 
 	if WallrunLogic.can_wallrun(is_on_floor(), on_wall, forward_speed):
-		velocity = WallrunLogic.wallrun_velocity(velocity, wall_normal, delta)
+		velocity = MoveMath.apply_gravity(velocity, GRAVITY, delta)
+		velocity = WallrunLogic.ride_velocity(velocity, wall_normal)
 		if Input.is_action_just_pressed(&"jump"):
-			velocity = WallrunLogic.walljump_velocity(velocity, wall_normal)
+			velocity = WallrunLogic.kick_velocity(velocity, wall_normal)
 	else:
 		var accel := (GROUND_ACCEL if is_on_floor() else AIR_ACCEL) * accel_scale
 		velocity = MoveMath.accel_horizontal(velocity, wish_dir, RUN_SPEED, accel, delta)
