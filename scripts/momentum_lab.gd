@@ -94,34 +94,38 @@ func _build_surf_run() -> void:
 	# start), not lateral fall-off through a face's bottom edge.
 	# Start platform: top y 112.5; player runs off -z edge onto R1's start peak (90, 111.50, 20).
 	_add_box(Vector3(90, 112.0, 26), Vector3(8, 1, 8), 0.0, Color(0.5, 0.4, 0.3))
-	# Ramp 1: peak line start (90,111.50,20) -> end (90,90.71,-77.81); peak mid (90,101.105,-28.905).
+	# Ramp 1: peak line (ENGINE-VERIFIED via global_transform on the built body, not hand math)
+	# start (90,111.5006,20.00238) -> end (90,90.70941,-77.81239); peak mid (90,101.105,-28.905).
 	_ramp_pair(-28.905, SURF_RAMP_ANGLE, 101.105, 18.0, 100.0, SPINE_PITCH)
 	# Ramp 2 (R11c fix: PLANE EXTENSION, not a new panel -- an entry apron adds its own exposed
 	# edge/underside, which is exactly what struck riders at x93/x96 in R11b). Same plane as
-	# before (peak mid unaffected in y/z proportion, angle/pitch unchanged), extended BACKWARD
-	# so its start peak now coincides with R1's own end (90,90.71,-77.81) -- zero z-overlap with
-	# R1 (touches, does not exceed, avoiding the ~0.26 m capsule-vs-slab clearance squeeze a
-	# deeper overlap would create). Live-engine exit-envelope data (v16..55 x x90.5/93/96 off
-	# R1's end) showed the earliest plane-crossing at z=-82.56 (v16); this extension reaches
-	# back to z=-77.81, a 4.75 m margin before that crossing (capped just short of the ideal 5 m
-	# because reaching the full 5 m would overlap R1's tail -- the crossing margin was verified
-	# adequate live, not assumed). Peak line: NEW start (90,89.4613,-77.81) -> end (90,64.42,-195.62)
-	# unchanged; peak mid (90,76.9406,-136.715); length 117.81 (was 100).
-	_ramp_pair(-136.715, SURF_RAMP_ANGLE, 76.9406, 18.0, 117.81, SPINE_PITCH)
-	# Ramp 3, same extension logic: new start (90,63.1713,-195.62) coincides with R2's own end
-	# exactly (zero overlap); end (90,38.13,-313.43) unchanged; peak mid (90,50.6506,-254.525);
-	# length 117.81 (was 100).
-	_ramp_pair(-254.525, SURF_RAMP_ANGLE, 50.6506, 18.0, 117.81, SPINE_PITCH)
-	# Up-kicker: raised + moved close to R3's exit (only 8 m past it, was 36 m) so mid-speed riders
-	# arrive shallow, not near-perpendicular -- clip retention depends on how parallel the arrival
-	# is to the face, not just landing inside the band (see report's post-clip energy table).
-	# Bottom edge (90,12,-328), top edge (90,18.89,-333.79). Face kept SHORT (9 m):
-	# mid-speed pops (post-clip ~12 m/s) must contact near the top or they stall on
-	# the climb and slide back (probe: 14 m face stalled a 35 m/s entry 0.7 m short);
-	# 40+ m/s arrivals fly just over the top edge and carry straight to the platform.
+	# before (angle/pitch unchanged), extended BACKWARD toward R1's end.
+	# R12a: lowered 8.0 m in Y from R11c (user: bigger air gaps for turn room during transfers;
+	# vertical launch-over-plane gap now ~9.25 m, was ~1.25 m). ENGINE-VERIFIED peak line (this
+	# round, corrects R11c's stale "coincides exactly" claim -- that claim carried a length-vs-
+	# z-projection unit error: world z-reach of a panel = length*cos(SPINE_PITCH), not length
+	# itself, so the panel is ~2.57 m short of the naive z-span; harmless, just mislabeled):
+	# start (90,81.18764,-79.09721) -> end (90,56.69356,-194.3328); peak mid (90,68.9406,-136.715).
+	# R1's end sits at z=-77.81239, so there's a real ~1.28 m air gap (z=-77.81 to -79.10) where
+	# NEITHER rail exists -- not a defect, consistent with this round's larger-gap intent.
+	_ramp_pair(-136.715, SURF_RAMP_ANGLE, 68.9406, 18.0, 117.81, SPINE_PITCH)
+	# Ramp 3, same extension logic, ALSO lowered 16.0 m in Y from R11c (8 m relative to R2's own
+	# 8 m drop). ENGINE-VERIFIED peak line: start (90,46.89764,-196.9072) ->
+	# end (90,22.40356,-312.1428); peak mid (90,34.6506,-254.525). R2's end sits at
+	# z=-194.3328, so there's a real ~2.57 m air gap (z=-194.33 to -196.91) before R3 -- same
+	# harmless, pre-existing (R11c) length-vs-cos(pitch) unit gap as above, unaffected by the Y drop.
+	_ramp_pair(-254.525, SURF_RAMP_ANGLE, 34.6506, 18.0, 117.81, SPINE_PITCH)
+	# Up-kicker: UNTOUCHED this round (position/size/rotation identical to R11c) -- but R3's
+	# 16 m drop lowers its exit height enough that the kicker (bottom edge y=12, top edge
+	# y=18.89, at z=-328..-333.79) is REACHABLE again from a live R3 exit (R12a finding: v25/35/45
+	# along-face-line exits all strike this face; only v55 clears past it to the platform -- see
+	# report's terminal interaction table). NOT retuned/moved per this round's explicit
+	# instruction; reachable-kicker interaction reported as a live finding, not fixed here.
 	_add_box_x(Vector3(90, 15.45, -330.89), Vector3(12, 0.5, 9), KICKER_ANGLE, Color(0.9, 0.3, 0.3))
-	# Landing platform: top y 4, spans z -336..-420 (near edge pulled in 4 m so the
-	# slowest/steepest kicker exit lands the edge instead of pitting 1.25 m short).
+	# Landing platform: top y 4, spans z -336..-420. UNCHANGED this round: R12a's terminal remap
+	# found v25/35/45 (post-kicker-contact) fall into the pit well short of even an 8 m-extended
+	# near edge (z=-328) -- see report's NEEDS_CONTEXT finding; did not extend/move this without
+	# the orchestrator's sign-off on new numbers.
 	_add_box(Vector3(90, 3.5, -378), Vector3(24, 1, 84), 0.0, Color(0.5, 0.4, 0.3))
 	# Pit: top y -12, widened to x 50..130 (margin past the new ±22.49 bottom edges), z 50..-430.
 	# Touching it = obvious fail -> R reset.
