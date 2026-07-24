@@ -3,6 +3,9 @@ extends CharacterBody3D
 ## Lab-only player: Source movement via SourceMove. No wallrun, no glance, no erosion.
 
 const MOUSE_SENS := 0.002
+const FLOOR_LIMIT_DEG := 38.0  ## must classify the pitched ramps' peak-side edge faces (normal
+## y = sin(51.34°)·cos(12°) ≈ 0.764) as WALLS; cos(38°) ≈ 0.788 gives margin; nothing legit in
+## the lab slopes between 0° and 45° — all real floors are flat, normal y = 1.0
 
 var _yaw := 0.0
 var _pitch := 0.0
@@ -14,6 +17,7 @@ func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	floor_snap_length = 0.0
 	wall_min_slide_angle = 0.0
+	floor_max_angle = deg_to_rad(FLOOR_LIMIT_DEG)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -51,7 +55,7 @@ func _physics_process(delta: float) -> void:
 	var steep: Array[Vector3] = []
 	for i in get_slide_collision_count():
 		var normal := get_slide_collision(i).get_normal()
-		if normal.dot(Vector3.UP) < 0.7:  # steeper than floor_max_angle → surf surface
+		if normal.dot(Vector3.UP) < cos(deg_to_rad(FLOOR_LIMIT_DEG)):  # steeper than floor_max_angle → surf surface
 			steep.append(normal)
 	if steep.size() > 0 and not is_on_floor():
 		# Godot GROUNDED move_and_slide deletes horizontal-into-wall velocity on
