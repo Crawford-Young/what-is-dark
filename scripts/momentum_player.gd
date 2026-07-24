@@ -9,6 +9,12 @@ const FLOOR_LIMIT_DEG := 38.0  ## must classify the pitched ramps' peak-side edg
 
 var _yaw := 0.0
 var _pitch := 0.0
+var _yaw_drain := YawDrain.new()  ## drains render-rate mouse yaw across physics ticks in a
+## bounded window -- see YawDrain docstring. Camera facing uses this SAME smoothed yaw as the
+## wish direction (no split raw/smoothed paths): the resulting ~1-tick average look latency is
+## imperceptible, and a single yaw feeding both keeps this script's one existing rotation path.
+## Pitch stays immediate (unbuffered) -- it only drives the camera look, never the movement
+## math the render-rate bug corrupted, so there's nothing for it to desync from.
 
 @onready var _head: Node3D = $Head
 
@@ -22,13 +28,14 @@ func _ready() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
-		_yaw -= event.relative.x * MOUSE_SENS
+		_yaw_drain.add_delta(-event.relative.x * MOUSE_SENS)
 		_pitch = clampf(_pitch - event.relative.y * MOUSE_SENS, -1.2, 1.2)
 	if event.is_action_pressed(&"ui_cancel"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
 func _physics_process(delta: float) -> void:
+	_yaw += _yaw_drain.drain_tick()
 	rotation.y = _yaw
 	_head.rotation.x = _pitch
 
@@ -70,3 +77,4 @@ func teleport(pos: Vector3, face_dir: Vector3) -> void:
 	_yaw = atan2(-face_dir.x, -face_dir.z)
 	rotation.y = _yaw
 	_pitch = 0.0
+	_yaw_drain.reset()
