@@ -19,9 +19,12 @@ const FRICTION := 4.0  ## surf-server sv_friction (CS2 matchmaking default is 5.
 const STOP_SPEED := 3.5
 const GROUND_ACCEL := 5.5
 const AIR_ACCEL := 150.0  ## surf/bhop community-server value (CS2 matchmaking uses 12 — near-zero strafe gain by design)
-const AIR_CAP := 0.75  ## unchanged under the GRAVITY ratio-match: per-tick hold-vs-slide ratio
-## at 120 Hz = 0.75 / (35.2*sin51.34/120) ≈ 3.3:1, vs CS2's 0.57/(15.24*sin51.34/64) ≈ 3.1:1 —
-## already matched; scaling this with GRAVITY would recreate the R4 pin-to-ramp bug
+const AIR_CAP := 1.5  ## R14: widened air turn window, deliberate parity break (user-approved).
+## Doubles the air turn-rate ceiling at every speed (omega_max = AIR_CAP*120/v rad/s; at
+## v=48: 107 -> 215 deg/s). R13 telemetry showed authentic sync-window overrun at surf
+## speeds -- physics verified faithful to the sync-window math, feel rejected. Was 0.75
+## (gravity-ratio-matched to CS2's per-tick hold-vs-slide ratio, ~3.3:1 at 120 Hz); that
+## match is now intentionally broken in favor of feel. Lab-scope only.
 const OVERBOUNCE := 1.0
 
 
