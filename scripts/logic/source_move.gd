@@ -44,16 +44,28 @@ static func clip_velocity(velocity: Vector3, normal: Vector3) -> Vector3:
 
 
 ## Source TryPlayerMove multi-plane semantics — clip each opposing plane; if still moving into
-## a clipped plane pair, slide along their crease (intersection line).
+## a clipped plane pair, slide along their crease (intersection line). Same-plane contacts are
+## deduped first: move_and_slide can report a single face as 2+ near-identical normals (float
+## noise on rotated panels), and a tiny non-zero cross between near-duplicates normalizes to an
+## arbitrary tangent, collapsing velocity onto it instead of a plain single-plane clip.
 static func clip_multi(velocity: Vector3, normals: Array[Vector3]) -> Vector3:
+	var unique: Array[Vector3] = []
 	for n in normals:
+		var dup := false
+		for u in unique:
+			if n.dot(u) > 0.999:  # same plane sampled twice (multi-contact on one face)
+				dup = true
+				break
+		if not dup:
+			unique.append(n)
+	for n in unique:
 		if velocity.dot(n) < 0.0:
 			velocity = clip_velocity(velocity, n)
-	if normals.size() >= 2:
-		for i in normals.size():
-			for j in range(i + 1, normals.size()):
-				if velocity.dot(normals[i]) < -0.001 or velocity.dot(normals[j]) < -0.001:
-					var crease := normals[i].cross(normals[j])
+	if unique.size() >= 2:
+		for i in unique.size():
+			for j in range(i + 1, unique.size()):
+				if velocity.dot(unique[i]) < -0.001 or velocity.dot(unique[j]) < -0.001:
+					var crease := unique[i].cross(unique[j])
 					if crease.length_squared() > 0.000001:
 						crease = crease.normalized()
 						velocity = crease * velocity.dot(crease)
