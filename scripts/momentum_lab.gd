@@ -5,7 +5,7 @@ extends Node3D
 const STATIONS := [
 	{"label": "1 BHOP", "spawn": Vector3(0, 1.0, 5.0)},
 	{"label": "2 STRAFE", "spawn": Vector3(40, 1.0, 0.0)},
-	{"label": "3 SURF", "spawn": Vector3(90, 48, 24)},
+	{"label": "3 SURF", "spawn": Vector3(90, 82, 24)},
 ]
 const SURF_RAMP_ANGLE := 51.34  ## Momentum Mod 5:4-slope community build standard; descending
 ## stage — real surf maps never touch anything flat, speed comes from the descent itself
@@ -86,26 +86,28 @@ func _build_surf_run() -> void:
 	# Utopia-style descending stage: 3 ramps ridden on their OUTER faces (peak-pair convention),
 	# each lower than the last, with 20 m air-transfer gaps between them — the descent itself is
 	# the speed source, nothing flat is ever touched until the final pit/landing.
-	# Start platform: top y 47; player runs off -z edge onto ramp 1's peak region (peak_y 46, z 20).
-	_add_box(Vector3(90, 46.5, 26), Vector3(8, 1, 8), 0.0, Color(0.5, 0.4, 0.3))
-	# Ramp 1: peak_y 46, z span 20..-60. Bottom edges y ≈ 33.51 at x ≈ 90±9.995.
-	_ramp_pair(-20.0, SURF_RAMP_ANGLE, 46.0, 8.0, 80.0)
-	# Ramp 2: peak_y 28, z span -80..-160 (20 m transfer gap after R1). Bottom edges y ≈ 15.51.
-	_ramp_pair(-120.0, SURF_RAMP_ANGLE, 28.0, 8.0, 80.0)
-	# Ramp 3: peak_y 10, z span -180..-260 (20 m transfer gap after R2). Bottom edges y ≈ -2.49
-	# (hangs above the pit region — fine, no walkable-surface conflict).
-	_ramp_pair(-220.0, SURF_RAMP_ANGLE, 10.0, 8.0, 80.0)
-	# Up-kicker: short redirect tap (real kickers aren't long climbs) — rotation.x = +KICKER_ANGLE,
-	# verified from basis math (local-Z-extent point under X-rotation maps to world offset
-	# (0, -sin(theta)*z0, cos(theta)*z0)); ONLY +50 reproduces the stated edges, surface normal
-	# (0, cos50, sin50) tips up toward the rider approaching in -z.
-	# Bottom edge (90,1,-278), top edge ≈ (90,7.13,-283.14): rider off R3 clips up the rising face.
-	_add_box_x(Vector3(90, 4.06, -280.57), Vector3(12, 0.5, 8), KICKER_ANGLE, Color(0.9, 0.3, 0.3))
-	# Landing platform: top y 4, spans z -285..-355 — catches the full launch-speed range off the
-	# shortened kicker (verified ballistics: entry 25/35/45 m/s all land within this span).
-	_add_box(Vector3(90, 3.5, -320), Vector3(24, 1, 70), 0.0, Color(0.5, 0.4, 0.3))
-	# Pit: top y -12, spans x 65..115, z 45..-355. Touching it = obvious fail -> R reset.
-	_add_box(Vector3(90, -12.5, -155), Vector3(50, 1, 400), 0.0, Color(0.08, 0.06, 0.08))
+	# Scaled up for a higher speed ceiling (physics/control constants untouched — geometry only).
+	# Start platform: top y 81; player runs off -z edge onto ramp 1's peak region (peak_y 80, z 20).
+	_add_box(Vector3(90, 80.5, 26), Vector3(8, 1, 8), 0.0, Color(0.5, 0.4, 0.3))
+	# Ramp 1: peak_y 80, z span 20..-80. Bottom edges y ≈ 64.38 at x ≈ 90±12.49.
+	_ramp_pair(-30.0, SURF_RAMP_ANGLE, 80.0, 10.0, 100.0)
+	# Ramp 2: peak_y 58.9, z span -100..-200 (20 m transfer gap after R1). Bottom edges y ≈ 43.28.
+	_ramp_pair(-150.0, SURF_RAMP_ANGLE, 58.9, 10.0, 100.0)
+	# Ramp 3: peak_y 37.8, z span -220..-320 (20 m transfer gap after R2). Bottom edges y ≈ 22.18
+	# (transfer relation preserved: next peak = previous bottom edge - 5.5, same 20 m gaps).
+	_ramp_pair(-270.0, SURF_RAMP_ANGLE, 37.8, 10.0, 100.0)
+	# Up-kicker: relocated to catch R3's exit (bottom edge y 22.18 at z -320, vy ~ -5..-8).
+	# Verified catch band (g=20 ballistics, exit speeds 32-48 m/s x vy -5/-6.5/-8): solid through
+	# 32-40 m/s; marginal-low near 32 (steep vy misses); risks overshooting the top edge at 45-48
+	# m/s with shallow vy (flies over, e.g. 48 m/s @ vy-5 lands y~9.6, past the 7.13 top edge).
+	# A +/-8m z search found no placement clearly better (best alt only 10/15 vs this position's
+	# 9/15 hits across the test grid, trading misses at one end for the other) -- kept as given.
+	# Bottom edge (90,1,-356), top edge (90,7.13,-361.14).
+	_add_box_x(Vector3(90, 4.06, -358.57), Vector3(12, 0.5, 8), KICKER_ANGLE, Color(0.9, 0.3, 0.3))
+	# Landing platform: top y 4, spans z -362..-442.
+	_add_box(Vector3(90, 3.5, -402), Vector3(24, 1, 80), 0.0, Color(0.5, 0.4, 0.3))
+	# Pit: top y -12, spans x 65..115, z 50..-460. Touching it = obvious fail -> R reset.
+	_add_box(Vector3(90, -12.5, -205), Vector3(50, 1, 510), 0.0, Color(0.08, 0.06, 0.08))
 
 
 func _ramp_pair(z_center: float, angle_deg: float, peak_y: float, half_width: float, length: float) -> void:
