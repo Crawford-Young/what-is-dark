@@ -5,7 +5,7 @@ extends Node3D
 const STATIONS := [
 	{"label": "1 BHOP", "spawn": Vector3(0, 1.0, 5.0)},
 	{"label": "2 STRAFE", "spawn": Vector3(40, 1.0, 0.0)},
-	{"label": "3 SURF", "spawn": Vector3(90, 82, 24)},
+	{"label": "3 SURF", "spawn": Vector3(90, 119.5, 24)},
 ]
 const SURF_RAMP_ANGLE := 51.34  ## Momentum Mod 5:4-slope community build standard; descending
 ## stage — real surf maps never touch anything flat, speed comes from the descent itself
@@ -57,7 +57,7 @@ func _physics_process(_delta: float) -> void:
 		_last_takeoff = speed
 	_was_on_floor = on_floor
 
-	_speed_label.text = "%.2f m/s" % speed
+	_speed_label.text = "%.2f m/s | 3d %.2f" % [speed, _player.velocity.length()]
 	_peak_label.text = "peak %.2f" % _peak_speed
 	_hop_label.text = "hop Δ %+.2f" % (_last_takeoff - _prev_takeoff)
 
@@ -87,15 +87,17 @@ func _build_surf_run() -> void:
 	# each lower than the last, with 20 m air-transfer gaps between them — the descent itself is
 	# the speed source, nothing flat is ever touched until the final pit/landing.
 	# Scaled up for a higher speed ceiling (physics/control constants untouched — geometry only).
-	# Start platform: top y 81; player runs off -z edge onto ramp 1's peak region (peak_y 80, z 20).
-	_add_box(Vector3(90, 80.5, 26), Vector3(8, 1, 8), 0.0, Color(0.5, 0.4, 0.3))
-	# Ramp 1: peak_y 80, z span 20..-80. Bottom edges y ≈ 64.38 at x ≈ 90±12.49.
-	_ramp_pair(-30.0, SURF_RAMP_ANGLE, 80.0, 10.0, 100.0)
-	# Ramp 2: peak_y 58.9, z span -100..-200 (20 m transfer gap after R1). Bottom edges y ≈ 43.28.
-	_ramp_pair(-150.0, SURF_RAMP_ANGLE, 58.9, 10.0, 100.0)
-	# Ramp 3: peak_y 37.8, z span -220..-320 (20 m transfer gap after R2). Bottom edges y ≈ 22.18
-	# (transfer relation preserved: next peak = previous bottom edge - 5.5, same 20 m gaps).
-	_ramp_pair(-270.0, SURF_RAMP_ANGLE, 37.8, 10.0, 100.0)
+	# Faces widened 20 m -> 36 m (hw 10 -> 18) for a longer descent per ramp; bottom-edge chain
+	# and transfer relation preserved (next peak = previous bottom edge - 5.5, same 20 m gaps).
+	# Start platform: top y 118.5; player runs off -z edge onto ramp 1's peak region (peak_y 117.53, z 20).
+	_add_box(Vector3(90, 118.0, 26), Vector3(8, 1, 8), 0.0, Color(0.5, 0.4, 0.3))
+	# Ramp 1: peak_y 117.53, z span 20..-80. Bottom edges y ≈ 89.41 at x ≈ 90±22.49.
+	_ramp_pair(-30.0, SURF_RAMP_ANGLE, 117.53, 18.0, 100.0)
+	# Ramp 2: peak_y 83.91, z span -100..-200 (20 m transfer gap after R1). Bottom edges y ≈ 55.80.
+	_ramp_pair(-150.0, SURF_RAMP_ANGLE, 83.91, 18.0, 100.0)
+	# Ramp 3: peak_y 50.30, z span -220..-320 (20 m transfer gap after R2). Bottom edges y ≈ 22.18
+	# (R3 bottom edge preserved from the pre-widen stage so the kicker/landing chain is untouched).
+	_ramp_pair(-270.0, SURF_RAMP_ANGLE, 50.30, 18.0, 100.0)
 	# Up-kicker: raised + moved close to R3's exit (only 8 m past it, was 36 m) so mid-speed riders
 	# arrive shallow, not near-perpendicular -- clip retention depends on how parallel the arrival
 	# is to the face, not just landing inside the band (see report's post-clip energy table).
@@ -107,8 +109,9 @@ func _build_surf_run() -> void:
 	# Landing platform: top y 4, spans z -336..-420 (near edge pulled in 4 m so the
 	# slowest/steepest kicker exit lands the edge instead of pitting 1.25 m short).
 	_add_box(Vector3(90, 3.5, -378), Vector3(24, 1, 84), 0.0, Color(0.5, 0.4, 0.3))
-	# Pit: top y -12, spans x 65..115, z 50..-430. Touching it = obvious fail -> R reset.
-	_add_box(Vector3(90, -12.5, -190), Vector3(50, 1, 480), 0.0, Color(0.08, 0.06, 0.08))
+	# Pit: top y -12, widened to x 50..130 (margin past the new ±22.49 bottom edges), z 50..-430.
+	# Touching it = obvious fail -> R reset.
+	_add_box(Vector3(90, -12.5, -190), Vector3(80, 1, 480), 0.0, Color(0.08, 0.06, 0.08))
 
 
 func _ramp_pair(z_center: float, angle_deg: float, peak_y: float, half_width: float, length: float) -> void:
