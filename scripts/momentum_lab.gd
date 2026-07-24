@@ -11,6 +11,11 @@ const SURF_RAMP_ANGLE := 51.34  ## Momentum Mod 5:4-slope community build standa
 ## stage — real surf maps never touch anything flat, speed comes from the descent itself
 const SPINE_PITCH := 12.0  ## descending-rail pitch; forward along-spine gravity gain =
 ## g*sin(12) ≈ 7.3 m/s²
+const APRON_PITCH := 30.0  ## entry-apron pitch (steeper than the rail) — kills the exposed-
+## start-lip edge-strike class (R11b Major): fast/shallow arrivals hit this steep face at
+## low incidence (high retention) instead of grazing the next rail's physical start corner
+const APRON_LENGTH := 12.0  ## apron spine length; short ramp bridging the transfer gap's
+## underside, top-back end higher, low-front end coinciding with the next rail's start peak
 const KICKER_ANGLE := 50.0  ## up-kicker face angle (separate from the ramp angle); dot(UP) =
 ## cos(50) ≈ 0.643 < 0.7 — steep enough to launch, not walk
 
@@ -95,13 +100,23 @@ func _build_surf_run() -> void:
 	# Start platform: top y 112.5; player runs off -z edge onto R1's start peak (90, 111.50, 20).
 	_add_box(Vector3(90, 112.0, 26), Vector3(8, 1, 8), 0.0, Color(0.5, 0.4, 0.3))
 	# Ramp 1: peak line start (90,111.50,20) -> end (90,90.71,-77.81); peak mid (90,101.105,-28.905).
-	_ramp_pair(-28.905, SURF_RAMP_ANGLE, 101.105, 18.0, 100.0)
+	_ramp_pair(-28.905, SURF_RAMP_ANGLE, 101.105, 18.0, 100.0, SPINE_PITCH)
+	# Entry apron before R2 (R11b Major fix): 12 m spine at 30 deg (steeper than the 12 deg
+	# rail), low/front end coincides EXACTLY with R2's start peak (90,85.21,-97.81); back/high
+	# end (90,91.21,-87.42). Kills the exposed-start-lip edge strike an active hold-into-wall
+	# ride hits at the R1->R2 transfer (reviewer Major, verified: 93% forward-speed loss in one
+	# tick striking the bare corner) -- fast/shallow arrivals now hit this steep face at low
+	# incidence instead, then slide down the seam onto R2's own face.
+	_ramp_pair(-92.614, SURF_RAMP_ANGLE, 88.21, 18.0, APRON_LENGTH, APRON_PITCH)
 	# Ramp 2: peak line start (90,85.21,-97.81) -> end (90,64.42,-195.62) (20 m gap after R1);
 	# peak mid (90,74.815,-146.715). Start peak = R1's end peak - 5.5 (transfer relation preserved).
-	_ramp_pair(-146.715, SURF_RAMP_ANGLE, 74.815, 18.0, 100.0)
+	_ramp_pair(-146.715, SURF_RAMP_ANGLE, 74.815, 18.0, 100.0, SPINE_PITCH)
+	# Entry apron before R3, same fix, low/front end coincides with R3's start peak
+	# (90,58.92,-215.62); back/high end (90,64.92,-205.23).
+	_ramp_pair(-210.424, SURF_RAMP_ANGLE, 61.92, 18.0, APRON_LENGTH, APRON_PITCH)
 	# Ramp 3: peak line start (90,58.92,-215.62) -> end (90,38.13,-313.43) (20 m gap after R2);
 	# peak mid (90,48.525,-264.525). Start peak = R2's end peak - 5.5.
-	_ramp_pair(-264.525, SURF_RAMP_ANGLE, 48.525, 18.0, 100.0)
+	_ramp_pair(-264.525, SURF_RAMP_ANGLE, 48.525, 18.0, 100.0, SPINE_PITCH)
 	# Up-kicker: raised + moved close to R3's exit (only 8 m past it, was 36 m) so mid-speed riders
 	# arrive shallow, not near-perpendicular -- clip retention depends on how parallel the arrival
 	# is to the face, not just landing inside the band (see report's post-clip energy table).
@@ -119,18 +134,20 @@ func _build_surf_run() -> void:
 
 
 ## peak_mid_z/peak_mid_y are the world coordinates of the peak LINE's midpoint (x=90); each
-## panel's spine pitches SPINE_PITCH down along -z, so the peak-to-center offset picks up a
-## z-component (hw*sin(a)*sin(phi)) alongside the usual x/y roll offset.
-func _ramp_pair(peak_mid_z: float, angle_deg: float, peak_mid_y: float, half_width: float, length: float) -> void:
+## panel's spine pitches pitch_deg down along -z, so the peak-to-center offset picks up a
+## z-component (hw*sin(a)*sin(phi)) alongside the usual x/y roll offset. pitch_deg is a
+## parameter (not just SPINE_PITCH) so the same builder serves both the main rails and the
+## steeper entry aprons.
+func _ramp_pair(peak_mid_z: float, angle_deg: float, peak_mid_y: float, half_width: float, length: float, pitch_deg: float) -> void:
 	var a := deg_to_rad(angle_deg)
-	var phi := deg_to_rad(SPINE_PITCH)
+	var phi := deg_to_rad(pitch_deg)
 	for side in [-1.0, 1.0]:
 		var center := Vector3(
 			90.0 + side * half_width * cos(a),
 			peak_mid_y - half_width * sin(a) * cos(phi),
 			peak_mid_z + half_width * sin(a) * sin(phi))
 		_add_box_xz(center, Vector3(half_width * 2.0, 0.5, length),
-			-SPINE_PITCH, -side * angle_deg, Color(0.45, 0.3, 0.5))
+			-pitch_deg, -side * angle_deg, Color(0.45, 0.3, 0.5))
 
 
 func _add_box_x(pos: Vector3, size: Vector3, rot_x_deg: float, color: Color) -> void:
