@@ -46,14 +46,18 @@ func _physics_process(delta: float) -> void:
 		velocity = SourceMove.accelerate(velocity, wish_dir, air_wish_speed, SourceMove.AIR_ACCEL, delta)
 		velocity = SourceMove.apply_gravity(velocity, delta)
 
+	var pre_slide_velocity := velocity
 	move_and_slide()
 	var steep: Array[Vector3] = []
 	for i in get_slide_collision_count():
 		var normal := get_slide_collision(i).get_normal()
 		if normal.dot(Vector3.UP) < 0.7:  # steeper than floor_max_angle → surf surface
 			steep.append(normal)
-	if steep.size() > 0:
-		velocity = SourceMove.clip_multi(velocity, steep)
+	if steep.size() > 0 and not is_on_floor():
+		# Godot GROUNDED move_and_slide deletes horizontal-into-wall velocity on
+		# steep walls (anti-climb) instead of sliding along the plane. Recompute
+		# from the pre-slide velocity with Source clip semantics.
+		velocity = SourceMove.clip_multi(pre_slide_velocity, steep)
 
 
 func teleport(pos: Vector3, face_dir: Vector3) -> void:
