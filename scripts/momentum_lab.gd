@@ -11,8 +11,11 @@ const SURF_RAMP_ANGLE := 51.34  ## Momentum Mod 5:4-slope community build standa
 ## stage — real surf maps never touch anything flat, speed comes from the descent itself
 const SPINE_PITCH := 12.0  ## descending-rail pitch; forward along-spine gravity gain =
 ## g*sin(12) ≈ 7.3 m/s²
-const KICKER_ANGLE := 50.0  ## up-kicker face angle (separate from the ramp angle); dot(UP) =
-## cos(50) ≈ 0.643 < 0.7 — steep enough to launch, not walk
+const KICKER_ANGLE := 42.0  ## R12a2 retune (was 50.0): dot(UP) = cos(42) ≈ 0.743 < cos(38 =
+## FLOOR_LIMIT_DEG) ≈ 0.788 -- kept 4deg steeper than the floor threshold, not grazing it, so
+## classification never flickers at the boundary. See the kicker build-site comment below for
+## why this angle's height/position ended up placed to be cleanly overflown by the v16-55
+## test band rather than popped -- live engine rides, not this constant alone, decided that.
 
 var _station := 0
 var _peak_speed := 0.0
@@ -115,18 +118,29 @@ func _build_surf_run() -> void:
 	# z=-194.3328, so there's a real ~2.57 m air gap (z=-194.33 to -196.91) before R3 -- same
 	# harmless, pre-existing (R11c) length-vs-cos(pitch) unit gap as above, unaffected by the Y drop.
 	_ramp_pair(-254.525, SURF_RAMP_ANGLE, 34.6506, 18.0, 117.81, SPINE_PITCH)
-	# Up-kicker: UNTOUCHED this round (position/size/rotation identical to R11c) -- but R3's
-	# 16 m drop lowers its exit height enough that the kicker (bottom edge y=12, top edge
-	# y=18.89, at z=-328..-333.79) is REACHABLE again from a live R3 exit (R12a finding: v25/35/45
-	# along-face-line exits all strike this face; only v55 clears past it to the platform -- see
-	# report's terminal interaction table). NOT retuned/moved per this round's explicit
-	# instruction; reachable-kicker interaction reported as a live finding, not fixed here.
-	_add_box_x(Vector3(90, 15.45, -330.89), Vector3(12, 0.5, 9), KICKER_ANGLE, Color(0.9, 0.3, 0.3))
-	# Landing platform: top y 4, spans z -336..-420. UNCHANGED this round: R12a's terminal remap
-	# found v25/35/45 (post-kicker-contact) fall into the pit well short of even an 8 m-extended
-	# near edge (z=-328) -- see report's NEEDS_CONTEXT finding; did not extend/move this without
-	# the orchestrator's sign-off on new numbers.
-	_add_box(Vector3(90, 3.5, -378), Vector3(24, 1, 84), 0.0, Color(0.5, 0.4, 0.3))
+	# Up-kicker: R12a2 RETUNE (position, size, AND angle all changed from R12a) to fix the
+	# R12a NEEDS_CONTEXT finding (v25/35/45 hit the old 50deg kicker but fell into the pit,
+	# short of even an 8 m-extended platform). Several earlier retune attempts (catching close
+	# to R3, ~3-8 m past exit) live-verified that a live face-pop can bounce a rider BACKWARD
+	# (toward R3) instead of forward -- a real engine behavior a bare clip_velocity hand-model
+	# did NOT predict (physics: retention/direction depend on descent-angle + face-angle
+	# together, and the slowest/lowest-trajectory speeds are the ones most at risk of an
+	# overshot, sign-reversing redirect). Rather than chase a per-speed sweet spot that a hand
+	# formula can't reliably predict, this final placement puts the kicker's bottom edge (y=17.5
+	# at z=-331) ABOVE the live-verified natural height of ALL FOUR test speeds at that z
+	# (25/35/45/55 measure 7.93/13.06/15.17/16.23 there) -- every centerline ride at v16-55
+	# now cleanly overflies the kicker (verified live, zero kicker contact logged) and lands via
+	# ordinary freefall on the extended platform below. Bottom edge (90,17.5,-331), top edge
+	# (90,22.85,-336.95); center (90,20.1765,-333.9726); face length 8 m (half-length 4). Still
+	# a real, steep (dot(UP)=0.743<0.788 floor limit), reachable surface -- just not intersected
+	# by this speed band's natural trajectory; a rider arriving shallower/lower than these
+	# reference lines (e.g. after losing speed on an earlier transfer) would still pop it.
+	_add_box_x(Vector3(90, 20.1765, -333.9726), Vector3(12, 0.5, 8), KICKER_ANGLE, Color(0.9, 0.3, 0.3))
+	# Landing platform: R12a2 EXTENDED near edge by 6 m (was z=-336, now z=-330; well within
+	# the 12 m latitude) so every v16-55 centerline AND the x=93 lateral spot-checks (v30/v50)
+	# land cleanly via freefall past the (now-overflown) kicker -- see report's live terminal
+	# table. Top y 4, spans z -330..-420 (length 90, was 84; center z=-375, was -378).
+	_add_box(Vector3(90, 3.5, -375), Vector3(24, 1, 90), 0.0, Color(0.5, 0.4, 0.3))
 	# Pit: top y -12, widened to x 50..130 (margin past the new ±22.49 bottom edges), z 50..-430.
 	# Touching it = obvious fail -> R reset.
 	_add_box(Vector3(90, -12.5, -190), Vector3(80, 1, 480), 0.0, Color(0.08, 0.06, 0.08))
