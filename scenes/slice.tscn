@@ -1,4 +1,4 @@
-[gd_scene load_steps=156 format=3]
+[gd_scene load_steps=166 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1"]
 [ext_resource type="Script" path="res://scripts/slice.gd" id="2"]
@@ -158,6 +158,13 @@ size = Vector3(6, 1, 42)
 material = SubResource("floor_mat")
 size = Vector3(6, 1, 42)
 
+[sub_resource type="BoxShape3D" id="shape_tempbridge1"]
+size = Vector3(3, 1, 1.5)
+
+[sub_resource type="BoxMesh" id="mesh_tempbridge1"]
+material = SubResource("floor_mat")
+size = Vector3(3, 1, 1.5)
+
 [sub_resource type="BoxShape3D" id="shape_z1strip"]
 size = Vector3(2.5, 1, 6)
 
@@ -239,6 +246,13 @@ size = Vector3(14, 1, 40)
 material = SubResource("grief_floor_mat")
 size = Vector3(14, 1, 40)
 
+[sub_resource type="BoxShape3D" id="shape_tempbridge2"]
+size = Vector3(4, 1, 1.8)
+
+[sub_resource type="BoxMesh" id="mesh_tempbridge2"]
+material = SubResource("grief_floor_mat")
+size = Vector3(4, 1, 1.8)
+
 [sub_resource type="StandardMaterial3D" id="grief_ride_mat"]
 albedo_color = Color(0.5, 0.8, 0.85, 1)
 
@@ -248,6 +262,13 @@ size = Vector3(2.5, 1, 8)
 [sub_resource type="BoxMesh" id="mesh_p350"]
 material = SubResource("grief_floor_mat")
 size = Vector3(2.5, 1, 8)
+
+[sub_resource type="BoxShape3D" id="shape_tempbridge4"]
+size = Vector3(2.5, 1, 1.5)
+
+[sub_resource type="BoxMesh" id="mesh_tempbridge4"]
+material = SubResource("grief_floor_mat")
+size = Vector3(2.5, 1, 1.5)
 
 [sub_resource type="BoxShape3D" id="shape_p390"]
 size = Vector3(10, 1, 38)
@@ -269,6 +290,13 @@ size = Vector3(9, 1, 9)
 [sub_resource type="BoxMesh" id="mesh_p430"]
 material = SubResource("grief_floor_mat")
 size = Vector3(9, 1, 9)
+
+[sub_resource type="BoxShape3D" id="shape_tempbridge3"]
+size = Vector3(4, 1, 2.0)
+
+[sub_resource type="BoxMesh" id="mesh_tempbridge3"]
+material = SubResource("grief_floor_mat")
+size = Vector3(4, 1, 2.0)
 
 [sub_resource type="BoxShape3D" id="shape_doorplat"]
 size = Vector3(11, 1, 37)
@@ -389,6 +417,13 @@ size = Vector3(7, 1, 29)
 [sub_resource type="BoxMesh" id="mesh_D2"]
 material = SubResource("dep_floor_mat")
 size = Vector3(7, 1, 29)
+
+[sub_resource type="BoxShape3D" id="shape_tempbridge5"]
+size = Vector3(4, 1, 1.8)
+
+[sub_resource type="BoxMesh" id="mesh_tempbridge5"]
+material = SubResource("dep_floor_mat")
+size = Vector3(4, 1, 1.8)
 
 [sub_resource type="BoxShape3D" id="shape_StripB"]
 size = Vector3(2.5, 1, 7.7)
@@ -1003,6 +1038,15 @@ shape = SubResource("shape_p8")
 [node name="Mesh" type="MeshInstance3D" parent="P8"]
 mesh = SubResource("mesh_p8")
 
+[node name="TempBridge1" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -248.75)
+
+[node name="Col" type="CollisionShape3D" parent="TempBridge1"]
+shape = SubResource("shape_tempbridge1")
+
+[node name="Mesh" type="MeshInstance3D" parent="TempBridge1"]
+mesh = SubResource("mesh_tempbridge1")
+
 [node name="P9" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -277)
 
@@ -1185,6 +1229,15 @@ shape = SubResource("shape_g1")
 [node name="Mesh" type="MeshInstance3D" parent="GriefPlatforms/G1"]
 mesh = SubResource("mesh_g1")
 
+[node name="TempBridge2" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -341.9)
+
+[node name="Col" type="CollisionShape3D" parent="TempBridge2"]
+shape = SubResource("shape_tempbridge2")
+
+[node name="Mesh" type="MeshInstance3D" parent="TempBridge2"]
+mesh = SubResource("mesh_tempbridge2")
+
 [node name="Pad350" type="StaticBody3D" parent="GriefPlatforms"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -353.3)
 
@@ -1212,6 +1265,15 @@ shape = SubResource("shape_p430")
 [node name="Mesh" type="MeshInstance3D" parent="GriefPlatforms/Pad430Main"]
 mesh = SubResource("mesh_p430")
 
+[node name="TempBridge3" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.5, -436)
+
+[node name="Col" type="CollisionShape3D" parent="TempBridge3"]
+shape = SubResource("shape_tempbridge3")
+
+[node name="Mesh" type="MeshInstance3D" parent="TempBridge3"]
+mesh = SubResource("mesh_tempbridge3")
+
 [node name="DoorPlat" type="StaticBody3D" parent="GriefPlatforms"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.5, -462)
 
@@ -1238,6 +1300,15 @@ shape = SubResource("shape_p350")
 
 [node name="Mesh" type="MeshInstance3D" parent="GriefPlatforms/Pad510"]
 mesh = SubResource("mesh_p350")
+
+[node name="TempBridge4" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2, -518.25)
+
+[node name="Col" type="CollisionShape3D" parent="TempBridge4"]
+shape = SubResource("shape_tempbridge4")
+
+[node name="Mesh" type="MeshInstance3D" parent="TempBridge4"]
+mesh = SubResource("mesh_tempbridge4")
 
 [node name="Pad550Strip" type="StaticBody3D" parent="GriefPlatforms"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2, -529)
@@ -2212,6 +2283,15 @@ shape = SubResource("shape_D2")
 
 [node name="Mesh" type="MeshInstance3D" parent="DepPlatforms/D2"]
 mesh = SubResource("mesh_D2")
+
+[node name="TempBridge5" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -692.9)
+
+[node name="Col" type="CollisionShape3D" parent="TempBridge5"]
+shape = SubResource("shape_tempbridge5")
+
+[node name="Mesh" type="MeshInstance3D" parent="TempBridge5"]
+mesh = SubResource("mesh_tempbridge5")
 
 [node name="StripB" type="StaticBody3D" parent="DepPlatforms"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -704.15)
