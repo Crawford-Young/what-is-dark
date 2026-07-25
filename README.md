@@ -1,29 +1,31 @@
 # What Is Dark
 
-First-person parkour about facing your own darkness. Phase 1: vertical slice complete.
+First-person parkour about facing your own darkness. Phase 3a: Source movement integrated game-wide.
 
 Spec: `~/code/docs/games/what-is-dark/specs/2026-07-21-what-is-dark-design.md`
 
 ## Current state
 
-Phase 1 vertical slice complete:
+Phase 3a — Source movement integration complete (movement + systems accepted at feel gate 2026-07-25):
 
-- First-person speedrun movement — run, jump, wall-run with emergent wall-climb
+- **Source-engine movement is the game's movement** — CS2-style bhop (auto-hop on held jump), air-strafing past the run cap, surf-capable plane clipping; core adopted from the momentum lab into `scripts/player.gd` (`scripts/logic/source_move.gd` + `yaw_drain.gd`)
+- Momentum-preserving wall ride — clip-to-plane ride with capped sink, speed-keeping kick-off
+- Erosion v2 — per-loop acceleration decay (ground + air, floors at 0.52); speed carried is never bled; landing retention removed
 - Snap glance back (hold to look over your shoulder)
 - Posture-sensitive void chase — the dark creeps fastest when you look away, slower when glancing, nearly stalls when you face it
 - Silent swallow on catch — screen fades out, holds, respawns you at a setback marker
 - Quick fall reset — falling off the course fades out/in and resets you near your last passed marker
-- 200 m greybox course with shell containment
+- 200 m greybox course with shell containment — **phase-2 layout, slated for full redesign in phase 3b** (built for the old movement envelope; five TempBridge planks temporarily restore flat-gap viability)
 
-## Momentum lab (Source-movement evaluation — ADOPTED)
+## Momentum lab (Source-movement evaluation — ADOPTED into the game)
 
-Isolated evaluation of CS2-style Source movement (bhop + surf), verdict **ADOPT** (2026-07-24) — Source movement will drive a Phase-3 zone-redesign project cycle. Lab only; the main game's `scripts/player.gd` movement is untouched.
+Isolated evaluation env for CS2-style Source movement (bhop + surf), verdict **ADOPT** (2026-07-24); core adopted into the main game in phase 3a. Lab scene kept as a tuning sandbox.
 
-- `scripts/logic/source_move.gd` — pure Source math (friction, accelerate, air cap, plane clip incl. crease `clip_multi`, jump, gravity), full TDD; all tunables top-of-file
+- `scripts/logic/source_move.gd` — pure Source math (friction, accelerate, air cap, plane clip incl. crease `clip_multi`, jump, gravity), full TDD; all tunables top-of-file, game-wide
 - `scripts/logic/yaw_drain.gd` — render-rate mouse yaw buffered across physics ticks (fixes render-rate strafe staleness)
-- `scripts/momentum_player.gd` + `scenes/momentum_player.tscn` — lab player (auto-hop on held jump, surf clip after `move_and_slide`)
+- `scripts/momentum_player.gd` + `scenes/momentum_player.tscn` — lab player
 - `scripts/momentum_lab.gd` + `scenes/momentum_lab.tscn` — greybox stations (bhop runway, strafe field, surf stage) + HUD; keys 1/2/3 teleport between stations, R resets
-- Lab constants deliberately break CS2 parity in two user-approved places: `JUMP_SPEED` (airtime parity at game gravity) and `AIR_CAP` 1.5 (2× air-turn window) — Phase-3 spec decides whether these carry into the game
+- Constants deliberately break CS2 parity in two user-approved places: `JUMP_SPEED` (airtime parity at game gravity) and `AIR_CAP` 1.5 (2× air-turn window)
 
 ## Controls
 

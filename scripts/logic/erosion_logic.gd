@@ -1,8 +1,9 @@
 class_name ErosionLogic
 extends RefCounted
-## Erosion v2 (Phase 3a spec §4): recovery fails per loop — air-carve authority
-## and strafe gain decay. Speed already carried never bleeds; top speed never
-## erodes. Capped — the game never forces the ending (parent spec §3).
+## Erosion v2 (Phase 3a spec §4): recovery fails per loop — acceleration decays
+## at BOTH ground and air call sites (player.gd scales GROUND_ACCEL and AIR_ACCEL).
+## Speed already carried never bleeds; top speed never erodes. Capped — the game
+## never forces the ending (parent spec §3).
 
 const ACCEL_DECAY_PER_LOOP := 0.12
 const ACCEL_FLOOR := 0.52
