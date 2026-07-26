@@ -1,4 +1,4 @@
-[gd_scene load_steps=68 format=3]
+[gd_scene load_steps=76 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1"]
 [ext_resource type="Script" path="res://scripts/slice.gd" id="2"]
@@ -101,11 +101,11 @@ material = SubResource("shame_mat")
 size = Vector3(12, 1, 8.5)
 
 [sub_resource type="BoxShape3D" id="shape_f21"]
-size = Vector3(12, 1, 21)
+size = Vector3(12, 1, 50)
 
 [sub_resource type="BoxMesh" id="mesh_f21"]
 material = SubResource("shame_mat")
-size = Vector3(12, 1, 21)
+size = Vector3(12, 1, 50)
 
 [sub_resource type="BoxShape3D" id="shape_f28"]
 size = Vector3(16, 1, 28)
@@ -202,12 +202,40 @@ size = Vector3(1.2, 14, 6)
 material = SubResource("locker_mat")
 size = Vector3(1.2, 14, 6)
 
-[sub_resource type="BoxShape3D" id="shape_c4"]
-size = Vector3(1.2, 14, 4)
+[sub_resource type="BoxShape3D" id="shape_f40"]
+size = Vector3(12, 1, 40)
 
-[sub_resource type="BoxMesh" id="mesh_c4"]
+[sub_resource type="BoxMesh" id="mesh_f40"]
+material = SubResource("shame_mat")
+size = Vector3(12, 1, 40)
+
+[sub_resource type="BoxShape3D" id="shape_shaftl"]
+size = Vector3(1.2, 6, 20)
+
+[sub_resource type="BoxMesh" id="mesh_shaftl"]
 material = SubResource("locker_mat")
-size = Vector3(1.2, 14, 4)
+size = Vector3(1.2, 6, 20)
+
+[sub_resource type="BoxShape3D" id="shape_shaftr"]
+size = Vector3(1.2, 8, 20)
+
+[sub_resource type="BoxMesh" id="mesh_shaftr"]
+material = SubResource("locker_mat")
+size = Vector3(1.2, 8, 20)
+
+[sub_resource type="BoxShape3D" id="shape_shaftend"]
+size = Vector3(4.4, 6, 1.2)
+
+[sub_resource type="BoxMesh" id="mesh_shaftend"]
+material = SubResource("locker_mat")
+size = Vector3(4.4, 6, 1.2)
+
+[sub_resource type="BoxShape3D" id="shape_ledge"]
+size = Vector3(6, 1, 24)
+
+[sub_resource type="BoxMesh" id="mesh_ledge"]
+material = SubResource("shame_mat")
+size = Vector3(6, 1, 24)
 
 [sub_resource type="BoxShape3D" id="shape_rib"]
 size = Vector3(2, 8, 1.6)
@@ -453,71 +481,53 @@ shape = SubResource("shape_f222")
 [node name="Mesh" type="MeshInstance3D" parent="Shame/Sh5FloorB"]
 mesh = SubResource("mesh_f222")
 
-[node name="Sh6Step1" type="StaticBody3D" parent="Shame"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -353)
+[node name="Sh6Floor" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -370)
 
-[node name="Col" type="CollisionShape3D" parent="Shame/Sh6Step1"]
-shape = SubResource("shape_s6")
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh6Floor"]
+shape = SubResource("shape_f40")
 
-[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6Step1"]
-mesh = SubResource("mesh_s6")
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6Floor"]
+mesh = SubResource("mesh_f40")
 
-[node name="Sh6Lip" type="StaticBody3D" parent="Shame"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.7, -364)
+[node name="Sh6ShaftL" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6, 2, -376)
 
-[node name="Col" type="CollisionShape3D" parent="Shame/Sh6Lip"]
-shape = SubResource("shape_s8")
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh6ShaftL"]
+shape = SubResource("shape_shaftl")
 
-[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6Lip"]
-mesh = SubResource("mesh_s8")
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6ShaftL"]
+mesh = SubResource("mesh_shaftl")
 
-[node name="Sh6WallL1" type="StaticBody3D" parent="Shame"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 3, -372)
+[node name="Sh6ShaftR" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6, 3, -376)
 
-[node name="Col" type="CollisionShape3D" parent="Shame/Sh6WallL1"]
-shape = SubResource("shape_c6")
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh6ShaftR"]
+shape = SubResource("shape_shaftr")
 
-[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6WallL1"]
-mesh = SubResource("mesh_c6")
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6ShaftR"]
+mesh = SubResource("mesh_shaftr")
 
-[node name="Sh6WallR1" type="StaticBody3D" parent="Shame"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 3, -383.5)
+[node name="Sh6ShaftEnd" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -386.6)
 
-[node name="Col" type="CollisionShape3D" parent="Shame/Sh6WallR1"]
-shape = SubResource("shape_c6")
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh6ShaftEnd"]
+shape = SubResource("shape_shaftend")
 
-[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6WallR1"]
-mesh = SubResource("mesh_c6")
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6ShaftEnd"]
+mesh = SubResource("mesh_shaftend")
 
-[node name="Sh6WallL2" type="StaticBody3D" parent="Shame"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 3, -395)
+[node name="Sh6Ledge" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.2, 4.5, -378)
 
-[node name="Col" type="CollisionShape3D" parent="Shame/Sh6WallL2"]
-shape = SubResource("shape_c6")
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh6Ledge"]
+shape = SubResource("shape_ledge")
 
-[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6WallL2"]
-mesh = SubResource("mesh_c6")
-
-[node name="Sh6WallR2" type="StaticBody3D" parent="Shame"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 3, -406.5)
-
-[node name="Col" type="CollisionShape3D" parent="Shame/Sh6WallR2"]
-shape = SubResource("shape_c6")
-
-[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6WallR2"]
-mesh = SubResource("mesh_c6")
-
-[node name="Sh6WallL3" type="StaticBody3D" parent="Shame"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 3, -417)
-
-[node name="Col" type="CollisionShape3D" parent="Shame/Sh6WallL3"]
-shape = SubResource("shape_c4")
-
-[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6WallL3"]
-mesh = SubResource("mesh_c4")
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6Ledge"]
+mesh = SubResource("mesh_ledge")
 
 [node name="Sh6Exit" type="StaticBody3D" parent="Shame"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -429.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -415)
 
 [node name="Col" type="CollisionShape3D" parent="Shame/Sh6Exit"]
 shape = SubResource("shape_f21")
