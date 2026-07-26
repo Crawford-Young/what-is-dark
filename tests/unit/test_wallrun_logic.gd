@@ -37,11 +37,11 @@ func test_kick_keeps_higher_upward_speed() -> void:
 	assert_almost_eq(v.y, 12.0, 0.0001)
 
 
-func test_jump_released_edge() -> void:
-	assert_true(WallrunLogic.jump_released(true, false), "release edge")
-	assert_false(WallrunLogic.jump_released(true, true), "still held")
-	assert_false(WallrunLogic.jump_released(false, false), "never held")
-	assert_false(WallrunLogic.jump_released(false, true), "press edge")
+func test_jump_pressed_edge() -> void:
+	assert_true(WallrunLogic.jump_pressed(false, true), "press edge")
+	assert_false(WallrunLogic.jump_pressed(true, true), "still held")
+	assert_false(WallrunLogic.jump_pressed(false, false), "never down")
+	assert_false(WallrunLogic.jump_pressed(true, false), "release edge")
 
 
 func test_rideable_normal_vertical_wall() -> void:
