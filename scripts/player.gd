@@ -67,7 +67,7 @@ func _physics_process(delta: float) -> void:
 	if WallrunLogic.can_wallrun(is_on_floor(), on_wall, forward_speed):
 		velocity = SourceMove.apply_gravity(velocity, delta)
 		velocity = WallrunLogic.ride_velocity(velocity, wall_normal)
-		if WallrunLogic.jump_released(_jump_was_down, jump_down):
+		if WallrunLogic.jump_pressed(_jump_was_down, jump_down):
 			velocity = WallrunLogic.kick_velocity(velocity, wall_normal)
 	elif is_on_floor() and jump_down:
 		# Auto-hop: jump fires on the landing frame, friction never bites.

@@ -30,8 +30,8 @@ static func kick_velocity(velocity: Vector3, wall_normal: Vector3) -> Vector3:
 	return v
 
 
-static func jump_released(was_down: bool, down: bool) -> bool:
-	return was_down and not down
+static func jump_pressed(was_down: bool, down: bool) -> bool:
+	return down and not was_down
 
 
 static func is_rideable_normal(normal: Vector3) -> bool:
