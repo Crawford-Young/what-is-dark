@@ -1,4 +1,4 @@
-[gd_scene load_steps=76 format=3]
+[gd_scene load_steps=78 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1"]
 [ext_resource type="Script" path="res://scripts/slice.gd" id="2"]
@@ -87,11 +87,11 @@ material = SubResource("shame_mat")
 size = Vector3(12, 1, 22.2)
 
 [sub_resource type="BoxShape3D" id="shape_f24"]
-size = Vector3(12, 1, 30)
+size = Vector3(12, 1, 44)
 
 [sub_resource type="BoxMesh" id="mesh_f24"]
 material = SubResource("shame_mat")
-size = Vector3(12, 1, 30)
+size = Vector3(12, 1, 44)
 
 [sub_resource type="BoxShape3D" id="shape_f85"]
 size = Vector3(12, 1, 8.5)
@@ -229,6 +229,13 @@ size = Vector3(4.4, 6, 1.2)
 [sub_resource type="BoxMesh" id="mesh_shaftend"]
 material = SubResource("locker_mat")
 size = Vector3(4.4, 6, 1.2)
+
+[sub_resource type="BoxShape3D" id="shape_block"]
+size = Vector3(0.8, 0.4, 20)
+
+[sub_resource type="BoxMesh" id="mesh_block"]
+material = SubResource("locker_mat")
+size = Vector3(0.8, 0.4, 20)
 
 [sub_resource type="BoxShape3D" id="shape_ledge"]
 size = Vector3(6, 1, 24)
@@ -427,17 +434,8 @@ shape = SubResource("shape_c6")
 [node name="Mesh" type="MeshInstance3D" parent="Shame/Sh4RideA"]
 mesh = SubResource("mesh_c6")
 
-[node name="Sh4RideB" type="StaticBody3D" parent="Shame"]
-transform = Transform3D(0.994522, 0, -0.104528, 0, 1, 0, 0.104528, 0, 0.994522, 2.1832, 3, -249.514)
-
-[node name="Col" type="CollisionShape3D" parent="Shame/Sh4RideB"]
-shape = SubResource("shape_c6")
-
-[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh4RideB"]
-mesh = SubResource("mesh_c6")
-
 [node name="Sh4CornerA" type="StaticBody3D" parent="Shame"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.1, 4, -261.434)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.1, 4, -249.5)
 
 [node name="Col" type="CollisionShape3D" parent="Shame/Sh4CornerA"]
 shape = SubResource("shape_w7")
@@ -446,7 +444,7 @@ shape = SubResource("shape_w7")
 mesh = SubResource("mesh_w7")
 
 [node name="Sh4CornerB" type="StaticBody3D" parent="Shame"]
-transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, -0.44926, 4, -267.833)
+transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, -0.44941, 4, -255.89911)
 
 [node name="Col" type="CollisionShape3D" parent="Shame/Sh4CornerB"]
 shape = SubResource("shape_w7")
@@ -455,7 +453,7 @@ shape = SubResource("shape_w7")
 mesh = SubResource("mesh_w7")
 
 [node name="Sh4Mid" type="StaticBody3D" parent="Shame"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -285)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -278)
 
 [node name="Col" type="CollisionShape3D" parent="Shame/Sh4Mid"]
 shape = SubResource("shape_f24")
@@ -507,6 +505,24 @@ shape = SubResource("shape_shaftr")
 
 [node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6ShaftR"]
 mesh = SubResource("mesh_shaftr")
+
+[node name="Sh6BlockL" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 4.8, -376)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh6BlockL"]
+shape = SubResource("shape_block")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6BlockL"]
+mesh = SubResource("mesh_block")
+
+[node name="Sh6BlockR" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 5.6, -376)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh6BlockR"]
+shape = SubResource("shape_block")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6BlockR"]
+mesh = SubResource("mesh_block")
 
 [node name="Sh6ShaftEnd" type="StaticBody3D" parent="Shame"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -386.6)
