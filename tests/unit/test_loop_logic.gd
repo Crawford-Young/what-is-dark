@@ -2,15 +2,15 @@ extends GutTest
 
 
 func test_door_not_crossed_before_boundary() -> void:
-	assert_false(LoopLogic.has_crossed_door(894.9))
+	assert_false(LoopLogic.has_crossed_door(1794.9))
 
 
 func test_door_crossed_at_exact_boundary() -> void:
-	assert_true(LoopLogic.has_crossed_door(895.0))
+	assert_true(LoopLogic.has_crossed_door(1795.0))
 
 
 func test_door_crossed_past_boundary() -> void:
-	assert_true(LoopLogic.has_crossed_door(900.0))
+	assert_true(LoopLogic.has_crossed_door(1800.0))
 
 
 func test_advance_loop_increments() -> void:
