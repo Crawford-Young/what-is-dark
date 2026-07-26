@@ -35,3 +35,10 @@ func test_kick_preserves_horizontal_and_boosts_up() -> void:
 func test_kick_keeps_higher_upward_speed() -> void:
 	var v := WallrunLogic.kick_velocity(Vector3(0, 12, -10), Vector3(1, 0, 0))
 	assert_almost_eq(v.y, 12.0, 0.0001)
+
+
+func test_jump_released_edge() -> void:
+	assert_true(WallrunLogic.jump_released(true, false), "release edge")
+	assert_false(WallrunLogic.jump_released(true, true), "still held")
+	assert_false(WallrunLogic.jump_released(false, false), "never held")
+	assert_false(WallrunLogic.jump_released(false, true), "press edge")

@@ -13,6 +13,7 @@ const FLOOR_LIMIT_DEG := 38.0  ## lab-parity classification boundary: steeper th
 var frozen := false
 var glancing := false
 var accel_scale := 1.0
+var _jump_was_down := false
 
 var _yaw := 0.0
 var _pitch := 0.0
@@ -52,6 +53,7 @@ func _physics_process(delta: float) -> void:
 	_head.rotation.x = _pitch if not glancing else -_pitch
 
 	var input_2d := Input.get_vector(&"move_left", &"move_right", &"move_forward", &"move_back")
+	var jump_down := Input.is_action_pressed(&"jump")
 	var wish_dir := transform.basis * Vector3(input_2d.x, 0.0, input_2d.y)
 	wish_dir.y = 0.0
 	if wish_dir.length_squared() > 0.000001:
@@ -65,9 +67,9 @@ func _physics_process(delta: float) -> void:
 	if WallrunLogic.can_wallrun(is_on_floor(), on_wall, forward_speed):
 		velocity = SourceMove.apply_gravity(velocity, delta)
 		velocity = WallrunLogic.ride_velocity(velocity, wall_normal)
-		if Input.is_action_just_pressed(&"jump"):
+		if WallrunLogic.jump_released(_jump_was_down, jump_down):
 			velocity = WallrunLogic.kick_velocity(velocity, wall_normal)
-	elif is_on_floor() and Input.is_action_pressed(&"jump"):
+	elif is_on_floor() and jump_down:
 		# Auto-hop: jump fires on the landing frame, friction never bites.
 		velocity = SourceMove.jump(velocity)
 		velocity = SourceMove.accelerate(velocity, wish_dir, air_wish_speed, SourceMove.AIR_ACCEL * accel_scale, delta)
@@ -90,6 +92,7 @@ func _physics_process(delta: float) -> void:
 		# steep walls (anti-climb). Recompute from the pre-slide velocity with
 		# Source clip semantics (lab lesson, 9822c47).
 		velocity = SourceMove.clip_multi(pre_slide_velocity, steep)
+	_jump_was_down = jump_down
 
 
 func _wall_normal() -> Vector3:
@@ -111,6 +114,7 @@ func teleport(pos: Vector3, face_dir: Vector3) -> void:
 	rotation.y = _yaw
 	_pitch = 0.0
 	_glance_amount = 0.0
+	_jump_was_down = false
 	_yaw_drain.reset()
 
 
