@@ -25,3 +25,7 @@ static func kick_velocity(velocity: Vector3, wall_normal: Vector3) -> Vector3:
 	var v := velocity + wall_normal * PUSH_AWAY_SPEED
 	v.y = maxf(v.y, WALL_JUMP_VY)
 	return v
+
+
+static func jump_released(was_down: bool, down: bool) -> bool:
+	return was_down and not down
