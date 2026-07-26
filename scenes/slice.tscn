@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=66 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1"]
 [ext_resource type="Script" path="res://scripts/slice.gd" id="2"]
@@ -31,6 +31,194 @@ size = Vector3(8, 1, 20)
 [sub_resource type="BoxMesh" id="mesh_startplat"]
 material = SubResource("floor_mat")
 size = Vector3(8, 1, 20)
+
+[sub_resource type="StandardMaterial3D" id="shame_mat"]
+albedo_color = Color(0.42, 0.47, 0.43, 1)
+
+[sub_resource type="StandardMaterial3D" id="locker_mat"]
+albedo_color = Color(0.35, 0.4, 0.37, 1)
+
+[sub_resource type="StandardMaterial3D" id="desk_mat"]
+albedo_color = Color(0.32, 0.26, 0.2, 1)
+
+[sub_resource type="StandardMaterial3D" id="shell_mat"]
+albedo_color = Color(0.1, 0.1, 0.13, 1)
+
+[sub_resource type="BoxShape3D" id="shape_f19"]
+size = Vector3(12, 1, 19)
+
+[sub_resource type="BoxMesh" id="mesh_f19"]
+material = SubResource("shame_mat")
+size = Vector3(12, 1, 19)
+
+[sub_resource type="BoxShape3D" id="shape_f14"]
+size = Vector3(12, 1, 14)
+
+[sub_resource type="BoxMesh" id="mesh_f14"]
+material = SubResource("shame_mat")
+size = Vector3(12, 1, 14)
+
+[sub_resource type="BoxShape3D" id="shape_f137"]
+size = Vector3(12, 1, 13.7)
+
+[sub_resource type="BoxMesh" id="mesh_f137"]
+material = SubResource("shame_mat")
+size = Vector3(12, 1, 13.7)
+
+[sub_resource type="BoxShape3D" id="shape_f20"]
+size = Vector3(12, 1, 20)
+
+[sub_resource type="BoxMesh" id="mesh_f20"]
+material = SubResource("shame_mat")
+size = Vector3(12, 1, 20)
+
+[sub_resource type="BoxShape3D" id="shape_f185"]
+size = Vector3(12, 1, 18.5)
+
+[sub_resource type="BoxMesh" id="mesh_f185"]
+material = SubResource("shame_mat")
+size = Vector3(12, 1, 18.5)
+
+[sub_resource type="BoxShape3D" id="shape_f24"]
+size = Vector3(12, 1, 24)
+
+[sub_resource type="BoxMesh" id="mesh_f24"]
+material = SubResource("shame_mat")
+size = Vector3(12, 1, 24)
+
+[sub_resource type="BoxShape3D" id="shape_f85"]
+size = Vector3(12, 1, 8.5)
+
+[sub_resource type="BoxMesh" id="mesh_f85"]
+material = SubResource("shame_mat")
+size = Vector3(12, 1, 8.5)
+
+[sub_resource type="BoxShape3D" id="shape_f21"]
+size = Vector3(12, 1, 21)
+
+[sub_resource type="BoxMesh" id="mesh_f21"]
+material = SubResource("shame_mat")
+size = Vector3(12, 1, 21)
+
+[sub_resource type="BoxShape3D" id="shape_f28"]
+size = Vector3(16, 1, 28)
+
+[sub_resource type="BoxMesh" id="mesh_f28"]
+material = SubResource("shame_mat")
+size = Vector3(16, 1, 28)
+
+[sub_resource type="BoxShape3D" id="shape_f48"]
+size = Vector3(16, 1, 48)
+
+[sub_resource type="BoxMesh" id="mesh_f48"]
+material = SubResource("shame_mat")
+size = Vector3(16, 1, 48)
+
+[sub_resource type="BoxShape3D" id="shape_f8"]
+size = Vector3(12, 1, 8)
+
+[sub_resource type="BoxMesh" id="mesh_f8"]
+material = SubResource("shame_mat")
+size = Vector3(12, 1, 8)
+
+[sub_resource type="BoxMesh" id="mesh_f8n"]
+material = SubResource("floor_mat")
+size = Vector3(12, 1, 8)
+
+[sub_resource type="BoxShape3D" id="shape_s6"]
+size = Vector3(10, 1, 6)
+
+[sub_resource type="BoxMesh" id="mesh_s6"]
+material = SubResource("shame_mat")
+size = Vector3(10, 1, 6)
+
+[sub_resource type="BoxShape3D" id="shape_s8"]
+size = Vector3(10, 1, 8)
+
+[sub_resource type="BoxMesh" id="mesh_s8"]
+material = SubResource("shame_mat")
+size = Vector3(10, 1, 8)
+
+[sub_resource type="BoxShape3D" id="shape_r2"]
+size = Vector3(10, 1, 16.76305)
+
+[sub_resource type="BoxMesh" id="mesh_r2"]
+material = SubResource("shame_mat")
+size = Vector3(10, 1, 16.76305)
+
+[sub_resource type="BoxShape3D" id="shape_r8"]
+size = Vector3(10, 1, 18.97367)
+
+[sub_resource type="BoxMesh" id="mesh_r8"]
+material = SubResource("shame_mat")
+size = Vector3(10, 1, 18.97367)
+
+[sub_resource type="BoxShape3D" id="shape_surf"]
+size = Vector3(10, 1, 25)
+
+[sub_resource type="BoxMesh" id="mesh_surf"]
+material = SubResource("desk_mat")
+size = Vector3(10, 1, 25)
+
+[sub_resource type="BoxShape3D" id="shape_w18"]
+size = Vector3(1.2, 16, 18)
+
+[sub_resource type="BoxMesh" id="mesh_w18"]
+material = SubResource("locker_mat")
+size = Vector3(1.2, 16, 18)
+
+[sub_resource type="BoxShape3D" id="shape_w14"]
+size = Vector3(1.2, 16, 14)
+
+[sub_resource type="BoxMesh" id="mesh_w14"]
+material = SubResource("locker_mat")
+size = Vector3(1.2, 16, 14)
+
+[sub_resource type="BoxShape3D" id="shape_w12"]
+size = Vector3(1.2, 16, 12)
+
+[sub_resource type="BoxMesh" id="mesh_w12"]
+material = SubResource("locker_mat")
+size = Vector3(1.2, 16, 12)
+
+[sub_resource type="BoxShape3D" id="shape_w7"]
+size = Vector3(1.2, 16, 7)
+
+[sub_resource type="BoxMesh" id="mesh_w7"]
+material = SubResource("locker_mat")
+size = Vector3(1.2, 16, 7)
+
+[sub_resource type="BoxShape3D" id="shape_c6"]
+size = Vector3(1.2, 14, 6)
+
+[sub_resource type="BoxMesh" id="mesh_c6"]
+material = SubResource("locker_mat")
+size = Vector3(1.2, 14, 6)
+
+[sub_resource type="BoxShape3D" id="shape_c4"]
+size = Vector3(1.2, 14, 4)
+
+[sub_resource type="BoxMesh" id="mesh_c4"]
+material = SubResource("locker_mat")
+size = Vector3(1.2, 14, 4)
+
+[sub_resource type="BoxShape3D" id="shape_rib"]
+size = Vector3(2, 8, 1.6)
+
+[sub_resource type="BoxMesh" id="mesh_rib"]
+material = SubResource("shell_mat")
+size = Vector3(2, 8, 1.6)
+
+[sub_resource type="BoxShape3D" id="shape_desk"]
+size = Vector3(1.2, 0.8, 0.8)
+
+[sub_resource type="BoxMesh" id="mesh_desk"]
+material = SubResource("desk_mat")
+size = Vector3(1.2, 0.8, 0.8)
+
+[sub_resource type="BoxMesh" id="mesh_locker"]
+material = SubResource("locker_mat")
+size = Vector3(0.5, 2, 10)
 
 [node name="Slice" type="Node3D"]
 script = ExtResource("2")
@@ -75,3 +263,699 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color(1, 1, 1, 0)
 mouse_filter = 2
+
+[node name="Shame" type="Node3D" parent="."]
+
+[node name="Sh1FloorA" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -24.5)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh1FloorA"]
+shape = SubResource("shape_f19")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh1FloorA"]
+mesh = SubResource("mesh_f19")
+
+[node name="Sh1FloorB" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -49)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh1FloorB"]
+shape = SubResource("shape_f14")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh1FloorB"]
+mesh = SubResource("mesh_f14")
+
+[node name="Sh1FloorC" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -71.15)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh1FloorC"]
+shape = SubResource("shape_f137")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh1FloorC"]
+mesh = SubResource("mesh_f137")
+
+[node name="Sh2Ramp" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 0.954479, 0.298275, 0, -0.298275, 0.954479, 0, 2.02276, -86.14914)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh2Ramp"]
+shape = SubResource("shape_r2")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh2Ramp"]
+mesh = SubResource("mesh_r2")
+
+[node name="Sh2Lip" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, -97)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh2Lip"]
+shape = SubResource("shape_s6")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh2Lip"]
+mesh = SubResource("mesh_s6")
+
+[node name="Sh2RideL" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6, 4, -110)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh2RideL"]
+shape = SubResource("shape_w18")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh2RideL"]
+mesh = SubResource("mesh_w18")
+
+[node name="Sh2RideR" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.9, 4, -131)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh2RideR"]
+shape = SubResource("shape_w12")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh2RideR"]
+mesh = SubResource("mesh_w12")
+
+[node name="Sh2Exit" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -149)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh2Exit"]
+shape = SubResource("shape_f20")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh2Exit"]
+mesh = SubResource("mesh_f20")
+
+[node name="Sh3FloorA" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -172)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh3FloorA"]
+shape = SubResource("shape_f14")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh3FloorA"]
+mesh = SubResource("mesh_f14")
+
+[node name="Sh3FloorB" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -194.75)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh3FloorB"]
+shape = SubResource("shape_f185")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh3FloorB"]
+mesh = SubResource("mesh_f185")
+
+[node name="Sh4Step1" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, -211)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh4Step1"]
+shape = SubResource("shape_s6")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh4Step1"]
+mesh = SubResource("mesh_s6")
+
+[node name="Sh4Step2" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.9, -221)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh4Step2"]
+shape = SubResource("shape_s6")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh4Step2"]
+mesh = SubResource("mesh_s6")
+
+[node name="Sh4Lip" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6.1, -231)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh4Lip"]
+shape = SubResource("shape_s6")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh4Lip"]
+mesh = SubResource("mesh_s6")
+
+[node name="Sh4RideA" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(0.994522, 0, 0.104528, 0, 1, 0, -0.104528, 0, 0.994522, -2.7832, 3, -238.046)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh4RideA"]
+shape = SubResource("shape_c6")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh4RideA"]
+mesh = SubResource("mesh_c6")
+
+[node name="Sh4RideB" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(0.994522, 0, -0.104528, 0, 1, 0, 0.104528, 0, 0.994522, 2.1832, 3, -249.514)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh4RideB"]
+shape = SubResource("shape_c6")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh4RideB"]
+mesh = SubResource("mesh_c6")
+
+[node name="Sh4CornerA" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.1, 4, -261.434)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh4CornerA"]
+shape = SubResource("shape_w7")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh4CornerA"]
+mesh = SubResource("mesh_w7")
+
+[node name="Sh4CornerB" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, -0.44926, 4, -267.833)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh4CornerB"]
+shape = SubResource("shape_w7")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh4CornerB"]
+mesh = SubResource("mesh_w7")
+
+[node name="Sh4Mid" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -288)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh4Mid"]
+shape = SubResource("shape_f24")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh4Mid"]
+mesh = SubResource("mesh_f24")
+
+[node name="Sh4KickWall" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6, 3, -285)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh4KickWall"]
+shape = SubResource("shape_c6")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh4KickWall"]
+mesh = SubResource("mesh_c6")
+
+[node name="Sh5FloorA" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -313.75)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh5FloorA"]
+shape = SubResource("shape_f85")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh5FloorA"]
+mesh = SubResource("mesh_f85")
+
+[node name="Sh5FloorB" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -336.75)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh5FloorB"]
+shape = SubResource("shape_f185")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh5FloorB"]
+mesh = SubResource("mesh_f185")
+
+[node name="Sh6Step1" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -353)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh6Step1"]
+shape = SubResource("shape_s6")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6Step1"]
+mesh = SubResource("mesh_s6")
+
+[node name="Sh6Lip" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.7, -364)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh6Lip"]
+shape = SubResource("shape_s8")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6Lip"]
+mesh = SubResource("mesh_s8")
+
+[node name="Sh6WallL1" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 3, -372)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh6WallL1"]
+shape = SubResource("shape_c6")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6WallL1"]
+mesh = SubResource("mesh_c6")
+
+[node name="Sh6WallR1" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 3, -383.5)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh6WallR1"]
+shape = SubResource("shape_c6")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6WallR1"]
+mesh = SubResource("mesh_c6")
+
+[node name="Sh6WallL2" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 3, -395)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh6WallL2"]
+shape = SubResource("shape_c6")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6WallL2"]
+mesh = SubResource("mesh_c6")
+
+[node name="Sh6WallR2" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 3, -406.5)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh6WallR2"]
+shape = SubResource("shape_c6")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6WallR2"]
+mesh = SubResource("mesh_c6")
+
+[node name="Sh6WallL3" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 3, -417)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh6WallL3"]
+shape = SubResource("shape_c4")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6WallL3"]
+mesh = SubResource("mesh_c4")
+
+[node name="Sh6Exit" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -429.5)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh6Exit"]
+shape = SubResource("shape_f21")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6Exit"]
+mesh = SubResource("mesh_f21")
+
+[node name="Sh7Floor" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -454)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh7Floor"]
+shape = SubResource("shape_f28")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh7Floor"]
+mesh = SubResource("mesh_f28")
+
+[node name="Sh7Desks" type="StaticBody3D" parent="Shame"]
+
+[node name="C1" type="CollisionShape3D" parent="Shame/Sh7Desks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.4, -444)
+shape = SubResource("shape_desk")
+
+[node name="M1" type="MeshInstance3D" parent="Shame/Sh7Desks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.4, -444)
+mesh = SubResource("mesh_desk")
+
+[node name="C2" type="CollisionShape3D" parent="Shame/Sh7Desks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.4, -450)
+shape = SubResource("shape_desk")
+
+[node name="M2" type="MeshInstance3D" parent="Shame/Sh7Desks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.4, -450)
+mesh = SubResource("mesh_desk")
+
+[node name="C3" type="CollisionShape3D" parent="Shame/Sh7Desks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.4, -456)
+shape = SubResource("shape_desk")
+
+[node name="M3" type="MeshInstance3D" parent="Shame/Sh7Desks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.4, -456)
+mesh = SubResource("mesh_desk")
+
+[node name="C4" type="CollisionShape3D" parent="Shame/Sh7Desks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.4, -462)
+shape = SubResource("shape_desk")
+
+[node name="M4" type="MeshInstance3D" parent="Shame/Sh7Desks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.4, -462)
+mesh = SubResource("mesh_desk")
+
+[node name="C5" type="CollisionShape3D" parent="Shame/Sh7Desks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.4, -444)
+shape = SubResource("shape_desk")
+
+[node name="M5" type="MeshInstance3D" parent="Shame/Sh7Desks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.4, -444)
+mesh = SubResource("mesh_desk")
+
+[node name="C6" type="CollisionShape3D" parent="Shame/Sh7Desks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.4, -450)
+shape = SubResource("shape_desk")
+
+[node name="M6" type="MeshInstance3D" parent="Shame/Sh7Desks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.4, -450)
+mesh = SubResource("mesh_desk")
+
+[node name="C7" type="CollisionShape3D" parent="Shame/Sh7Desks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.4, -456)
+shape = SubResource("shape_desk")
+
+[node name="M7" type="MeshInstance3D" parent="Shame/Sh7Desks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.4, -456)
+mesh = SubResource("mesh_desk")
+
+[node name="C8" type="CollisionShape3D" parent="Shame/Sh7Desks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.4, -462)
+shape = SubResource("shape_desk")
+
+[node name="M8" type="MeshInstance3D" parent="Shame/Sh7Desks"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.4, -462)
+mesh = SubResource("mesh_desk")
+
+[node name="Sh8Lift" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 0.948683, 0.316228, 0, -0.316228, 0.948683, 0, 2.525658, -477.158114)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh8Lift"]
+shape = SubResource("shape_r8")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh8Lift"]
+mesh = SubResource("mesh_r8")
+
+[node name="Sh8Lip" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.5, -489)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh8Lip"]
+shape = SubResource("shape_s6")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh8Lip"]
+mesh = SubResource("mesh_s6")
+
+[node name="Sh8Ramp" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(0.707107, 0.703233, -0.073912, -0.707107, 0.703233, -0.073912, 0, 0.104528, 0.994522, -0.110911, 4.457948, -504.764129)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh8Ramp"]
+shape = SubResource("shape_surf")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh8Ramp"]
+mesh = SubResource("mesh_surf")
+
+[node name="Sh8Floor" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -514)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh8Floor"]
+shape = SubResource("shape_f48")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh8Floor"]
+mesh = SubResource("mesh_f48")
+
+[node name="Sh9Step1" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, -545)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh9Step1"]
+shape = SubResource("shape_s6")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh9Step1"]
+mesh = SubResource("mesh_s6")
+
+[node name="Sh9Lip" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.9, -556)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh9Lip"]
+shape = SubResource("shape_s8")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh9Lip"]
+mesh = SubResource("mesh_s8")
+
+[node name="Sh9RideL" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6, 4, -568)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh9RideL"]
+shape = SubResource("shape_w14")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh9RideL"]
+mesh = SubResource("mesh_w14")
+
+[node name="Sh9RideR" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.9, 4, -587)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh9RideR"]
+shape = SubResource("shape_w12")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh9RideR"]
+mesh = SubResource("mesh_w12")
+
+[node name="Sh9Exit" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -596)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh9Exit"]
+shape = SubResource("shape_f8")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh9Exit"]
+mesh = SubResource("mesh_f8")
+
+[node name="Sh9Handoff" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -604)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh9Handoff"]
+shape = SubResource("shape_f8")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh9Handoff"]
+mesh = SubResource("mesh_f8n")
+
+[node name="ShameLockers" type="Node3D" parent="Shame"]
+
+[node name="L1" type="MeshInstance3D" parent="Shame/ShameLockers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, 1, -168)
+mesh = SubResource("mesh_locker")
+
+[node name="L2" type="MeshInstance3D" parent="Shame/ShameLockers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.5, 1, -168)
+mesh = SubResource("mesh_locker")
+
+[node name="L3" type="MeshInstance3D" parent="Shame/ShameLockers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, 1, -194)
+mesh = SubResource("mesh_locker")
+
+[node name="L4" type="MeshInstance3D" parent="Shame/ShameLockers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.5, 1, -194)
+mesh = SubResource("mesh_locker")
+
+[node name="L5" type="MeshInstance3D" parent="Shame/ShameLockers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, 1, -336)
+mesh = SubResource("mesh_locker")
+
+[node name="L6" type="MeshInstance3D" parent="Shame/ShameLockers"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.5, 1, -336)
+mesh = SubResource("mesh_locker")
+
+[node name="ShameShell" type="StaticBody3D" parent="Shame"]
+
+[node name="CL20" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -20)
+shape = SubResource("shape_rib")
+
+[node name="ML20" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -20)
+mesh = SubResource("mesh_rib")
+
+[node name="CR20" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -20)
+shape = SubResource("shape_rib")
+
+[node name="MR20" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -20)
+mesh = SubResource("mesh_rib")
+
+[node name="CL60" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -60)
+shape = SubResource("shape_rib")
+
+[node name="ML60" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -60)
+mesh = SubResource("mesh_rib")
+
+[node name="CR60" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -60)
+shape = SubResource("shape_rib")
+
+[node name="MR60" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -60)
+mesh = SubResource("mesh_rib")
+
+[node name="CL100" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -100)
+shape = SubResource("shape_rib")
+
+[node name="ML100" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -100)
+mesh = SubResource("mesh_rib")
+
+[node name="CR100" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -100)
+shape = SubResource("shape_rib")
+
+[node name="MR100" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -100)
+mesh = SubResource("mesh_rib")
+
+[node name="CL140" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -140)
+shape = SubResource("shape_rib")
+
+[node name="ML140" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -140)
+mesh = SubResource("mesh_rib")
+
+[node name="CR140" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -140)
+shape = SubResource("shape_rib")
+
+[node name="MR140" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -140)
+mesh = SubResource("mesh_rib")
+
+[node name="CL180" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -180)
+shape = SubResource("shape_rib")
+
+[node name="ML180" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -180)
+mesh = SubResource("mesh_rib")
+
+[node name="CR180" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -180)
+shape = SubResource("shape_rib")
+
+[node name="MR180" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -180)
+mesh = SubResource("mesh_rib")
+
+[node name="CL220" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -220)
+shape = SubResource("shape_rib")
+
+[node name="ML220" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -220)
+mesh = SubResource("mesh_rib")
+
+[node name="CR220" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -220)
+shape = SubResource("shape_rib")
+
+[node name="MR220" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -220)
+mesh = SubResource("mesh_rib")
+
+[node name="CL260" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -260)
+shape = SubResource("shape_rib")
+
+[node name="ML260" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -260)
+mesh = SubResource("mesh_rib")
+
+[node name="CR260" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -260)
+shape = SubResource("shape_rib")
+
+[node name="MR260" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -260)
+mesh = SubResource("mesh_rib")
+
+[node name="CL300" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -300)
+shape = SubResource("shape_rib")
+
+[node name="ML300" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -300)
+mesh = SubResource("mesh_rib")
+
+[node name="CR300" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -300)
+shape = SubResource("shape_rib")
+
+[node name="MR300" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -300)
+mesh = SubResource("mesh_rib")
+
+[node name="CL340" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -340)
+shape = SubResource("shape_rib")
+
+[node name="ML340" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -340)
+mesh = SubResource("mesh_rib")
+
+[node name="CR340" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -340)
+shape = SubResource("shape_rib")
+
+[node name="MR340" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -340)
+mesh = SubResource("mesh_rib")
+
+[node name="CL380" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -380)
+shape = SubResource("shape_rib")
+
+[node name="ML380" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -380)
+mesh = SubResource("mesh_rib")
+
+[node name="CR380" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -380)
+shape = SubResource("shape_rib")
+
+[node name="MR380" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -380)
+mesh = SubResource("mesh_rib")
+
+[node name="CL420" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -420)
+shape = SubResource("shape_rib")
+
+[node name="ML420" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -420)
+mesh = SubResource("mesh_rib")
+
+[node name="CR420" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -420)
+shape = SubResource("shape_rib")
+
+[node name="MR420" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -420)
+mesh = SubResource("mesh_rib")
+
+[node name="CL460" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -460)
+shape = SubResource("shape_rib")
+
+[node name="ML460" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -460)
+mesh = SubResource("mesh_rib")
+
+[node name="CR460" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -460)
+shape = SubResource("shape_rib")
+
+[node name="MR460" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -460)
+mesh = SubResource("mesh_rib")
+
+[node name="CL500" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -500)
+shape = SubResource("shape_rib")
+
+[node name="ML500" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -500)
+mesh = SubResource("mesh_rib")
+
+[node name="CR500" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -500)
+shape = SubResource("shape_rib")
+
+[node name="MR500" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -500)
+mesh = SubResource("mesh_rib")
+
+[node name="CL540" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -540)
+shape = SubResource("shape_rib")
+
+[node name="ML540" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -540)
+mesh = SubResource("mesh_rib")
+
+[node name="CR540" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -540)
+shape = SubResource("shape_rib")
+
+[node name="MR540" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -540)
+mesh = SubResource("mesh_rib")
+
+[node name="CL580" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -580)
+shape = SubResource("shape_rib")
+
+[node name="ML580" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 5, -580)
+mesh = SubResource("mesh_rib")
+
+[node name="CR580" type="CollisionShape3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -580)
+shape = SubResource("shape_rib")
+
+[node name="MR580" type="MeshInstance3D" parent="Shame/ShameShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 5, -580)
+mesh = SubResource("mesh_rib")
