@@ -19,7 +19,10 @@ static func can_wallrun(on_floor: bool, has_wall: bool, forward_speed: float) ->
 
 
 static func ride_velocity(velocity: Vector3, wall_normal: Vector3) -> Vector3:
-	var v := SourceMove.clip_velocity(velocity, wall_normal)
+	var v := velocity
+	if v.dot(wall_normal) < 0.0:  # clip only motion INTO the wall — the tick after a
+		# kick the ray still sees the wall, and an unguarded clip erases the launch
+		v = SourceMove.clip_velocity(v, wall_normal)
 	v.y = maxf(v.y, SINK_CAP)
 	return v
 
