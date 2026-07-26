@@ -69,28 +69,6 @@ func _physics_process(delta: float) -> void:
 		# steep walls (anti-climb) instead of sliding along the plane. Recompute
 		# from the pre-slide velocity with Source clip semantics.
 		velocity = SourceMove.clip_multi(pre_slide_velocity, steep)
-	_probe_sample(delta)  # DEBUG PROBE — remove before gates
-
-
-## DEBUG PROBE — remove before gates (phase-3b T3 surf measurement).
-## Per-tick position/velocity samples to user://surf_probe.csv; rates are
-## post-processed from POSITION deltas over spans, never per-tick strides.
-var _probe_file: FileAccess = null
-var _probe_t := 0.0
-var _probe_ticks := 0
-
-
-func _probe_sample(delta: float) -> void:
-	if _probe_file == null:
-		_probe_file = FileAccess.open("user://surf_probe.csv", FileAccess.WRITE)
-		_probe_file.store_line("t,x,y,z,vx,vy,vz,on_floor")
-	_probe_t += delta
-	_probe_file.store_line("%.5f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%d" % [
-		_probe_t, global_position.x, global_position.y, global_position.z,
-		velocity.x, velocity.y, velocity.z, 1 if is_on_floor() else 0])
-	_probe_ticks += 1
-	if _probe_ticks % 120 == 0:
-		_probe_file.flush()
 
 
 func teleport(pos: Vector3, face_dir: Vector3) -> void:
