@@ -17,7 +17,15 @@ func test_ride_preserves_along_wall_speed_and_caps_sink() -> void:
 func test_ride_clips_into_wall_component() -> void:
 	var v := WallrunLogic.ride_velocity(Vector3(-5, 0, -20), Vector3(1, 0, 0))
 	assert_almost_eq(v.x, 0.0, 0.0001)
-	assert_almost_eq(v.z, -20.0, 0.0001)
+
+
+func test_ride_preserves_outward_motion_after_kick() -> void:
+	# Post-kick tick: ray still sees the wall but velocity points away —
+	# ride must not clip the launch back off (unguarded clip ate the kick).
+	var v := WallrunLogic.ride_velocity(Vector3(6.0, 8.63, -10.0), Vector3(1, 0, 0))
+	assert_almost_eq(v.x, 6.0, 0.0001)
+	assert_almost_eq(v.y, 8.63, 0.0001)
+	assert_almost_eq(v.z, -10.0, 0.0001)
 
 
 func test_ride_keeps_upward_carry() -> void:
