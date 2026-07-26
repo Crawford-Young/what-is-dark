@@ -61,7 +61,7 @@ func _physics_process(delta: float) -> void:
 	var forward_speed := -(transform.basis.inverse() * velocity).z
 
 	var wall_normal := _wall_normal()
-	var on_wall := wall_normal != Vector3.ZERO
+	var on_wall := WallrunLogic.is_rideable_normal(wall_normal)
 	var air_wish_speed := minf(SourceMove.RUN_SPEED, SourceMove.AIR_CAP)
 
 	if WallrunLogic.can_wallrun(is_on_floor(), on_wall, forward_speed):
