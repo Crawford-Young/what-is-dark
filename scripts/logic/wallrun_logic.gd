@@ -9,6 +9,9 @@ const MIN_FORWARD_SPEED := 4.0
 const SINK_CAP := -2.0
 const PUSH_AWAY_SPEED := 6.0
 const WALL_JUMP_VY := 8.63  ## phase-1's 1.06 m rise reproduced at GRAVITY 35.2
+const RIDE_MAX_NORMAL_Y := 0.2  ## ride gate: |normal.y| <= 0.2 = surface within ~11.5
+## deg of vertical. Surf ramps (45-55 deg, normal.y 0.574-0.707) never engage the
+## ride/sink-cap; the 38 deg floor limit (normal.y 0.788) sits strictly above ramp range.
 
 
 static func can_wallrun(on_floor: bool, has_wall: bool, forward_speed: float) -> bool:
@@ -29,3 +32,7 @@ static func kick_velocity(velocity: Vector3, wall_normal: Vector3) -> Vector3:
 
 static func jump_released(was_down: bool, down: bool) -> bool:
 	return was_down and not down
+
+
+static func is_rideable_normal(normal: Vector3) -> bool:
+	return normal != Vector3.ZERO and absf(normal.y) <= RIDE_MAX_NORMAL_Y

@@ -42,3 +42,22 @@ func test_jump_released_edge() -> void:
 	assert_false(WallrunLogic.jump_released(true, true), "still held")
 	assert_false(WallrunLogic.jump_released(false, false), "never held")
 	assert_false(WallrunLogic.jump_released(false, true), "press edge")
+
+
+func test_rideable_normal_vertical_wall() -> void:
+	assert_true(WallrunLogic.is_rideable_normal(Vector3(1, 0, 0)))
+
+
+func test_rideable_normal_slight_lean_ok() -> void:
+	assert_true(WallrunLogic.is_rideable_normal(Vector3(0.99, 0.15, 0).normalized()))
+	assert_true(WallrunLogic.is_rideable_normal(Vector3(0.99, -0.15, 0).normalized()), "overhang lean")
+
+
+func test_surf_ramp_normals_not_rideable() -> void:
+	assert_false(WallrunLogic.is_rideable_normal(Vector3(sin(deg_to_rad(45.0)), cos(deg_to_rad(45.0)), 0.0)))
+	assert_false(WallrunLogic.is_rideable_normal(Vector3(sin(deg_to_rad(51.34)), cos(deg_to_rad(51.34)), 0.0)))
+	assert_false(WallrunLogic.is_rideable_normal(Vector3(sin(deg_to_rad(55.0)), cos(deg_to_rad(55.0)), 0.0)))
+
+
+func test_rideable_normal_zero_is_not_wall() -> void:
+	assert_false(WallrunLogic.is_rideable_normal(Vector3.ZERO))
