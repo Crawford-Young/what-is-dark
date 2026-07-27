@@ -17,7 +17,7 @@ extends CanvasLayer
 const ZONE_BOUNDS: Array[float] = [600.0, 1200.0, 1795.0]
 const ZONE_NAMES: Array[String] = ["Shame", "Grief", "Depression"]
 const SPEED_WINDOW := 6  ## ticks spanned by the position-delta speed measurement
-const CSV_HEADER := "tick,t_s,progress_m,v_engine,v_pos,y,on_floor,frozen,loop"
+const CSV_HEADER := "tick,t_s,progress_m,v_engine,v_pos,y,on_floor,frozen,loop,void_m,void_gap_m"
 
 @onready var _label: Label = $Label
 
@@ -31,6 +31,8 @@ var _next_zone := 0
 var _splits: PackedStringArray = []
 var _max_speed := 0.0
 var _max_speed_at := 0.0
+var _min_void_gap := INF
+var _min_void_gap_at := 0.0
 var _resets := 0
 var _was_frozen := false
 var _last_loop := 0
@@ -63,9 +65,15 @@ func _physics_process(delta: float) -> void:
 		_resets += 1
 	_was_frozen = _player.frozen
 
+	var void_progress := _slice.void_logic.progress
+	var void_gap := progress - void_progress
+
 	if not _player.frozen and v_engine > _max_speed:
 		_max_speed = v_engine
 		_max_speed_at = progress
+	if not _player.frozen and void_gap < _min_void_gap:
+		_min_void_gap = void_gap
+		_min_void_gap_at = progress
 
 	while _next_zone < ZONE_BOUNDS.size() and progress >= ZONE_BOUNDS[_next_zone]:
 		_splits.append("%s %.1fs" % [ZONE_NAMES[_next_zone], _lap_seconds()])
@@ -75,11 +83,12 @@ func _physics_process(delta: float) -> void:
 		_finish_lap()
 		_last_loop = loop
 
-	_rows.append("%d,%.4f,%.3f,%.4f,%.4f,%.3f,%d,%d,%d" % [
+	_rows.append("%d,%.4f,%.3f,%.4f,%.4f,%.3f,%d,%d,%d,%.3f,%.3f" % [
 		_tick, _tick * delta, progress, v_engine, v_pos, pos.y,
 		1 if _player.is_on_floor() else 0, 1 if _player.frozen else 0, loop,
+		void_progress, void_gap,
 	])
-	_update_label(progress, v_engine, v_pos, loop)
+	_update_label(progress, v_engine, v_pos, loop, void_gap)
 
 
 ## Horizontal speed from position deltas across the whole window — immune to the
@@ -99,8 +108,9 @@ func _lap_seconds() -> float:
 func _finish_lap() -> void:
 	var tick_seconds := _lap_seconds()
 	var wall_seconds := (Time.get_ticks_msec() - _lap_msec_start) / 1000.0
-	print("[telemetry] LAP %d — tick-clock %.2fs · wall-clock %.2fs · splits %s · max %.2f m/s at %.0f m · resets %d" % [
-		_run_index, tick_seconds, wall_seconds, ", ".join(_splits), _max_speed, _max_speed_at, _resets,
+	print("[telemetry] LAP %d — tick-clock %.2fs · wall-clock %.2fs · splits %s · max %.2f m/s at %.0f m · closest void %.0f m at %.0f m · resets %d" % [
+		_run_index, tick_seconds, wall_seconds, ", ".join(_splits), _max_speed, _max_speed_at,
+		_min_void_gap, _min_void_gap_at, _resets,
 	])
 	_write_csv()
 	_run_index += 1
@@ -110,6 +120,8 @@ func _finish_lap() -> void:
 	_splits = PackedStringArray()
 	_max_speed = 0.0
 	_max_speed_at = 0.0
+	_min_void_gap = INF
+	_min_void_gap_at = 0.0
 	_resets = 0
 	_rows = PackedStringArray([CSV_HEADER])
 
@@ -125,10 +137,10 @@ func _write_csv() -> void:
 	print("[telemetry] wrote ", ProjectSettings.globalize_path(path), " (", _rows.size() - 1, " ticks)")
 
 
-func _update_label(progress: float, v_engine: float, v_pos: float, loop: int) -> void:
-	_label.text = "%.1f m  |  loop %d\n%.1f m/s  (pos %.1f)\nmax %.1f m/s @ %.0f m\nlap %.1fs   resets %d\n%s" % [
+func _update_label(progress: float, v_engine: float, v_pos: float, loop: int, void_gap: float) -> void:
+	_label.text = "%.1f m  |  loop %d\n%.1f m/s  (pos %.1f)\nmax %.1f m/s @ %.0f m\nvoid %.0f m back  (closest %.0f m)\nlap %.1fs   resets %d\n%s" % [
 		progress, loop, v_engine, v_pos, _max_speed, _max_speed_at,
-		_lap_seconds(), _resets, ", ".join(_splits),
+		void_gap, _min_void_gap, _lap_seconds(), _resets, ", ".join(_splits),
 	]
 
 
