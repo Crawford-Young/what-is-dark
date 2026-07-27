@@ -1,4 +1,4 @@
-[gd_scene load_steps=76 format=3]
+[gd_scene load_steps=80 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1"]
 [ext_resource type="Script" path="res://scripts/slice.gd" id="2"]
@@ -229,6 +229,20 @@ size = Vector3(4.4, 8, 1.2)
 [sub_resource type="BoxMesh" id="mesh_shaftend"]
 material = SubResource("locker_mat")
 size = Vector3(4.4, 8, 1.2)
+
+[sub_resource type="BoxShape3D" id="shape_massl"]
+size = Vector3(3.8, 7, 20)
+
+[sub_resource type="BoxMesh" id="mesh_massl"]
+material = SubResource("shell_mat")
+size = Vector3(3.8, 7, 20)
+
+[sub_resource type="BoxShape3D" id="shape_massr"]
+size = Vector3(3.8, 10, 20)
+
+[sub_resource type="BoxMesh" id="mesh_massr"]
+material = SubResource("shell_mat")
+size = Vector3(3.8, 10, 20)
 
 [sub_resource type="BoxShape3D" id="shape_ledge"]
 size = Vector3(6, 1, 24)
@@ -498,6 +512,24 @@ shape = SubResource("shape_shaftr")
 
 [node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6ShaftR"]
 mesh = SubResource("mesh_shaftr")
+
+[node name="Sh6MassL" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.1, 2.5, -376)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh6MassL"]
+shape = SubResource("shape_massl")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6MassL"]
+mesh = SubResource("mesh_massl")
+
+[node name="Sh6MassR" type="StaticBody3D" parent="Shame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.1, 4, -376)
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh6MassR"]
+shape = SubResource("shape_massr")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6MassR"]
+mesh = SubResource("mesh_massr")
 
 [node name="Sh6ShaftEnd" type="StaticBody3D" parent="Shame"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -386.6)
