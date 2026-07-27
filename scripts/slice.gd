@@ -41,7 +41,7 @@ func _physics_process(delta: float) -> void:
 	var progress := player_progress()
 	var dir_to_void := _horizontal_dir(_void_wall.global_position - _player.global_position)
 	var posture := Posture.evaluate(_player.camera_forward(), dir_to_void, _player.glancing)
-	void_logic.advance(posture, delta)
+	void_logic.advance(posture, delta, loop_logic.loop_count)
 	_void_wall.place_on_path(_path, void_logic.progress)
 	if catch_armed and void_logic.has_caught(progress):
 		catch_armed = false

@@ -1,13 +1,13 @@
 class_name ErosionLogic
 extends RefCounted
-## Erosion v2 (Phase 3a spec §4): recovery fails per loop — acceleration decays
-## at BOTH ground and air call sites (player.gd scales GROUND_ACCEL and AIR_ACCEL).
-## Speed already carried never bleeds; top speed never erodes. Capped — the game
-## never forces the ending (parent spec §3).
+## Erosion v3 (phase 3b, ruling #14): the player never erodes — movement
+## constants are immutable across loops forever. Pressure is world-side
+## instead: a per-loop scale ramping 0→1 as loops accumulate, consumed by
+## world systems (void creep speedup here; platform/fog application in a
+## later task) rather than by scaling the player's own acceleration.
 
-const ACCEL_DECAY_PER_LOOP := 0.12
-const ACCEL_FLOOR := 0.52
+const PLATEAU_LOOP := 5
 
 
-static func accel_multiplier(loop: int) -> float:
-	return maxf(1.0 - ACCEL_DECAY_PER_LOOP * maxi(loop, 0), ACCEL_FLOOR)
+static func world_scale(loop: int, plateau_loop: int = PLATEAU_LOOP) -> float:
+	return clampf(float(loop) / float(plateau_loop), 0.0, 1.0)

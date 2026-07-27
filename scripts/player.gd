@@ -12,7 +12,6 @@ const FLOOR_LIMIT_DEG := 38.0  ## lab-parity classification boundary: steeper th
 
 var frozen := false
 var glancing := false
-var accel_scale := 1.0
 var _jump_was_down := false
 
 var _yaw := 0.0
@@ -72,12 +71,12 @@ func _physics_process(delta: float) -> void:
 	elif is_on_floor() and jump_down:
 		# Auto-hop: jump fires on the landing frame, friction never bites.
 		velocity = SourceMove.jump(velocity)
-		velocity = SourceMove.accelerate(velocity, wish_dir, air_wish_speed, SourceMove.AIR_ACCEL * accel_scale, delta)
+		velocity = SourceMove.accelerate(velocity, wish_dir, air_wish_speed, SourceMove.AIR_ACCEL, delta)
 	elif is_on_floor():
 		velocity = SourceMove.apply_friction(velocity, delta)
-		velocity = SourceMove.accelerate(velocity, wish_dir, SourceMove.RUN_SPEED, SourceMove.GROUND_ACCEL * accel_scale, delta)
+		velocity = SourceMove.accelerate(velocity, wish_dir, SourceMove.RUN_SPEED, SourceMove.GROUND_ACCEL, delta)
 	else:
-		velocity = SourceMove.accelerate(velocity, wish_dir, air_wish_speed, SourceMove.AIR_ACCEL * accel_scale, delta)
+		velocity = SourceMove.accelerate(velocity, wish_dir, air_wish_speed, SourceMove.AIR_ACCEL, delta)
 		velocity = SourceMove.apply_gravity(velocity, delta)
 
 	var pre_slide_velocity := velocity

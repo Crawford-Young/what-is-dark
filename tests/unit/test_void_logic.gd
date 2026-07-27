@@ -11,6 +11,37 @@ func test_creep_speed_depends_on_posture() -> void:
 	assert_almost_eq(v.progress, 8.9, 0.0001, "facing slows creep but never stops it")
 
 
+func test_creep_speed_at_loop_zero_matches_base_speeds() -> void:
+	assert_almost_eq(VoidLogic.creep_speed(Posture.AWAY, 0), 6.0, 0.0001)
+	assert_almost_eq(VoidLogic.creep_speed(Posture.GLANCING, 0), 2.2, 0.0001)
+	assert_almost_eq(VoidLogic.creep_speed(Posture.FACING, 0), 0.7, 0.0001)
+
+
+func test_creep_speed_caps_at_plateau_multiplier() -> void:
+	assert_almost_eq(VoidLogic.creep_speed(Posture.AWAY, 5), 9.6, 0.0001)
+	assert_almost_eq(VoidLogic.creep_speed(Posture.AWAY, 9), 9.6, 0.0001, "clamped past plateau, never exceeds it")
+
+
+func test_creep_speed_grows_monotonically_with_loop() -> void:
+	var at_2 := VoidLogic.creep_speed(Posture.AWAY, 2)
+	var at_4 := VoidLogic.creep_speed(Posture.AWAY, 4)
+	var at_5 := VoidLogic.creep_speed(Posture.AWAY, 5)
+	assert_true(at_2 < at_4)
+	assert_true(at_4 < at_5)
+
+
+func test_advance_default_loop_reproduces_loop_zero_behavior() -> void:
+	var v := VoidLogic.new(0.0)
+	v.advance(Posture.AWAY, 1.0)
+	assert_almost_eq(v.progress, 6.0, 0.0001, "no loop arg = loop 0 = identity multiplier")
+
+
+func test_advance_with_loop_applies_world_pressure() -> void:
+	var v := VoidLogic.new(0.0)
+	v.advance(Posture.AWAY, 1.0, 5)
+	assert_almost_eq(v.progress, 9.6, 0.0001, "plateau loop speeds up void creep")
+
+
 func test_has_caught_at_or_past_player() -> void:
 	var v := VoidLogic.new(10.0)
 	assert_true(v.has_caught(10.0))
