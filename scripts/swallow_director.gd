@@ -81,8 +81,6 @@ func _loop_respawn(slice: Slice, player: Player) -> void:
 		return
 	player.shift_to(slice.respawn_position(0))
 	slice.loop_logic.advance_loop()
-	var loop := slice.loop_logic.loop_count
-	player.accel_scale = ErosionLogic.accel_multiplier(loop)
 	slice.void_logic.progress = Slice.VOID_START
 	slice.sync_void_wall()
 

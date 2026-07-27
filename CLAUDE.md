@@ -30,8 +30,8 @@
 - `scripts/player.gd` — `MOUSE_SENS`, `GLANCE_TURN_SPEED`, `FLOOR_LIMIT_DEG` (input/camera only — movement constants live in `source_move.gd`)
 - `scripts/logic/source_move.gd` — ALL game-wide movement constants (`RUN_SPEED`, `GRAVITY`, `JUMP_SPEED`, `FRICTION`, `STOP_SPEED`, `GROUND_ACCEL`, `AIR_ACCEL`, `AIR_CAP`, `OVERBOUNCE`); changing one requires deliberate test-expectation updates in `tests/unit/test_source_move.gd` — never loosen tolerances
 - `scripts/logic/wallrun_logic.gd` — `MIN_FORWARD_SPEED`, `SINK_CAP`, `PUSH_AWAY_SPEED`, `WALL_JUMP_VY`
-- `scripts/logic/erosion_logic.gd` — `ACCEL_DECAY_PER_LOOP`, `ACCEL_FLOOR` (per-loop acceleration decay, ground + air; speed never bled; landing retention deleted)
-- `scripts/logic/void_logic.gd` — `CREEP_SPEEDS` (per posture), `RESET_GAP`
+- `scripts/logic/erosion_logic.gd` — `PLATEAU_LOOP` (erosion v3, ruling #14: player never degrades; `world_scale(loop)` ramps world pressure 0→1 at plateau)
+- `scripts/logic/void_logic.gd` — `CREEP_SPEEDS` (per posture), `CREEP_MULT_MAX` (per-loop creep speedup cap at plateau), `RESET_GAP`
 - `scripts/swallow_director.gd` — `FADE_OUT`/`HOLD`/`FADE_IN` (swallow), `SETBACK_MARKERS`, `FALL_FADE_OUT`/`FALL_FADE_IN`/`FALL_VOID_GAP` (fall reset)
 - `scripts/slice.gd` — `MARKER_PROGRESSES`, `FALL_Y`
 
