@@ -10,7 +10,7 @@ Phase 3b — full map redesign under Source movement (all three zone feel gates 
 
 - **Source-engine movement is the game's movement** — CS2-style bhop (auto-hop on held jump), air-strafing past the run cap, surf-capable plane clipping; core adopted from the momentum lab into `scripts/player.gd` (`scripts/logic/source_move.gd` + `yaw_drain.gd`)
 - Momentum-preserving wall ride — clip-to-plane ride with capped sink, speed-keeping kick-off
-- Erosion v3 — **the player never degrades**; movement constants are identical on loop 1 and loop 100. Per-loop pressure is world-side instead: the dark creeps faster (up to 1.6× base), fog closes in, and eleven hand-picked margined floors shrink toward authored plateau sizes. Ramps loop 1 → plateau (loop 5), then holds. Every eroded gap stays inside the reach ceiling at max erosion
+- Erosion v3 — **the player never degrades**; movement constants are identical on loop 1 and loop 100. Per-loop pressure is world-side instead, ramping loop 1 → plateau (loop 5) and then holding: the dark creeps faster (up to 1.6× base), fog closes in, margined floors shrink so their gaps drift toward the reach ceiling, and long flat floors **perforate** — holes open and widen until you have to pick a weaving line instead of holding W. Fourteen surfaces erode in total (40 tagged bodies, since a perforated floor is a grid of tiles). Loop 1 is the solid, shipped course exactly; at max erosion every gap and every hole still sits inside the reach ceiling
 - Snap glance back (hold to look over your shoulder)
 - Posture-sensitive void chase — the dark creeps fastest when you look away, slower when glancing, nearly stalls when you face it
 - Silent swallow on catch — screen fades out, holds, respawns you at a setback marker
