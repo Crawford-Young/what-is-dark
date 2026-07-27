@@ -1,4 +1,4 @@
-[gd_scene load_steps=264 format=3]
+[gd_scene load_steps=280 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1"]
 [ext_resource type="Script" path="res://scripts/slice.gd" id="2"]
@@ -104,26 +104,12 @@ size = Vector3(12, 1, 8.5)
 material = SubResource("shame_mat")
 size = Vector3(12, 1, 8.5)
 
-[sub_resource type="BoxShape3D" id="shape_f21"]
-size = Vector3(12, 1, 50)
-
-[sub_resource type="BoxMesh" id="mesh_f21"]
-material = SubResource("shame_mat")
-size = Vector3(12, 1, 50)
-
 [sub_resource type="BoxShape3D" id="shape_f28"]
 size = Vector3(16, 1, 28)
 
 [sub_resource type="BoxMesh" id="mesh_f28"]
 material = SubResource("shame_mat")
 size = Vector3(16, 1, 28)
-
-[sub_resource type="BoxShape3D" id="shape_f48"]
-size = Vector3(16, 1, 48)
-
-[sub_resource type="BoxMesh" id="mesh_f48"]
-material = SubResource("shame_mat")
-size = Vector3(16, 1, 48)
 
 [sub_resource type="BoxShape3D" id="shape_f8"]
 size = Vector3(12, 1, 8)
@@ -911,6 +897,76 @@ size = Vector3(6, 1, 8.2)
 material = SubResource("g_grief_mat")
 size = Vector3(6, 1, 8.2)
 
+[sub_resource type="BoxShape3D" id="pf_sh6_a_s"]
+size = Vector3(4, 1, 41)
+
+[sub_resource type="BoxMesh" id="pf_sh6_a_m"]
+material = SubResource("shame_mat")
+size = Vector3(4, 1, 41)
+
+[sub_resource type="BoxShape3D" id="pf_sh6_b_s"]
+size = Vector3(4, 1, 9)
+
+[sub_resource type="BoxMesh" id="pf_sh6_b_m"]
+material = SubResource("shame_mat")
+size = Vector3(4, 1, 9)
+
+[sub_resource type="BoxShape3D" id="pf_sh6_c_s"]
+size = Vector3(4, 1, 22)
+
+[sub_resource type="BoxMesh" id="pf_sh6_c_m"]
+material = SubResource("shame_mat")
+size = Vector3(4, 1, 22)
+
+[sub_resource type="BoxShape3D" id="pf_sh6_d_s"]
+size = Vector3(4, 1, 28)
+
+[sub_resource type="BoxMesh" id="pf_sh6_d_m"]
+material = SubResource("shame_mat")
+size = Vector3(4, 1, 28)
+
+[sub_resource type="BoxShape3D" id="pf_sh8_a_s"]
+size = Vector3(5.5, 1, 23)
+
+[sub_resource type="BoxMesh" id="pf_sh8_a_m"]
+material = SubResource("shame_mat")
+size = Vector3(5.5, 1, 23)
+
+[sub_resource type="BoxShape3D" id="pf_sh8_b_s"]
+size = Vector3(5.5, 1, 25)
+
+[sub_resource type="BoxMesh" id="pf_sh8_b_m"]
+material = SubResource("shame_mat")
+size = Vector3(5.5, 1, 25)
+
+[sub_resource type="BoxShape3D" id="pf_sh8_c_s"]
+size = Vector3(5, 1, 10)
+
+[sub_resource type="BoxMesh" id="pf_sh8_c_m"]
+material = SubResource("shame_mat")
+size = Vector3(5, 1, 10)
+
+[sub_resource type="BoxShape3D" id="pf_sh8_d_s"]
+size = Vector3(5, 1, 38)
+
+[sub_resource type="BoxMesh" id="pf_sh8_d_m"]
+material = SubResource("shame_mat")
+size = Vector3(5, 1, 38)
+
+[sub_resource type="BoxShape3D" id="pf_sh8_e_s"]
+size = Vector3(5.5, 1, 40)
+
+[sub_resource type="BoxMesh" id="pf_sh8_e_m"]
+material = SubResource("shame_mat")
+size = Vector3(5.5, 1, 40)
+
+[sub_resource type="BoxShape3D" id="pf_sh8_f_s"]
+size = Vector3(5.5, 1, 8)
+
+[sub_resource type="BoxMesh" id="pf_sh8_f_m"]
+material = SubResource("shame_mat")
+size = Vector3(5.5, 1, 8)
+
 [node name="Slice" type="Node3D"]
 script = ExtResource("2")
 
@@ -1217,14 +1273,77 @@ shape = SubResource("shape_ledge")
 [node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6Ledge"]
 mesh = SubResource("mesh_ledge")
 
-[node name="Sh6Exit" type="StaticBody3D" parent="Shame"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -415)
+[node name="Sh6ExitTileL1" type="StaticBody3D" parent="Shame" groups=["erodable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -0.5, -410.5)
+metadata/erode_axis = 2
+metadata/erode_min = 38.5
+metadata/erode_anchor = 1.0
 
-[node name="Col" type="CollisionShape3D" parent="Shame/Sh6Exit"]
-shape = SubResource("shape_f21")
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh6ExitTileL1"]
+shape = SubResource("pf_sh6_a_s")
 
-[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6Exit"]
-mesh = SubResource("mesh_f21")
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6ExitTileL1"]
+mesh = SubResource("pf_sh6_a_m")
+
+[node name="Sh6ExitTileL2" type="StaticBody3D" parent="Shame" groups=["erodable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, -0.5, -435.5)
+metadata/erode_axis = 2
+metadata/erode_min = 6.5
+metadata/erode_anchor = -1.0
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh6ExitTileL2"]
+shape = SubResource("pf_sh6_b_s")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6ExitTileL2"]
+mesh = SubResource("pf_sh6_b_m")
+
+[node name="Sh6ExitTileM1" type="StaticBody3D" parent="Shame" groups=["erodable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -401)
+metadata/erode_axis = 2
+metadata/erode_min = 19.5
+metadata/erode_anchor = 1.0
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh6ExitTileM1"]
+shape = SubResource("pf_sh6_c_s")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6ExitTileM1"]
+mesh = SubResource("pf_sh6_c_m")
+
+[node name="Sh6ExitTileM2" type="StaticBody3D" parent="Shame" groups=["erodable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -426)
+metadata/erode_axis = 2
+metadata/erode_min = 25.5
+metadata/erode_anchor = -1.0
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh6ExitTileM2"]
+shape = SubResource("pf_sh6_d_s")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6ExitTileM2"]
+mesh = SubResource("pf_sh6_d_m")
+
+[node name="Sh6ExitTileR1" type="StaticBody3D" parent="Shame" groups=["erodable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, -0.5, -394.5)
+metadata/erode_axis = 2
+metadata/erode_min = 6.5
+metadata/erode_anchor = 1.0
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh6ExitTileR1"]
+shape = SubResource("pf_sh6_b_s")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6ExitTileR1"]
+mesh = SubResource("pf_sh6_b_m")
+
+[node name="Sh6ExitTileR2" type="StaticBody3D" parent="Shame" groups=["erodable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, -0.5, -419.5)
+metadata/erode_axis = 2
+metadata/erode_min = 38.5
+metadata/erode_anchor = -1.0
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh6ExitTileR2"]
+shape = SubResource("pf_sh6_a_s")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh6ExitTileR2"]
+mesh = SubResource("pf_sh6_a_m")
 
 [node name="Sh7Floor" type="StaticBody3D" parent="Shame"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -454)
@@ -1328,14 +1447,77 @@ shape = SubResource("shape_surf")
 [node name="Mesh" type="MeshInstance3D" parent="Shame/Sh8Ramp"]
 mesh = SubResource("mesh_surf")
 
-[node name="Sh8Floor" type="StaticBody3D" parent="Shame"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -514)
+[node name="Sh8FloorTileL1" type="StaticBody3D" parent="Shame" groups=["erodable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.25, -0.5, -501.5)
+metadata/erode_axis = 2
+metadata/erode_min = 20.5
+metadata/erode_anchor = 1.0
 
-[node name="Col" type="CollisionShape3D" parent="Shame/Sh8Floor"]
-shape = SubResource("shape_f48")
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh8FloorTileL1"]
+shape = SubResource("pf_sh8_a_s")
 
-[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh8Floor"]
-mesh = SubResource("mesh_f48")
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh8FloorTileL1"]
+mesh = SubResource("pf_sh8_a_m")
+
+[node name="Sh8FloorTileL2" type="StaticBody3D" parent="Shame" groups=["erodable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.25, -0.5, -525.5)
+metadata/erode_axis = 2
+metadata/erode_min = 22.5
+metadata/erode_anchor = -1.0
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh8FloorTileL2"]
+shape = SubResource("pf_sh8_b_s")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh8FloorTileL2"]
+mesh = SubResource("pf_sh8_b_m")
+
+[node name="Sh8FloorTileM1" type="StaticBody3D" parent="Shame" groups=["erodable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -495)
+metadata/erode_axis = 2
+metadata/erode_min = 7.5
+metadata/erode_anchor = 1.0
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh8FloorTileM1"]
+shape = SubResource("pf_sh8_c_s")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh8FloorTileM1"]
+mesh = SubResource("pf_sh8_c_m")
+
+[node name="Sh8FloorTileM2" type="StaticBody3D" parent="Shame" groups=["erodable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -519)
+metadata/erode_axis = 2
+metadata/erode_min = 35.5
+metadata/erode_anchor = -1.0
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh8FloorTileM2"]
+shape = SubResource("pf_sh8_d_s")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh8FloorTileM2"]
+mesh = SubResource("pf_sh8_d_m")
+
+[node name="Sh8FloorTileR1" type="StaticBody3D" parent="Shame" groups=["erodable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.25, -0.5, -510)
+metadata/erode_axis = 2
+metadata/erode_min = 37.5
+metadata/erode_anchor = 1.0
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh8FloorTileR1"]
+shape = SubResource("pf_sh8_e_s")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh8FloorTileR1"]
+mesh = SubResource("pf_sh8_e_m")
+
+[node name="Sh8FloorTileR2" type="StaticBody3D" parent="Shame" groups=["erodable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.25, -0.5, -534)
+metadata/erode_axis = 2
+metadata/erode_min = 5.5
+metadata/erode_anchor = -1.0
+
+[node name="Col" type="CollisionShape3D" parent="Shame/Sh8FloorTileR2"]
+shape = SubResource("pf_sh8_f_s")
+
+[node name="Mesh" type="MeshInstance3D" parent="Shame/Sh8FloorTileR2"]
+mesh = SubResource("pf_sh8_f_m")
 
 [node name="Sh9Step1" type="StaticBody3D" parent="Shame"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7, -545)
