@@ -14,6 +14,7 @@
 - Pure gameplay math lives in `RefCounted` scripts under `scripts/logic/` (`source_move.gd`, `yaw_drain.gd`, `wallrun_logic.gd`, `erosion_logic.gd`, `loop_logic.gd`, `void_logic.gd`, `posture.gd`, `course_logic.gd`) — full TDD, 100% coverage expectation. `source_move.gd` + `yaw_drain.gd` are the GAME's movement core (adopted from the momentum lab, phase 3a); `move_math.gd` is deleted.
 - Node scripts (`scripts/player.gd`, `scripts/slice.gd`, `scripts/swallow_director.gd`, `scripts/void_wall.gd`, lab-only `scripts/momentum_player.gd`/`momentum_lab.gd`) wire input/scene-tree only and delegate all math to `scripts/logic/`.
 - **Momentum lab** (`scenes/momentum_lab.tscn`, `just momentum-lab`): Source-movement evaluation env, verdict ADOPT 2026-07-24 — core adopted into `scripts/player.gd` in phase 3a; lab scene kept as a tuning sandbox. Movement constants live ONLY in `scripts/logic/source_move.gd` (top-of-file) and are game-wide; two deliberate CS2-parity breaks are user-locked there (`JUMP_SPEED` airtime parity, `AIR_CAP` 1.5 = 2× turn window).
+- **Erodable-platform contract** (erosion v3, ruling #14): a `slice.tscn` `StaticBody3D` in group `erodable` with children `Col` (CollisionShape3D/BoxShape3D) + `Mesh` (MeshInstance3D/BoxMesh) and metadata `erode_axis` (0=x, 2=z), `erode_min` (plateau size on that axis, m), `erode_anchor` (−1 pin low edge / 0 centre / +1 pin high edge). `slice.gd:apply_erosion()` reads the group, duplicates the shared sub-resources per body, and recomputes size+origin from cached shipped geometry every loop (idempotent; loop 0 = shipped course exactly). NEVER tag kickers, surf ramps, ride walls, marker/respawn floors, feed platforms, or the door — issue #12 + the E2 max-erosion audit are the standing law.
 - **No coverage gate on node scripts/scenes.** Stated explicitly so this is never mistaken for an oversight — see games-domain CLAUDE.md, scene/node tests are smoke-level only.
 
 ## Test command
@@ -30,7 +31,7 @@
 - `scripts/player.gd` — `MOUSE_SENS`, `GLANCE_TURN_SPEED`, `FLOOR_LIMIT_DEG` (input/camera only — movement constants live in `source_move.gd`)
 - `scripts/logic/source_move.gd` — ALL game-wide movement constants (`RUN_SPEED`, `GRAVITY`, `JUMP_SPEED`, `FRICTION`, `STOP_SPEED`, `GROUND_ACCEL`, `AIR_ACCEL`, `AIR_CAP`, `OVERBOUNCE`); changing one requires deliberate test-expectation updates in `tests/unit/test_source_move.gd` — never loosen tolerances
 - `scripts/logic/wallrun_logic.gd` — `MIN_FORWARD_SPEED`, `SINK_CAP`, `PUSH_AWAY_SPEED`, `WALL_JUMP_VY`
-- `scripts/logic/erosion_logic.gd` — `PLATEAU_LOOP` (erosion v3, ruling #14: player never degrades; `world_scale(loop)` ramps world pressure 0→1 at plateau)
+- `scripts/logic/erosion_logic.gd` — `PLATEAU_LOOP`, `FOG_DENSITY_MAX` (erosion v3, ruling #14: player never degrades; `world_scale(loop)` ramps world pressure 0→1 at plateau)
 - `scripts/logic/void_logic.gd` — `CREEP_SPEEDS` (per posture), `CREEP_MULT_MAX` (per-loop creep speedup cap at plateau), `RESET_GAP`
 - `scripts/swallow_director.gd` — `FADE_OUT`/`HOLD`/`FADE_IN` (swallow), `SETBACK_MARKERS`, `FALL_FADE_OUT`/`FALL_FADE_IN`/`FALL_VOID_GAP` (fall reset)
 - `scripts/slice.gd` — `MARKER_PROGRESSES`, `FALL_Y`

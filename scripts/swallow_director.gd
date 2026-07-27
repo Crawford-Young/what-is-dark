@@ -81,6 +81,7 @@ func _loop_respawn(slice: Slice, player: Player) -> void:
 		return
 	player.shift_to(slice.respawn_position(0))
 	slice.loop_logic.advance_loop()
+	slice.apply_erosion()
 	slice.void_logic.progress = Slice.VOID_START
 	slice.sync_void_wall()
 
