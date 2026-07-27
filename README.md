@@ -1,21 +1,21 @@
 # What Is Dark
 
-First-person parkour about facing your own darkness. Phase 3a: Source movement integrated game-wide.
+First-person parkour about facing your own darkness. Phase 3b: full 1800 m three-zone course built for Source movement.
 
 Spec: `~/code/docs/games/what-is-dark/specs/2026-07-21-what-is-dark-design.md`
 
 ## Current state
 
-Phase 3a — Source movement integration complete (movement + systems accepted at feel gate 2026-07-25):
+Phase 3b — full map redesign under Source movement (all three zone feel gates passed; erosion inverted per ruling #14). Phase 3a's movement integration is included below:
 
 - **Source-engine movement is the game's movement** — CS2-style bhop (auto-hop on held jump), air-strafing past the run cap, surf-capable plane clipping; core adopted from the momentum lab into `scripts/player.gd` (`scripts/logic/source_move.gd` + `yaw_drain.gd`)
 - Momentum-preserving wall ride — clip-to-plane ride with capped sink, speed-keeping kick-off
-- Erosion v2 — per-loop acceleration decay (ground + air, floors at 0.52); speed carried is never bled; landing retention removed
+- Erosion v3 — **the player never degrades**; movement constants are identical on loop 1 and loop 100. Per-loop pressure is world-side instead: the dark creeps faster (up to 1.6× base), fog closes in, and eleven hand-picked margined floors shrink toward authored plateau sizes. Ramps loop 1 → plateau (loop 5), then holds. Every eroded gap stays inside the reach ceiling at max erosion
 - Snap glance back (hold to look over your shoulder)
 - Posture-sensitive void chase — the dark creeps fastest when you look away, slower when glancing, nearly stalls when you face it
 - Silent swallow on catch — screen fades out, holds, respawns you at a setback marker
 - Quick fall reset — falling off the course fades out/in and resets you near your last passed marker
-- 200 m greybox course with shell containment — **phase-2 layout, slated for full redesign in phase 3b** (built for the old movement envelope; five TempBridge planks temporarily restore flat-gap viability)
+- **1800 m three-zone course** (phase 3b) with shell containment — **Shame** (0–600 m, school corridors: bhop gaps, wall climbs, an elevator shaft), **Grief** (600–1200 m, hospital opening up: surf ramps into flat kicker pads, chained speed gains to ~25 m/s, long ride walls), **Depression** (1200–1800 m, bedroom compressing: low ceilings, duck-or-die arches, narrow strips at the reach ceiling), ending at a lit door — the game's only warm light
 
 ## Momentum lab (Source-movement evaluation — ADOPTED into the game)
 
@@ -38,7 +38,7 @@ Derived from `project.godot` `[input]` and `scripts/player.gd`.
 | Glance back (hold) | Q |
 | Look | Mouse |
 
-Wall-running has no dedicated bind — running into a side wall while airborne and above minimum speed slides you along it automatically; press Jump while wall-running to kick off (wall-jump).
+Wall traversal has no dedicated bind and splits on how you use Jump: **hold** Jump against a side wall (airborne, above minimum speed) to ride it, **press** Jump to kick off it. Riding preserves along-wall speed with a capped sink; the kick keeps your horizontal speed and adds upward velocity.
 
 ## How to run / test
 
