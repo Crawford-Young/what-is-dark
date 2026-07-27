@@ -1,9 +1,10 @@
-[gd_scene load_steps=221 format=3]
+[gd_scene load_steps=222 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1"]
 [ext_resource type="Script" path="res://scripts/slice.gd" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/void_wall.tscn" id="3"]
 [ext_resource type="Script" path="res://scripts/swallow_director.gd" id="4"]
+[ext_resource type="Script" path="res://scripts/telemetry.gd" id="5"]
 
 [sub_resource type="StandardMaterial3D" id="floor_mat"]
 albedo_color = Color(0.15, 0.16, 0.2, 1)
@@ -805,6 +806,20 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color(1, 1, 1, 0)
+mouse_filter = 2
+
+[node name="Telemetry" type="CanvasLayer" parent="."]
+script = ExtResource("5")
+
+[node name="Label" type="Label" parent="Telemetry"]
+offset_left = 16.0
+offset_top = 12.0
+offset_right = 480.0
+offset_bottom = 160.0
+theme_override_colors/font_color = Color(0.6, 1, 0.75, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 20
 mouse_filter = 2
 
 [node name="Shame" type="Node3D" parent="."]
