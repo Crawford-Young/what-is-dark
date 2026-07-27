@@ -1,4 +1,4 @@
-[gd_scene load_steps=132 format=3]
+[gd_scene load_steps=221 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1"]
 [ext_resource type="Script" path="res://scripts/slice.gd" id="2"]
@@ -448,6 +448,317 @@ size = Vector3(2, 12, 1.6)
 [sub_resource type="BoxMesh" id="g_m23"]
 material = SubResource("g_ward_mat")
 size = Vector3(2, 12, 1.6)
+
+[sub_resource type="StandardMaterial3D" id="d_floor_mat"]
+albedo_color = Color(0.3, 0.28, 0.31, 1)
+
+[sub_resource type="StandardMaterial3D" id="d_ceil_mat"]
+albedo_color = Color(0.19, 0.18, 0.22, 1)
+
+[sub_resource type="StandardMaterial3D" id="d_wall_mat"]
+albedo_color = Color(0.37, 0.33, 0.35, 1)
+
+[sub_resource type="StandardMaterial3D" id="d_surf_mat"]
+albedo_color = Color(0.33, 0.29, 0.38, 1)
+
+[sub_resource type="StandardMaterial3D" id="d_prop_mat"]
+albedo_color = Color(0.46, 0.4, 0.35, 1)
+
+[sub_resource type="StandardMaterial3D" id="d_shell_mat"]
+albedo_color = Color(0.12, 0.11, 0.15, 1)
+
+[sub_resource type="StandardMaterial3D" id="d_door_mat"]
+albedo_color = Color(0.52, 0.45, 0.36, 1)
+
+[sub_resource type="StandardMaterial3D" id="d_glow_mat"]
+albedo_color = Color(1, 0.87, 0.66, 1)
+emission_enabled = true
+emission = Color(1, 0.84, 0.6, 1)
+emission_energy_multiplier = 4.0
+
+[sub_resource type="BoxShape3D" id="d_s01"]
+size = Vector3(10, 1, 36.8)
+
+[sub_resource type="BoxMesh" id="d_m01"]
+material = SubResource("d_floor_mat")
+size = Vector3(10, 1, 36.8)
+
+[sub_resource type="BoxShape3D" id="d_s02"]
+size = Vector3(10, 0.6, 14.8)
+
+[sub_resource type="BoxMesh" id="d_m02"]
+material = SubResource("d_ceil_mat")
+size = Vector3(10, 0.6, 14.8)
+
+[sub_resource type="BoxShape3D" id="d_s03"]
+size = Vector3(10, 0.6, 14)
+
+[sub_resource type="BoxMesh" id="d_m03"]
+material = SubResource("d_ceil_mat")
+size = Vector3(10, 0.6, 14)
+
+[sub_resource type="BoxShape3D" id="d_s04"]
+size = Vector3(2.2, 0.6, 4)
+
+[sub_resource type="BoxMesh" id="d_m04"]
+material = SubResource("d_prop_mat")
+size = Vector3(2.2, 0.6, 4)
+
+[sub_resource type="BoxShape3D" id="d_s05"]
+size = Vector3(1, 1, 2)
+
+[sub_resource type="BoxMesh" id="d_m05"]
+material = SubResource("d_prop_mat")
+size = Vector3(1, 1, 2)
+
+[sub_resource type="BoxShape3D" id="d_s06"]
+size = Vector3(0.7, 0.7, 0.7)
+
+[sub_resource type="BoxMesh" id="d_m06"]
+material = SubResource("d_prop_mat")
+size = Vector3(0.7, 0.7, 0.7)
+
+[sub_resource type="BoxShape3D" id="d_s07"]
+size = Vector3(2.5, 1, 7)
+
+[sub_resource type="BoxMesh" id="d_m07"]
+material = SubResource("d_floor_mat")
+size = Vector3(2.5, 1, 7)
+
+[sub_resource type="BoxShape3D" id="d_s08"]
+size = Vector3(10, 1, 58.5)
+
+[sub_resource type="BoxMesh" id="d_m08"]
+material = SubResource("d_floor_mat")
+size = Vector3(10, 1, 58.5)
+
+[sub_resource type="BoxShape3D" id="d_s09"]
+size = Vector3(10, 0.6, 22)
+
+[sub_resource type="BoxMesh" id="d_m09"]
+material = SubResource("d_ceil_mat")
+size = Vector3(10, 0.6, 22)
+
+[sub_resource type="BoxShape3D" id="d_s10"]
+size = Vector3(10, 0.6, 20)
+
+[sub_resource type="BoxMesh" id="d_m10"]
+material = SubResource("d_ceil_mat")
+size = Vector3(10, 0.6, 20)
+
+[sub_resource type="BoxShape3D" id="d_s11"]
+size = Vector3(10, 1, 8)
+
+[sub_resource type="BoxMesh" id="d_m11"]
+material = SubResource("d_floor_mat")
+size = Vector3(10, 1, 8)
+
+[sub_resource type="BoxShape3D" id="d_s12"]
+size = Vector3(10, 1, 10)
+
+[sub_resource type="BoxMesh" id="d_m12"]
+material = SubResource("d_floor_mat")
+size = Vector3(10, 1, 10)
+
+[sub_resource type="BoxShape3D" id="d_s13"]
+size = Vector3(10, 1, 23)
+
+[sub_resource type="BoxMesh" id="d_m13"]
+material = SubResource("d_floor_mat")
+size = Vector3(10, 1, 23)
+
+[sub_resource type="BoxShape3D" id="d_s14"]
+size = Vector3(1.2, 7, 10)
+
+[sub_resource type="BoxMesh" id="d_m14"]
+material = SubResource("d_wall_mat")
+size = Vector3(1.2, 7, 10)
+
+[sub_resource type="BoxShape3D" id="d_s15"]
+size = Vector3(8, 1, 9.5189285)
+
+[sub_resource type="BoxMesh" id="d_m15"]
+material = SubResource("d_floor_mat")
+size = Vector3(8, 1, 9.5189285)
+
+[sub_resource type="BoxShape3D" id="d_s16"]
+size = Vector3(8, 1, 3)
+
+[sub_resource type="BoxMesh" id="d_m16"]
+material = SubResource("d_floor_mat")
+size = Vector3(8, 1, 3)
+
+[sub_resource type="BoxShape3D" id="d_s17"]
+size = Vector3(9, 1, 13.29812)
+
+[sub_resource type="BoxMesh" id="d_m17"]
+material = SubResource("d_surf_mat")
+size = Vector3(9, 1, 13.29812)
+
+[sub_resource type="BoxShape3D" id="d_s18"]
+size = Vector3(12, 1, 5)
+
+[sub_resource type="BoxMesh" id="d_m18"]
+material = SubResource("d_floor_mat")
+size = Vector3(12, 1, 5)
+
+[sub_resource type="BoxShape3D" id="d_s19"]
+size = Vector3(8, 1, 21)
+
+[sub_resource type="BoxMesh" id="d_m19"]
+material = SubResource("d_floor_mat")
+size = Vector3(8, 1, 21)
+
+[sub_resource type="BoxShape3D" id="d_s20"]
+size = Vector3(8, 0.8, 1)
+
+[sub_resource type="BoxMesh" id="d_m20"]
+material = SubResource("d_wall_mat")
+size = Vector3(8, 0.8, 1)
+
+[sub_resource type="BoxShape3D" id="d_s21"]
+size = Vector3(0.8, 3.2, 1)
+
+[sub_resource type="BoxMesh" id="d_m21"]
+material = SubResource("d_wall_mat")
+size = Vector3(0.8, 3.2, 1)
+
+[sub_resource type="BoxShape3D" id="d_s22"]
+size = Vector3(0.8, 3.05, 1)
+
+[sub_resource type="BoxMesh" id="d_m22"]
+material = SubResource("d_wall_mat")
+size = Vector3(0.8, 3.05, 1)
+
+[sub_resource type="BoxShape3D" id="d_s23"]
+size = Vector3(0.8, 2.9, 1)
+
+[sub_resource type="BoxMesh" id="d_m23"]
+material = SubResource("d_wall_mat")
+size = Vector3(0.8, 2.9, 1)
+
+[sub_resource type="BoxShape3D" id="d_s24"]
+size = Vector3(8, 1, 18)
+
+[sub_resource type="BoxMesh" id="d_m24"]
+material = SubResource("d_floor_mat")
+size = Vector3(8, 1, 18)
+
+[sub_resource type="BoxShape3D" id="d_s25"]
+size = Vector3(8, 1, 11.6)
+
+[sub_resource type="BoxMesh" id="d_m25"]
+material = SubResource("d_floor_mat")
+size = Vector3(8, 1, 11.6)
+
+[sub_resource type="BoxShape3D" id="d_s26"]
+size = Vector3(8, 1, 25)
+
+[sub_resource type="BoxMesh" id="d_m26"]
+material = SubResource("d_floor_mat")
+size = Vector3(8, 1, 25)
+
+[sub_resource type="BoxShape3D" id="d_s27"]
+size = Vector3(8, 1, 90)
+
+[sub_resource type="BoxMesh" id="d_m27"]
+material = SubResource("d_floor_mat")
+size = Vector3(8, 1, 90)
+
+[sub_resource type="BoxShape3D" id="d_s28"]
+size = Vector3(8, 0.6, 22)
+
+[sub_resource type="BoxMesh" id="d_m28"]
+material = SubResource("d_ceil_mat")
+size = Vector3(8, 0.6, 22)
+
+[sub_resource type="BoxShape3D" id="d_s29"]
+size = Vector3(4, 1, 8.7)
+
+[sub_resource type="BoxMesh" id="d_m29"]
+material = SubResource("d_floor_mat")
+size = Vector3(4, 1, 8.7)
+
+[sub_resource type="BoxShape3D" id="d_s30"]
+size = Vector3(1.2, 7, 6)
+
+[sub_resource type="BoxMesh" id="d_m30"]
+material = SubResource("d_wall_mat")
+size = Vector3(1.2, 7, 6)
+
+[sub_resource type="BoxShape3D" id="d_s31"]
+size = Vector3(6, 1, 13.5)
+
+[sub_resource type="BoxMesh" id="d_m31"]
+material = SubResource("d_floor_mat")
+size = Vector3(6, 1, 13.5)
+
+[sub_resource type="BoxShape3D" id="d_s32"]
+size = Vector3(6, 1, 12.9022324)
+
+[sub_resource type="BoxMesh" id="d_m32"]
+material = SubResource("d_floor_mat")
+size = Vector3(6, 1, 12.9022324)
+
+[sub_resource type="BoxShape3D" id="d_s33"]
+size = Vector3(6, 1, 4)
+
+[sub_resource type="BoxMesh" id="d_m33"]
+material = SubResource("d_floor_mat")
+size = Vector3(6, 1, 4)
+
+[sub_resource type="BoxShape3D" id="d_s34"]
+size = Vector3(9, 1, 12.80976)
+
+[sub_resource type="BoxMesh" id="d_m34"]
+material = SubResource("d_surf_mat")
+size = Vector3(9, 1, 12.80976)
+
+[sub_resource type="BoxShape3D" id="d_s35"]
+size = Vector3(6, 1, 26.5)
+
+[sub_resource type="BoxMesh" id="d_m35"]
+material = SubResource("d_floor_mat")
+size = Vector3(6, 1, 26.5)
+
+[sub_resource type="BoxShape3D" id="d_s36"]
+size = Vector3(6, 0.6, 22)
+
+[sub_resource type="BoxMesh" id="d_m36"]
+material = SubResource("d_ceil_mat")
+size = Vector3(6, 0.6, 22)
+
+[sub_resource type="BoxShape3D" id="d_s37"]
+size = Vector3(6, 1, 30)
+
+[sub_resource type="BoxMesh" id="d_m37"]
+material = SubResource("d_floor_mat")
+size = Vector3(6, 1, 30)
+
+[sub_resource type="BoxShape3D" id="d_s38"]
+size = Vector3(0.8, 5.5, 0.8)
+
+[sub_resource type="BoxMesh" id="d_m38"]
+material = SubResource("d_door_mat")
+size = Vector3(0.8, 5.5, 0.8)
+
+[sub_resource type="BoxShape3D" id="d_s39"]
+size = Vector3(6.8, 0.8, 0.8)
+
+[sub_resource type="BoxMesh" id="d_m39"]
+material = SubResource("d_door_mat")
+size = Vector3(6.8, 0.8, 0.8)
+
+[sub_resource type="BoxShape3D" id="d_s40"]
+size = Vector3(2, 8, 1.6)
+
+[sub_resource type="BoxMesh" id="d_m40"]
+material = SubResource("d_shell_mat")
+size = Vector3(2, 8, 1.6)
+
+[sub_resource type="BoxMesh" id="d_m41"]
+material = SubResource("d_glow_mat")
+size = Vector3(5, 5, 0.15)
 
 [node name="Slice" type="Node3D"]
 script = ExtResource("2")
@@ -1809,3 +2120,878 @@ shape = SubResource("g_s23")
 [node name="MR1180" type="MeshInstance3D" parent="Grief/GriefShell"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 3, -1180)
 mesh = SubResource("g_m23")
+
+[node name="Depression" type="Node3D" parent="."]
+
+[node name="D1Floor" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, -1243.6)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D1Floor"]
+shape = SubResource("d_s01")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D1Floor"]
+mesh = SubResource("d_m01")
+
+[node name="D1CeilA" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.9, -1232.6)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D1CeilA"]
+shape = SubResource("d_s02")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D1CeilA"]
+mesh = SubResource("d_m02")
+
+[node name="D1CeilB" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.65, -1249)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D1CeilB"]
+shape = SubResource("d_s03")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D1CeilB"]
+mesh = SubResource("d_m03")
+
+[node name="D1Props" type="StaticBody3D" parent="Depression"]
+
+[node name="CBed" type="CollisionShape3D" parent="Depression/D1Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.6, -2.2, -1234)
+shape = SubResource("d_s04")
+
+[node name="MBed" type="MeshInstance3D" parent="Depression/D1Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.6, -2.2, -1234)
+mesh = SubResource("d_m04")
+
+[node name="CDresser" type="CollisionShape3D" parent="Depression/D1Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2, -2, -1246)
+shape = SubResource("d_s05")
+
+[node name="MDresser" type="MeshInstance3D" parent="Depression/D1Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2, -2, -1246)
+mesh = SubResource("d_m05")
+
+[node name="CStand" type="CollisionShape3D" parent="Depression/D1Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.9, -2.15, -1230.5)
+shape = SubResource("d_s06")
+
+[node name="MStand" type="MeshInstance3D" parent="Depression/D1Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.9, -2.15, -1230.5)
+mesh = SubResource("d_m06")
+
+[node name="D2StripA" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, -1273.5)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D2StripA"]
+shape = SubResource("d_s07")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D2StripA"]
+mesh = SubResource("d_m07")
+
+[node name="D2StripB" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, -1288.7)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D2StripB"]
+shape = SubResource("d_s07")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D2StripB"]
+mesh = SubResource("d_m07")
+
+[node name="D2StripC" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, -1304)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D2StripC"]
+shape = SubResource("d_s07")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D2StripC"]
+mesh = SubResource("d_m07")
+
+[node name="D2Exit" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, -1336.75)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D2Exit"]
+shape = SubResource("d_s08")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D2Exit"]
+mesh = SubResource("d_m08")
+
+[node name="D2CeilA" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, -1275)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D2CeilA"]
+shape = SubResource("d_s09")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D2CeilA"]
+mesh = SubResource("d_m09")
+
+[node name="D2CeilB" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, -1299)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D2CeilB"]
+shape = SubResource("d_s09")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D2CeilB"]
+mesh = SubResource("d_m09")
+
+[node name="D2CeilC" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, -1323)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D2CeilC"]
+shape = SubResource("d_s09")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D2CeilC"]
+mesh = SubResource("d_m09")
+
+[node name="D2CeilD" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, -1346)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D2CeilD"]
+shape = SubResource("d_s10")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D2CeilD"]
+mesh = SubResource("d_m10")
+
+[node name="D3PadA" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, -1370)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D3PadA"]
+shape = SubResource("d_s11")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D3PadA"]
+mesh = SubResource("d_m11")
+
+[node name="D3WallA" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6, -2, -1377.5)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D3WallA"]
+shape = SubResource("d_s14")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D3WallA"]
+mesh = SubResource("d_m14")
+
+[node name="D3PadB" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, -1387.5)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D3PadB"]
+shape = SubResource("d_s12")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D3PadB"]
+mesh = SubResource("d_m12")
+
+[node name="D3WallB" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, -2, -1396)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D3WallB"]
+shape = SubResource("d_s14")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D3WallB"]
+mesh = SubResource("d_m14")
+
+[node name="D3PadC" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, -1412.5)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D3PadC"]
+shape = SubResource("d_s13")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D3PadC"]
+mesh = SubResource("d_m13")
+
+[node name="D3CeilA" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, -1375)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D3CeilA"]
+shape = SubResource("d_s09")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D3CeilA"]
+mesh = SubResource("d_m09")
+
+[node name="D3CeilB" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, -1399)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D3CeilB"]
+shape = SubResource("d_s09")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D3CeilB"]
+mesh = SubResource("d_m09")
+
+[node name="D4Lift" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 0.9454847, -0.3256557, 0, 0.3256557, 0.9454847, 0, -1.4227424, -1428.6628279)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D4Lift"]
+shape = SubResource("d_s15")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D4Lift"]
+mesh = SubResource("d_m15")
+
+[node name="D4Pad" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, -1434.5)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D4Pad"]
+shape = SubResource("d_s16")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D4Pad"]
+mesh = SubResource("d_m16")
+
+[node name="D4Ramp" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(0.7071068, -0.7071068, 0, 0.6912486, 0.6912486, 0.2104757, -0.1488296, -0.1488296, 0.9775852, 0.3535534, -1.4456243, -1443.4255861)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D4Ramp"]
+shape = SubResource("d_s17")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D4Ramp"]
+mesh = SubResource("d_m17")
+
+[node name="D4Kick" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, -1452.5)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D4Kick"]
+shape = SubResource("d_s18")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D4Kick"]
+mesh = SubResource("d_m18")
+
+[node name="D4LandA" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, -1476.5)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D4LandA"]
+shape = SubResource("d_s19")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D4LandA"]
+mesh = SubResource("d_m19")
+
+[node name="D4ArchA" type="StaticBody3D" parent="Depression"]
+
+[node name="CLintel" type="CollisionShape3D" parent="Depression/D4ArchA"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, -1470.5)
+shape = SubResource("d_s20")
+
+[node name="MLintel" type="MeshInstance3D" parent="Depression/D4ArchA"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, -1470.5)
+mesh = SubResource("d_m20")
+
+[node name="CPillarL" type="CollisionShape3D" parent="Depression/D4ArchA"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, -0.9, -1470.5)
+shape = SubResource("d_s21")
+
+[node name="MPillarL" type="MeshInstance3D" parent="Depression/D4ArchA"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, -0.9, -1470.5)
+mesh = SubResource("d_m21")
+
+[node name="CPillarR" type="CollisionShape3D" parent="Depression/D4ArchA"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4, -0.9, -1470.5)
+shape = SubResource("d_s21")
+
+[node name="MPillarR" type="MeshInstance3D" parent="Depression/D4ArchA"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4, -0.9, -1470.5)
+mesh = SubResource("d_m21")
+
+[node name="D4ArchB" type="StaticBody3D" parent="Depression"]
+
+[node name="CLintel" type="CollisionShape3D" parent="Depression/D4ArchB"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, -1476)
+shape = SubResource("d_s20")
+
+[node name="MLintel" type="MeshInstance3D" parent="Depression/D4ArchB"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, -1476)
+mesh = SubResource("d_m20")
+
+[node name="CPillarL" type="CollisionShape3D" parent="Depression/D4ArchB"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, -0.975, -1476)
+shape = SubResource("d_s22")
+
+[node name="MPillarL" type="MeshInstance3D" parent="Depression/D4ArchB"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, -0.975, -1476)
+mesh = SubResource("d_m22")
+
+[node name="CPillarR" type="CollisionShape3D" parent="Depression/D4ArchB"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4, -0.975, -1476)
+shape = SubResource("d_s22")
+
+[node name="MPillarR" type="MeshInstance3D" parent="Depression/D4ArchB"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4, -0.975, -1476)
+mesh = SubResource("d_m22")
+
+[node name="D4ArchC" type="StaticBody3D" parent="Depression"]
+
+[node name="CLintel" type="CollisionShape3D" parent="Depression/D4ArchC"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, -1484)
+shape = SubResource("d_s20")
+
+[node name="MLintel" type="MeshInstance3D" parent="Depression/D4ArchC"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, -1484)
+mesh = SubResource("d_m20")
+
+[node name="CPillarL" type="CollisionShape3D" parent="Depression/D4ArchC"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, -1.05, -1484)
+shape = SubResource("d_s23")
+
+[node name="MPillarL" type="MeshInstance3D" parent="Depression/D4ArchC"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, -1.05, -1484)
+mesh = SubResource("d_m23")
+
+[node name="CPillarR" type="CollisionShape3D" parent="Depression/D4ArchC"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4, -1.05, -1484)
+shape = SubResource("d_s23")
+
+[node name="MPillarR" type="MeshInstance3D" parent="Depression/D4ArchC"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4, -1.05, -1484)
+mesh = SubResource("d_m23")
+
+[node name="D5FloorA" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, -1504.2)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D5FloorA"]
+shape = SubResource("d_s24")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D5FloorA"]
+mesh = SubResource("d_m24")
+
+[node name="D5ArchA" type="StaticBody3D" parent="Depression"]
+
+[node name="CLintel" type="CollisionShape3D" parent="Depression/D5ArchA"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, -1500)
+shape = SubResource("d_s20")
+
+[node name="MLintel" type="MeshInstance3D" parent="Depression/D5ArchA"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, -1500)
+mesh = SubResource("d_m20")
+
+[node name="CPillarL" type="CollisionShape3D" parent="Depression/D5ArchA"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, -1.05, -1500)
+shape = SubResource("d_s23")
+
+[node name="MPillarL" type="MeshInstance3D" parent="Depression/D5ArchA"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, -1.05, -1500)
+mesh = SubResource("d_m23")
+
+[node name="CPillarR" type="CollisionShape3D" parent="Depression/D5ArchA"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4, -1.05, -1500)
+shape = SubResource("d_s23")
+
+[node name="MPillarR" type="MeshInstance3D" parent="Depression/D5ArchA"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4, -1.05, -1500)
+mesh = SubResource("d_m23")
+
+[node name="D5ArchB" type="StaticBody3D" parent="Depression"]
+
+[node name="CLintel" type="CollisionShape3D" parent="Depression/D5ArchB"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, -1507)
+shape = SubResource("d_s20")
+
+[node name="MLintel" type="MeshInstance3D" parent="Depression/D5ArchB"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, -1507)
+mesh = SubResource("d_m20")
+
+[node name="CPillarL" type="CollisionShape3D" parent="Depression/D5ArchB"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, -1.05, -1507)
+shape = SubResource("d_s23")
+
+[node name="MPillarL" type="MeshInstance3D" parent="Depression/D5ArchB"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, -1.05, -1507)
+mesh = SubResource("d_m23")
+
+[node name="CPillarR" type="CollisionShape3D" parent="Depression/D5ArchB"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4, -1.05, -1507)
+shape = SubResource("d_s23")
+
+[node name="MPillarR" type="MeshInstance3D" parent="Depression/D5ArchB"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4, -1.05, -1507)
+mesh = SubResource("d_m23")
+
+[node name="D5FloorB" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, -1527.2)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D5FloorB"]
+shape = SubResource("d_s25")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D5FloorB"]
+mesh = SubResource("d_m25")
+
+[node name="D5ArchC" type="StaticBody3D" parent="Depression"]
+
+[node name="CLintel" type="CollisionShape3D" parent="Depression/D5ArchC"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, -1527)
+shape = SubResource("d_s20")
+
+[node name="MLintel" type="MeshInstance3D" parent="Depression/D5ArchC"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, -1527)
+mesh = SubResource("d_m20")
+
+[node name="CPillarL" type="CollisionShape3D" parent="Depression/D5ArchC"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, -1.05, -1527)
+shape = SubResource("d_s23")
+
+[node name="MPillarL" type="MeshInstance3D" parent="Depression/D5ArchC"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, -1.05, -1527)
+mesh = SubResource("d_m23")
+
+[node name="CPillarR" type="CollisionShape3D" parent="Depression/D5ArchC"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4, -1.05, -1527)
+shape = SubResource("d_s23")
+
+[node name="MPillarR" type="MeshInstance3D" parent="Depression/D5ArchC"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.4, -1.05, -1527)
+mesh = SubResource("d_m23")
+
+[node name="D5Wall" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6, -2, -1537)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D5Wall"]
+shape = SubResource("d_s14")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D5Wall"]
+mesh = SubResource("d_m14")
+
+[node name="D5FloorC" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, -1553.5)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D5FloorC"]
+shape = SubResource("d_s26")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D5FloorC"]
+mesh = SubResource("d_m26")
+
+[node name="D6Floor" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, -1611)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D6Floor"]
+shape = SubResource("d_s27")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D6Floor"]
+mesh = SubResource("d_m27")
+
+[node name="D6CeilA" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, -1579)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D6CeilA"]
+shape = SubResource("d_s28")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D6CeilA"]
+mesh = SubResource("d_m28")
+
+[node name="D6CeilB" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, -1603)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D6CeilB"]
+shape = SubResource("d_s28")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D6CeilB"]
+mesh = SubResource("d_m28")
+
+[node name="D6CeilC" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, -1627)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D6CeilC"]
+shape = SubResource("d_s28")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D6CeilC"]
+mesh = SubResource("d_m28")
+
+[node name="D6Props" type="StaticBody3D" parent="Depression"]
+
+[node name="CBed1" type="CollisionShape3D" parent="Depression/D6Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.7, -2.2, -1580)
+shape = SubResource("d_s04")
+
+[node name="MBed1" type="MeshInstance3D" parent="Depression/D6Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.7, -2.2, -1580)
+mesh = SubResource("d_m04")
+
+[node name="CDresser1" type="CollisionShape3D" parent="Depression/D6Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.3, -2, -1596)
+shape = SubResource("d_s05")
+
+[node name="MDresser1" type="MeshInstance3D" parent="Depression/D6Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.3, -2, -1596)
+mesh = SubResource("d_m05")
+
+[node name="CStand1" type="CollisionShape3D" parent="Depression/D6Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, -2.15, -1610)
+shape = SubResource("d_s06")
+
+[node name="MStand1" type="MeshInstance3D" parent="Depression/D6Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4, -2.15, -1610)
+mesh = SubResource("d_m06")
+
+[node name="CBed2" type="CollisionShape3D" parent="Depression/D6Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, -2.2, -1620)
+shape = SubResource("d_s04")
+
+[node name="MBed2" type="MeshInstance3D" parent="Depression/D6Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, -2.2, -1620)
+mesh = SubResource("d_m04")
+
+[node name="CDresser2" type="CollisionShape3D" parent="Depression/D6Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.3, -2, -1634)
+shape = SubResource("d_s05")
+
+[node name="MDresser2" type="MeshInstance3D" parent="Depression/D6Props"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.3, -2, -1634)
+mesh = SubResource("d_m05")
+
+[node name="D7PadA" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, -1668.65)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D7PadA"]
+shape = SubResource("d_s29")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D7PadA"]
+mesh = SubResource("d_m29")
+
+[node name="D7PadB" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, -1685.65)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D7PadB"]
+shape = SubResource("d_s29")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D7PadB"]
+mesh = SubResource("d_m29")
+
+[node name="D7Wall" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6, -2.5, -1689)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D7Wall"]
+shape = SubResource("d_s30")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D7Wall"]
+mesh = SubResource("d_m30")
+
+[node name="D7PadC" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4.64, -1703.25)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D7PadC"]
+shape = SubResource("d_s31")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D7PadC"]
+mesh = SubResource("d_m31")
+
+[node name="D7Rise" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 0.9300307, -0.3673621, 0, 0.3673621, 0.9300307, 0, -2.2350154, -1716.1836811)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D7Rise"]
+shape = SubResource("d_s32")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D7Rise"]
+mesh = SubResource("d_m32")
+
+[node name="D7Pad" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, -1724)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D7Pad"]
+shape = SubResource("d_s33")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D7Pad"]
+mesh = SubResource("d_m33")
+
+[node name="D7Ramp" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(0.6819984, -0.7313537, 0, 0.7136721, 0.6655098, 0.2185844, -0.1598594, -0.1490639, 0.9758196, 0.3656769, -1.4327549, -1733.1754736)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D7Ramp"]
+shape = SubResource("d_s34")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D7Ramp"]
+mesh = SubResource("d_m34")
+
+[node name="D7Kick" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, -1742)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D7Kick"]
+shape = SubResource("d_s18")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D7Kick"]
+mesh = SubResource("d_m18")
+
+[node name="D7Final" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, -1768.75)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D7Final"]
+shape = SubResource("d_s35")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D7Final"]
+mesh = SubResource("d_m35")
+
+[node name="D7CeilA" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, -1667)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D7CeilA"]
+shape = SubResource("d_s36")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D7CeilA"]
+mesh = SubResource("d_m36")
+
+[node name="D7CeilB" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, -1767)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/D7CeilB"]
+shape = SubResource("d_s36")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/D7CeilB"]
+mesh = SubResource("d_m36")
+
+[node name="DoorPlat" type="StaticBody3D" parent="Depression"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, -1797)
+
+[node name="Col" type="CollisionShape3D" parent="Depression/DoorPlat"]
+shape = SubResource("d_s37")
+
+[node name="Mesh" type="MeshInstance3D" parent="Depression/DoorPlat"]
+mesh = SubResource("d_m37")
+
+[node name="DoorFrame" type="StaticBody3D" parent="Depression"]
+
+[node name="CPostL" type="CollisionShape3D" parent="Depression/DoorFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6, 0.25, -1795)
+shape = SubResource("d_s38")
+
+[node name="MPostL" type="MeshInstance3D" parent="Depression/DoorFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.6, 0.25, -1795)
+mesh = SubResource("d_m38")
+
+[node name="CPostR" type="CollisionShape3D" parent="Depression/DoorFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 0.25, -1795)
+shape = SubResource("d_s38")
+
+[node name="MPostR" type="MeshInstance3D" parent="Depression/DoorFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.6, 0.25, -1795)
+mesh = SubResource("d_m38")
+
+[node name="CLintel" type="CollisionShape3D" parent="Depression/DoorFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -1795)
+shape = SubResource("d_s39")
+
+[node name="MLintel" type="MeshInstance3D" parent="Depression/DoorFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -1795)
+mesh = SubResource("d_m39")
+
+[node name="Glow" type="MeshInstance3D" parent="Depression/DoorFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, -1796.2)
+mesh = SubResource("d_m41")
+
+[node name="DoorLight" type="OmniLight3D" parent="Depression/DoorFrame"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, -1796.5)
+light_color = Color(1, 0.84, 0.6, 1)
+light_energy = 8.0
+omni_range = 26.0
+
+[node name="DepShell" type="StaticBody3D" parent="Depression"]
+
+[node name="CL1240" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1240)
+shape = SubResource("d_s40")
+
+[node name="ML1240" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1240)
+mesh = SubResource("d_m40")
+
+[node name="CR1240" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1240)
+shape = SubResource("d_s40")
+
+[node name="MR1240" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1240)
+mesh = SubResource("d_m40")
+
+[node name="CL1280" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1280)
+shape = SubResource("d_s40")
+
+[node name="ML1280" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1280)
+mesh = SubResource("d_m40")
+
+[node name="CR1280" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1280)
+shape = SubResource("d_s40")
+
+[node name="MR1280" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1280)
+mesh = SubResource("d_m40")
+
+[node name="CL1320" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1320)
+shape = SubResource("d_s40")
+
+[node name="ML1320" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1320)
+mesh = SubResource("d_m40")
+
+[node name="CR1320" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1320)
+shape = SubResource("d_s40")
+
+[node name="MR1320" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1320)
+mesh = SubResource("d_m40")
+
+[node name="CL1360" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1360)
+shape = SubResource("d_s40")
+
+[node name="ML1360" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1360)
+mesh = SubResource("d_m40")
+
+[node name="CR1360" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1360)
+shape = SubResource("d_s40")
+
+[node name="MR1360" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1360)
+mesh = SubResource("d_m40")
+
+[node name="CL1400" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1400)
+shape = SubResource("d_s40")
+
+[node name="ML1400" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1400)
+mesh = SubResource("d_m40")
+
+[node name="CR1400" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1400)
+shape = SubResource("d_s40")
+
+[node name="MR1400" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1400)
+mesh = SubResource("d_m40")
+
+[node name="CL1440" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1440)
+shape = SubResource("d_s40")
+
+[node name="ML1440" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1440)
+mesh = SubResource("d_m40")
+
+[node name="CR1440" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1440)
+shape = SubResource("d_s40")
+
+[node name="MR1440" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1440)
+mesh = SubResource("d_m40")
+
+[node name="CL1480" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1480)
+shape = SubResource("d_s40")
+
+[node name="ML1480" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1480)
+mesh = SubResource("d_m40")
+
+[node name="CR1480" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1480)
+shape = SubResource("d_s40")
+
+[node name="MR1480" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1480)
+mesh = SubResource("d_m40")
+
+[node name="CL1520" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1520)
+shape = SubResource("d_s40")
+
+[node name="ML1520" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1520)
+mesh = SubResource("d_m40")
+
+[node name="CR1520" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1520)
+shape = SubResource("d_s40")
+
+[node name="MR1520" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1520)
+mesh = SubResource("d_m40")
+
+[node name="CL1560" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1560)
+shape = SubResource("d_s40")
+
+[node name="ML1560" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1560)
+mesh = SubResource("d_m40")
+
+[node name="CR1560" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1560)
+shape = SubResource("d_s40")
+
+[node name="MR1560" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1560)
+mesh = SubResource("d_m40")
+
+[node name="CL1600" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1600)
+shape = SubResource("d_s40")
+
+[node name="ML1600" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1600)
+mesh = SubResource("d_m40")
+
+[node name="CR1600" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1600)
+shape = SubResource("d_s40")
+
+[node name="MR1600" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1600)
+mesh = SubResource("d_m40")
+
+[node name="CL1640" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1640)
+shape = SubResource("d_s40")
+
+[node name="ML1640" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1640)
+mesh = SubResource("d_m40")
+
+[node name="CR1640" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1640)
+shape = SubResource("d_s40")
+
+[node name="MR1640" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1640)
+mesh = SubResource("d_m40")
+
+[node name="CL1680" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1680)
+shape = SubResource("d_s40")
+
+[node name="ML1680" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1680)
+mesh = SubResource("d_m40")
+
+[node name="CR1680" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1680)
+shape = SubResource("d_s40")
+
+[node name="MR1680" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1680)
+mesh = SubResource("d_m40")
+
+[node name="CL1720" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1720)
+shape = SubResource("d_s40")
+
+[node name="ML1720" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1720)
+mesh = SubResource("d_m40")
+
+[node name="CR1720" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1720)
+shape = SubResource("d_s40")
+
+[node name="MR1720" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1720)
+mesh = SubResource("d_m40")
+
+[node name="CL1760" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1760)
+shape = SubResource("d_s40")
+
+[node name="ML1760" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1, -1760)
+mesh = SubResource("d_m40")
+
+[node name="CR1760" type="CollisionShape3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1760)
+shape = SubResource("d_s40")
+
+[node name="MR1760" type="MeshInstance3D" parent="Depression/DepShell"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1, -1760)
+mesh = SubResource("d_m40")
