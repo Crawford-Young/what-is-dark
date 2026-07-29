@@ -38,7 +38,7 @@ Derived from `project.godot` `[input]` and `scripts/player.gd`.
 | Glance back (hold) | Q |
 | Look | Mouse |
 
-Wall traversal has no dedicated bind and splits on how you use Jump: **hold** Jump against a side wall (airborne, above minimum speed) to ride it, **press** Jump to kick off it. Riding preserves along-wall speed with a capped sink; the kick keeps your horizontal speed and adds upward velocity.
+Wall traversal has no dedicated bind. Hitting a side wall while airborne and above minimum speed rides it **automatically** — no input required. **Press** Jump during the ride to kick off it; holding Jump through the ride fires nothing, since the kick reads the press edge. Riding preserves along-wall speed with a capped sink; the kick keeps your horizontal speed and adds upward velocity.
 
 ## How to run / test
 
