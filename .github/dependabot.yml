@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: chore
+
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: chore
+    groups:
+      # Tooling-only dev deps (commitlint, husky) — a grouped bump keeps them out
+      # of feature PRs, per the standing rule that devDependency upgrades landing
+      # alongside feature work break release workflows.
+      dev-tooling:
+        dependency-type: development
