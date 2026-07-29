@@ -17,6 +17,9 @@ func test_ride_preserves_along_wall_speed_and_caps_sink() -> void:
 func test_ride_clips_into_wall_component() -> void:
 	var v := WallrunLogic.ride_velocity(Vector3(-5, 0, -20), Vector3(1, 0, 0))
 	assert_almost_eq(v.x, 0.0, 0.0001)
+	# The sibling ride test enters with dot == 0, so the clip is skipped there —
+	# this is the only case that pins along-wall speed THROUGH the clip path.
+	assert_almost_eq(v.z, -20.0, 0.0001)
 
 
 func test_ride_preserves_outward_motion_after_kick() -> void:
