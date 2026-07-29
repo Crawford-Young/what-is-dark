@@ -23,6 +23,8 @@
 
 `just test` — run FOREGROUND, unpiped. Read the GUT summary block yourself (`Totals:` line — scripts/tests/asserts counts); never trust exit code alone.
 
+**CI enforces the same read** (`.github/workflows/ci.yml`, pinned to Godot 4.7.1): it greps for `could not find script`, asserts the `Scripts` count against an `EXPECTED_SCRIPTS` floor, and asserts `Passing Tests == Tests` — because an exit-code-only gate passes a suite that silently shrank. **Adding a test script means bumping `EXPECTED_SCRIPTS` in the workflow env block** (currently 13); CI fails loudly if you forget, which is the intended direction. The launch step fails on any `ERROR:`/`WARNING:`/`SCRIPT ERROR` in 600 headless frames.
+
 ## Gotchas
 
 - New `class_name` scripts need one `godot --headless --editor --quit --path .` pass (same Godot exe the Justfile's `godot` variable points at) before headless GUT will see them (rebuilds Godot's global script-class cache). **No Justfile recipe currently wraps this** — `just import` runs `--headless --path . --import`, which reimports assets, not the same flag combination, and does not rebuild the class cache. Run the editor-quit pass manually (or open/quit via `just edit`) whenever a new `class_name` script is added.

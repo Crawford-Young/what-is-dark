@@ -47,3 +47,5 @@ Wall traversal has no dedicated bind. Hitting a side wall while airborne and abo
 - `just test` — headless GUT unit tests
 - `just import` — import assets headlessly (after adding new assets, or after any `.tscn` edit)
 - `just momentum-lab` — run the momentum lab scene directly
+
+CI runs the same gates on every PR against `main` (GitHub Actions, pinned to Godot 4.7.1): asset import, the GUT suite, and a 600-frame headless launch that fails on any error or warning. The test step does not trust the exit code — GUT drops a test file that fails to parse and still exits 0, so CI checks the suite size and the pass count as well.

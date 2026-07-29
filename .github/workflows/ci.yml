@@ -1,0 +1,149 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Pin the exact engine the project targets (project.godot: config/features 4.7).
+  # A CI run on a different patch release is not the gate the local runs were.
+  GODOT_VERSION: 4.7.1
+  # Floor for the GUT suite-size guard below. BUMP THIS when adding a test script.
+  EXPECTED_SCRIPTS: 13
+
+jobs:
+  test:
+    name: Import & Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install just
+        uses: extractions/setup-just@v4
+
+      - name: Cache Godot binary
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/godot
+          key: godot-${{ env.GODOT_VERSION }}-linux
+
+      - name: Download Godot ${{ env.GODOT_VERSION }}
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          mkdir -p ~/godot
+          NAME="Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          curl -fsSL -o /tmp/godot.zip \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/${NAME}.zip"
+          unzip -q /tmp/godot.zip -d ~/godot
+          mv ~/godot/"${NAME}" ~/godot/godot
+          chmod +x ~/godot/godot
+
+      - name: Verify engine version
+        run: |
+          set -euo pipefail
+          echo "GODOT=$HOME/godot/godot" >> "$GITHUB_ENV"
+          "$HOME/godot/godot" --version
+
+      - name: Import assets
+        # Required before any headless run; --import is also what builds the
+        # .godot/ cache the test run reads.
+        run: just import
+
+      - name: Unit tests (GUT)
+        # The gate is NOT the exit code. GUT 9.7.1 reports "could not find script"
+        # for a test file that fails to PARSE, drops it, and still exits 0 — the
+        # suite silently shrinks instead of failing. Every assertion below exists
+        # because exit-code-only reads have shipped false greens in this domain.
+        run: |
+          set -euo pipefail
+          just test 2>&1 | tee gut-output.txt
+          echo "--- gate ---"
+
+          if grep -q "could not find script" gut-output.txt; then
+            echo "::error::GUT dropped a test script (parse failure). Suite ran incomplete."
+            grep "could not find script" gut-output.txt
+            exit 1
+          fi
+
+          SCRIPTS=$(awk '/^Scripts/ {print $2; exit}' gut-output.txt)
+          TESTS=$(awk '/^Tests/ {print $2; exit}' gut-output.txt)
+          PASSING=$(awk '/^Passing Tests/ {print $3; exit}' gut-output.txt)
+
+          if [ -z "$SCRIPTS" ] || [ -z "$TESTS" ] || [ -z "$PASSING" ]; then
+            echo "::error::Could not parse the GUT Totals block — treating as failure."
+            exit 1
+          fi
+
+          echo "scripts=$SCRIPTS tests=$TESTS passing=$PASSING"
+
+          if [ "$SCRIPTS" -lt "$EXPECTED_SCRIPTS" ]; then
+            echo "::error::Suite shrank: $SCRIPTS scripts, expected at least $EXPECTED_SCRIPTS."
+            exit 1
+          fi
+
+          if [ "$PASSING" -ne "$TESTS" ]; then
+            echo "::error::$((TESTS - PASSING)) of $TESTS tests did not pass."
+            exit 1
+          fi
+
+      - name: Headless launch (600 frames, zero errors)
+        # A green unit suite says nothing about whether the scene tree comes up.
+        # Any push_error/push_warning during startup fails the build.
+        run: |
+          set -euo pipefail
+          "$GODOT" --headless --path . --quit-after 600 2>&1 | tee launch.txt
+
+          if grep -Eiq "ERROR:|WARNING:|SCRIPT ERROR|Failed to load" launch.txt; then
+            echo "::error::Headless launch emitted errors or warnings."
+            exit 1
+          fi
+
+      - name: Upload run output
+        uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: godot-output
+          path: |
+            gut-output.txt
+            launch.txt
+          retention-days: 7
+
+  commitlint:
+    name: Commit Messages
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint PR commits
+        run: >-
+          npx commitlint
+          --from ${{ github.event.pull_request.base.sha }}
+          --to ${{ github.event.pull_request.head.sha }}
+          --verbose
