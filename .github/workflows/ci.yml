@@ -24,6 +24,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          # .gitattributes routes binary assets (png/jpg/wav/ogg/glb/ttf) through
+          # Git LFS. Without this the checkout lands pointer stubs — harmless
+          # today because nothing headless loads them, and a silent failure the
+          # moment a sprite or font does. dog-eat-dog hit exactly that: 10 tests
+          # failed on font rasterization against a 130-byte .ttf.
+          lfs: true
 
       - name: Install just
         uses: extractions/setup-just@v4
