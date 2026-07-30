@@ -1,0 +1,747 @@
+class_name CourseAudit
+extends RefCounted
+## Method A of the course-law harness: read the shipped geometry off the box metadata of a LIVE
+## `Slice` and hand `CourseSweep` numbers to apply the laws to. Takes a scene, so it is not pure
+## and does not belong in `scripts/logic/`; it is dev tooling, hence `scripts/dev/`.
+##
+## Two rules govern every extraction here.
+##
+## **Nothing is derived that the manifest states.** Wall and ramp classification is role-declared,
+## because a 3b recon child's own slope formula mislabelled yaw-only vertical walls as FLOOR and
+## the audit inherited a false map of its own course. Lane membership is declared for the same
+## reason: a lane read off a node-name suffix is a parse, not a measurement.
+##
+## **Nothing is assumed that can be read.** The capsule diameter comes off the player's own shape,
+## the erosion state off `apply_erosion()`, the shipped span off loop 0. `assert_setup()` is the
+## guard for the one failure mode none of that survives — a scene whose `_ready` never ran reports
+## the shipped size at every loop, confidently and wrongly.
+
+const DECL_PATH := "res://data/course_declarations.json"
+
+## Role lookup resolves against the body for the 155 single-`Col` bodies and against the collision
+## node for the 15 multi-shape aggregates (shells, prop clusters, the door frame) — issue #9. The
+## manifest's `"CBed1": {"role": "prop"}` is the second form.
+const COL_NAME := "Col"
+
+const ROLE_WALL := "ride_wall"
+const ROLE_RAMP := "surf_ramp"
+const ROLE_PROP := "prop"
+
+## Subtrees that are not course geometry: the player carries the capsule the laws measure against,
+## and the void wall is a moving hazard, not a surface anyone stands on.
+const SKIP_NODES: Array[String] = ["Player", "VoidWall"]
+
+## A box is wall-like when it stands taller than its own footprint. Slope alone cannot make this
+## call (a yaw-only wall has a level top face), and role alone cannot either — the shell ribs the
+## anti-skip cap is about are never declared, because declaring them would not make them
+## chainable.
+const WALL_ASPECT := 1.0
+
+## Respawn offsets along z — 5 samples reproducing 3b's "24 markers × 5 dz offsets". On z because
+## that is the axis the lanes split and the holes open along.
+const MARKER_OFFSETS: Array[float] = [0.0, -0.5, 0.5, -1.0, 1.0]
+
+var _slice: Slice
+var _manifest: Dictionary
+
+
+static func load_manifest(path := DECL_PATH) -> Dictionary:
+	var manifest := {"spans": {}, "surfaces": {}, "floors": {}, "landing_bands": []}
+	if not FileAccess.file_exists(path):
+		# A fresh checkout reports every span undeclared instead of crashing — that report is the
+		# authoring worklist, so an empty manifest is a legal state, not an error.
+		return manifest
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if parsed is not Dictionary:
+		return manifest
+	var source: Dictionary = parsed
+	for key in manifest:
+		if source.has(key):
+			manifest[key] = source[key]
+	return manifest
+
+
+func _init(slice: Slice, manifest: Dictionary = load_manifest()) -> void:
+	_slice = slice
+	_manifest = manifest
+
+
+func declarations() -> Dictionary:
+	return _manifest.get("spans", {}) as Dictionary
+
+
+## Non-empty when a read from this collector would not be evidence. The CLI and the GUT gate both
+## call it FIRST and abort on non-empty.
+func assert_setup() -> Array[String]:
+	var errors: Array[String] = []
+	if _slice == null:
+		errors.append("no slice")
+		return errors
+
+	if (_slice._erodable as Array).is_empty():
+		errors.append(
+			"the erodable cache is empty — `_ready` has not run, so every box reads its shipped "
+			+ "size at every loop"
+		)
+
+	var world_env := _slice.get_node_or_null("WorldEnvironment") as WorldEnvironment
+	if world_env == null or world_env.environment == null:
+		errors.append("no WorldEnvironment — `apply_erosion()` cannot complete")
+
+	var path := _slice.get_node_or_null("CoursePath") as Path3D
+	if path == null or path.curve == null or path.curve.get_baked_length() <= 0.0:
+		errors.append("the course curve has no baked length — no marker z can be resolved")
+
+	if _capsule_diameter() <= 0.0:
+		errors.append("the player capsule could not be read — every width law loses its unit")
+
+	return errors
+
+
+## Sets the loop count and re-applies erosion. Idempotent by `apply_erosion()`'s own contract:
+## every dimension is recomputed from the cached shipped geometry, never from the current size.
+func set_loop(loop: int) -> void:
+	_slice.loop_logic.loop_count = loop
+	_slice.apply_erosion()
+
+
+func survey_boxes(loop: int) -> Dictionary:
+	set_loop(loop)
+
+	var boxes := _collect_boxes()
+	var surfaces := _surfaces(boxes)
+	var floor_boxes := _floor_boxes(boxes, surfaces)
+	var spans := _spans(floor_boxes, boxes)
+	var floors := _floors(boxes)
+	var chasms := _chasms(floors, boxes)
+
+	return {
+		"method": "box",
+		"loop": loop,
+		# Fixed by construction from three counts that erosion cannot move: the boxes read, the
+		# floor surfaces each offered one successor, and the declared tiles examined. A count that
+		# drifts between loops means the probe window moved and no number from the run is evidence.
+		"sample_count": boxes.size() + floor_boxes.size() + _declared_tile_count(),
+		"capsule_diameter": _capsule_diameter(),
+		"surfaces": surfaces,
+		"spans": spans,
+		"walls": _walls(boxes),
+		"ramps": _ramps(boxes),
+		"chasms": chasms,
+		"markers": _markers(floor_boxes),
+		"floors": floors,
+		"props": _props(boxes, floors),
+		"landing_bands": _manifest.get("landing_bands", []) as Array,
+		"shell_runs": _shell_runs(boxes),
+	}
+
+
+# --- box collection --------------------------------------------------------------------------
+
+
+## One row per `BoxShape3D` collider in the course, with its role resolved and its world-space
+## extents already reduced to the numbers every family below needs. Read AFTER `apply_erosion()`.
+func _collect_boxes() -> Array[Dictionary]:
+	var boxes: Array[Dictionary] = []
+	for body in _bodies(_slice):
+		var cols: Array[CollisionShape3D] = []
+		for child in body.get_children():
+			var col := child as CollisionShape3D
+			if col != null and col.shape is BoxShape3D:
+				cols.append(col)
+		var aggregate := cols.size() > 1 or (cols.size() == 1 and cols[0].name != COL_NAME)
+		for col in cols:
+			var box_name := str(col.name) if aggregate else str(body.name)
+			boxes.append(_box_row(box_name, body, col, aggregate))
+	return boxes
+
+
+func _bodies(node: Node) -> Array[StaticBody3D]:
+	var bodies: Array[StaticBody3D] = []
+	for child in node.get_children():
+		if SKIP_NODES.has(str(child.name)):
+			continue
+		var body := child as StaticBody3D
+		if body != null:
+			bodies.append(body)
+		bodies.append_array(_bodies(child))
+	return bodies
+
+
+func _box_row(
+	box_name: String, body: StaticBody3D, col: CollisionShape3D, aggregate: bool
+) -> Dictionary:
+	var shape := col.shape as BoxShape3D
+	var basis := col.global_transform.basis
+	var centre := col.global_position
+	var size := shape.size
+	# Half-extents along the world axes, so a yaw-rotated box still reports the footprint it
+	# actually occupies rather than its local size.
+	var half := Vector3(
+		absf(basis.x.x * size.x) + absf(basis.y.x * size.y) + absf(basis.z.x * size.z),
+		absf(basis.x.y * size.x) + absf(basis.y.y * size.y) + absf(basis.z.y * size.z),
+		absf(basis.x.z * size.x) + absf(basis.y.z * size.y) + absf(basis.z.z * size.z),
+	) * 0.5
+
+	var up := basis.y.normalized()
+	return {
+		"name": box_name,
+		"body": str(body.name),
+		"role": str((_manifest.get("surfaces", {}) as Dictionary).get(box_name, {}).get("role", "")),
+		"aggregate": aggregate,
+		"erodable": body.is_in_group(Slice.EROSION_GROUP),
+		"size": size,
+		"level": up.dot(Vector3.UP) > 1.0 - CourseLaw.EPS,
+		"normal_y": up.y,
+		"top": centre.y + half.y,
+		"bottom": centre.y - half.y,
+		"x_min": centre.x - half.x,
+		"x_max": centre.x + half.x,
+		"z_min": centre.z - half.z,
+		"z_max": centre.z + half.z,
+		"basis": basis,
+	}
+
+
+func _capsule_diameter() -> float:
+	var player := _slice.get_node_or_null("Player") as CharacterBody3D
+	if player == null:
+		return 0.0
+	for child in player.get_children():
+		var col := child as CollisionShape3D
+		if col != null and col.shape is CapsuleShape3D:
+			return (col.shape as CapsuleShape3D).radius * 2.0
+	return 0.0
+
+
+# --- surfaces, walls, ramps, props ------------------------------------------------------------
+
+
+## The course's own surfaces: one row per single-`Col` body. The aggregates are reached through
+## `props` and the shell scan instead — issue #9. Erosion metadata lives on the body, and role is
+## a property of a surface, not of a collider.
+func _surfaces(boxes: Array[Dictionary]) -> Array[Dictionary]:
+	var surfaces: Array[Dictionary] = []
+	for row in boxes:
+		if bool(row["aggregate"]) or _is_wall(row) or not bool(row["level"]):
+			continue
+		var floors_map := _manifest.get("floors", {}) as Dictionary
+		var declared: Dictionary = (_manifest.get("surfaces", {}) as Dictionary).get(row["name"], {})
+		var surface := {
+			"name": row["name"],
+			"erodable": row["erodable"],
+			"perforated": _floor_of(str(row["name"]), floors_map) != "",
+			"supports": _supports(row, boxes),
+			"width": float((row["size"] as Vector3).x),
+		}
+		for key in ["role", "width_shrink"]:
+			if declared.has(key):
+				surface[key] = declared[key]
+		surfaces.append(surface)
+	return surfaces
+
+
+## Issue #19's query: does this shrink target carry anything? A scene-tree fact no review can be
+## trusted to see. A box counts as carried when it rests within `EPS` of this surface's top face
+## and its footprint overlaps in x and z.
+func _supports(surface: Dictionary, boxes: Array[Dictionary]) -> Array[String]:
+	var supports: Array[String] = []
+	if not bool(surface["erodable"]):
+		return supports
+	for row in boxes:
+		if row["name"] == surface["name"]:
+			continue
+		if absf(float(row["bottom"]) - float(surface["top"])) > CourseLaw.EPS:
+			continue
+		if not _overlaps(row, surface, "x_min", "x_max"):
+			continue
+		if not _overlaps(row, surface, "z_min", "z_max"):
+			continue
+		supports.append(str(row["name"]))
+	return supports
+
+
+func _is_wall(row: Dictionary) -> bool:
+	return str(row["role"]) == ROLE_WALL
+
+
+func _walls(boxes: Array[Dictionary]) -> Array[Dictionary]:
+	var walls: Array[Dictionary] = []
+	for row in boxes:
+		if not _is_wall(row):
+			continue
+		var size: Vector3 = row["size"]
+		walls.append({
+			"name": row["name"],
+			# The long horizontal axis: a ride runs along the wall, never up it.
+			"length": maxf(size.x, size.z),
+			"extent": size.y,
+			# The face normal is the wall's own short horizontal axis, so its y component is the
+			# basis column for that axis — level on an unrotated wall, which is what the ride gate
+			# (|normal.y| ≤ 0.2) is measured against.
+			"normal_y": _face_normal_y(row),
+		})
+	return walls
+
+
+func _ramps(boxes: Array[Dictionary]) -> Array[Dictionary]:
+	var ramps: Array[Dictionary] = []
+	for row in boxes:
+		if str(row["role"]) != ROLE_RAMP:
+			continue
+		var size: Vector3 = row["size"]
+		var up: Vector3 = (row["basis"] as Basis).y.normalized()
+		ramps.append({
+			"name": row["name"],
+			"angle_deg": rad_to_deg(acos(clampf(up.dot(Vector3.UP), -1.0, 1.0))),
+			# Along the sloped face, which is the box's own long horizontal axis in local space —
+			# the rotation is what turns that length into a climb.
+			"path_len": maxf(size.x, size.z),
+			"normal_y": up.y,
+		})
+	return ramps
+
+
+func _face_normal_y(row: Dictionary) -> float:
+	var size: Vector3 = row["size"]
+	var basis: Basis = row["basis"]
+	return (basis.x.normalized().y if size.x < size.z else basis.z.normalized().y)
+
+
+## Props block holes, so each collider carries its own z extent: a bed is one obstacle, not the
+## bounding box of the whole cluster it happens to be authored under.
+func _props(boxes: Array[Dictionary], floors: Array[Dictionary]) -> Array[Dictionary]:
+	var props: Array[Dictionary] = []
+	for row in boxes:
+		if str(row["role"]) != ROLE_PROP:
+			continue
+		props.append({
+			"name": row["name"],
+			"lane": _lane_at(floors, float(row["x_min"]), float(row["x_max"])),
+			"from": row["z_min"],
+			"to": row["z_max"],
+		})
+	return props
+
+
+## A prop belongs to the lane whose x footprint it overlaps; "" means every lane, which is the
+## conservative reading and the right one for a prop standing clear of any declared floor.
+func _lane_at(floors: Array[Dictionary], x_min: float, x_max: float) -> String:
+	for floor_row in floors:
+		for lane_row in floor_row["lanes"] as Array:
+			var lane: Dictionary = lane_row
+			if x_min < float(lane["x_max"]) and x_max > float(lane["x_min"]):
+				return str(lane["id"])
+	return ""
+
+
+# --- spans -----------------------------------------------------------------------------------
+
+
+## Floor tops in course order (−z). A declared wall or ramp is excluded, and so is anything
+## standing taller than its own footprint — the aspect test is what stops a yaw-only wall from
+## entering the span graph as a floor.
+func _floor_boxes(boxes: Array[Dictionary], surfaces: Array[Dictionary]) -> Array[Dictionary]:
+	var by_name := {}
+	for row in surfaces:
+		by_name[str(row["name"])] = true
+
+	var floor_boxes: Array[Dictionary] = []
+	for row in boxes:
+		if not by_name.has(str(row["name"])):
+			continue
+		var size: Vector3 = row["size"]
+		if size.y >= minf(size.x, size.z) * WALL_ASPECT:
+			continue
+		floor_boxes.append(row)
+	floor_boxes.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return float(a["z_max"]) > float(b["z_max"]))
+	return floor_boxes
+
+
+## Each floor surface offers exactly one successor: the nearest floor ahead along −z whose x
+## extent overlaps it. One candidate per surface keeps `sample_count` loop-invariant even though
+## erosion changes which candidates survive the filters.
+func _spans(floor_boxes: Array[Dictionary], boxes: Array[Dictionary]) -> Array[Dictionary]:
+	var spans: Array[Dictionary] = []
+	var floors_map := _manifest.get("floors", {}) as Dictionary
+	var marker_zs := _marker_zs()
+
+	for i in floor_boxes.size():
+		var near: Dictionary = floor_boxes[i]
+		var far := _successor(floor_boxes, i)
+		if far.is_empty():
+			continue
+
+		var length := float(near["z_min"]) - float(far["z_max"])
+		if length < CourseLaw.MIN_SPAN:
+			continue
+		# Two tiles of one logical floor are a seam, not a span — the perforation laws own them,
+		# and without this filter T8 would have to declare hundreds of degenerate spans.
+		var near_floor := _floor_of(str(near["name"]), floors_map)
+		if near_floor != "" and near_floor == _floor_of(str(far["name"]), floors_map):
+			continue
+
+		spans.append({
+			"id": "%s>%s" % [str(near["name"]), str(far["name"])],
+			"span": length,
+			"drop": float(near["top"]) - float(far["top"]),
+			"landing_width": float(far["x_max"]) - float(far["x_min"]),
+			"void_punished": _void_between(near, far, boxes),
+			"marker_break_before": _marker_between(marker_zs, near, far),
+		})
+	return spans
+
+
+func _successor(floor_boxes: Array[Dictionary], index: int) -> Dictionary:
+	var near: Dictionary = floor_boxes[index]
+	for j in range(index + 1, floor_boxes.size()):
+		var far: Dictionary = floor_boxes[j]
+		if float(far["z_max"]) > float(near["z_min"]) + CourseLaw.EPS:
+			continue
+		if not _overlaps(near, far, "x_min", "x_max"):
+			continue
+		return far
+	return {}
+
+
+## A gap is void-punished when nothing catches a short landing: no box reaching into the OPEN
+## interval between the two lips at or below lip height. A lower ledge makes the same gap a
+## mistake rather than a reset, and only the reset kind counts toward ruling #7's chain.
+##
+## The two endpoint surfaces are excluded explicitly. Without that they satisfy their own opening —
+## `near` starts at or before its own far edge and ends after `far`'s near edge — so every span in
+## the course read as caught and `void_punished` was false 78 times out of 78. A law that never
+## fires and a law that was never wired up are indistinguishable from the outside.
+func _void_between(near: Dictionary, far: Dictionary, boxes: Array[Dictionary]) -> bool:
+	var lip := minf(float(near["top"]), float(far["top"]))
+	for row in boxes:
+		if row["name"] == near["name"] or row["name"] == far["name"]:
+			continue
+		if float(row["top"]) > lip + CourseLaw.EPS:
+			continue
+		# Strictly inside the opening, at either end or across it.
+		if float(row["z_min"]) >= float(near["z_min"]) - CourseLaw.EPS:
+			continue
+		if float(row["z_max"]) <= float(far["z_max"]) + CourseLaw.EPS:
+			continue
+		if not _overlaps(near, row, "x_min", "x_max"):
+			continue
+		return false
+	return true
+
+
+func _marker_between(marker_zs: Array[float], near: Dictionary, far: Dictionary) -> bool:
+	for z in marker_zs:
+		if z <= float(near["z_min"]) + CourseLaw.EPS and z >= float(far["z_max"]) - CourseLaw.EPS:
+			return true
+	return false
+
+
+# --- markers ---------------------------------------------------------------------------------
+
+
+func _marker_zs() -> Array[float]:
+	var zs: Array[float] = []
+	for i in Slice.MARKER_PROGRESSES.size():
+		zs.append(_slice.respawn_position(i).z)
+	return zs
+
+
+## Every respawn point must stand up at every loop, at every offset. A marker over a hole is a
+## softlock, it passes every other gate, and the geometry under it is authored by later tasks
+## than the one that placed it.
+func _markers(floor_boxes: Array[Dictionary]) -> Array[Dictionary]:
+	var markers: Array[Dictionary] = []
+	for i in Slice.MARKER_PROGRESSES.size():
+		var at := _slice.respawn_position(i)
+		var hit := 0
+		for dz in MARKER_OFFSETS:
+			if _standable(floor_boxes, at.x, at.z + dz, at.y):
+				hit += 1
+		markers.append({
+			"index": i,
+			"z": at.z,
+			"offsets_hit": hit,
+			"offsets_total": MARKER_OFFSETS.size(),
+		})
+	return markers
+
+
+func _standable(floor_boxes: Array[Dictionary], x: float, z: float, y: float) -> bool:
+	for row in floor_boxes:
+		if float(row["top"]) > y + CourseLaw.EPS:
+			continue
+		if x < float(row["x_min"]) or x > float(row["x_max"]):
+			continue
+		if z < float(row["z_min"]) or z > float(row["z_max"]):
+			continue
+		return true
+	return false
+
+
+# --- perforated floors and chasms -------------------------------------------------------------
+
+
+## One row per declared logical floor, its lanes and the holes open in each at this loop. Hole
+## edges come from exact interval arithmetic on the tile boxes, never from a sampling grid: loop 0
+## must reproduce the shipped solid box to `EPS`, and a grid can only do that by luck of alignment.
+func _floors(boxes: Array[Dictionary]) -> Array[Dictionary]:
+	var by_name := {}
+	for row in boxes:
+		by_name[str(row["name"])] = row
+
+	var floors: Array[Dictionary] = []
+	for floor_id in (_manifest.get("floors", {}) as Dictionary):
+		var lanes_decl: Dictionary = (_manifest["floors"] as Dictionary)[floor_id]
+		var lanes: Array[Dictionary] = []
+		var solid := 0.0
+		var extent := 0.0
+		var floor_min := INF
+		var floor_max := -INF
+
+		for lane_id in lanes_decl:
+			var tiles: Array[Dictionary] = []
+			for tile_name in lanes_decl[lane_id] as Array:
+				if by_name.has(str(tile_name)):
+					tiles.append(by_name[str(tile_name)])
+			if tiles.is_empty():
+				continue
+			var lane := _lane(str(lane_id), tiles)
+			lanes.append(lane)
+			solid += float(lane["solid"])
+			extent += float(lane["to"]) - float(lane["from"])
+			floor_min = minf(floor_min, float(lane["from"]))
+			floor_max = maxf(floor_max, float(lane["to"]))
+
+		if lanes.is_empty():
+			continue
+		# Both measured live, and that is the point: the outer tiles pin the floor's outer edges,
+		# so the lane EXTENT is erosion-invariant by design while the solid metres inside it shrink.
+		# Comparing the two is therefore a real seam check at loop 0 rather than a value compared
+		# against a cached copy of itself — which is what a "shipped span" captured on the first
+		# survey would have been, in whatever loop order the caller happened to use.
+		floors.append({
+			"id": str(floor_id),
+			"lanes": lanes,
+			"from": floor_min,
+			"to": floor_max,
+			"solid_span": solid,
+			"shipped_span": extent,
+		})
+	return floors
+
+
+func _lane(lane_id: String, tiles: Array[Dictionary]) -> Dictionary:
+	tiles.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return float(a["z_max"]) > float(b["z_max"]))
+
+	var holes: Array[Dictionary] = []
+	var solid := 0.0
+	var x_min := INF
+	var x_max := -INF
+	for i in tiles.size():
+		var tile: Dictionary = tiles[i]
+		solid += float(tile["z_max"]) - float(tile["z_min"])
+		x_min = minf(x_min, float(tile["x_min"]))
+		x_max = maxf(x_max, float(tile["x_max"]))
+		if i + 1 >= tiles.size():
+			continue
+		var next: Dictionary = tiles[i + 1]
+		var opening := float(tile["z_min"]) - float(next["z_max"])
+		if opening > CourseLaw.EPS:
+			holes.append({
+				"from": float(tile["z_min"]),
+				"to": float(next["z_max"]),
+				"near_tile": str(tile["name"]),
+				"far_tile": str(next["name"]),
+			})
+
+	return {
+		"id": lane_id,
+		"holes": holes,
+		"solid": solid,
+		"x_min": x_min,
+		"x_max": x_max,
+		"from": float((tiles[tiles.size() - 1] as Dictionary)["z_min"]),
+		"to": float((tiles[0] as Dictionary)["z_max"]),
+	}
+
+
+## A chasm is a z range where EVERY lane of one floor is open at once — the floor parts edge to
+## edge and the only way across is a jump. The per-loop growth is measured from the opening rather
+## than read off the declaration, so a mis-authored seam cannot certify itself.
+func _chasms(floors: Array[Dictionary], boxes: Array[Dictionary]) -> Array[Dictionary]:
+	var chasms: Array[Dictionary] = []
+	var loop := _slice.loop_logic.loop_count
+
+	for floor_row in floors:
+		var lanes := floor_row["lanes"] as Array
+		if lanes.is_empty():
+			continue
+		var aligned := _aligned_openings(lanes)
+		for opening_row in aligned:
+			var opening: Dictionary = opening_row
+			var from := float(opening["from"])
+			var to := float(opening["to"])
+			var gap := from - to
+			if gap < CourseLaw.MIN_SPAN:
+				continue
+			chasms.append({
+				"id": str(opening["lips"]),
+				"gap": gap,
+				"per_loop": (gap / float(loop) if loop > 0 else 0.0),
+				"from": from,
+				"to": to,
+				"runout": _runout(lanes, to, boxes),
+				"full_width": true,
+			})
+	return chasms
+
+
+## Openings shared by every lane, intersected pairwise: an opening one lane does not have is a
+## staggered hole, and those answer to the telegraph law instead.
+func _aligned_openings(lanes: Array) -> Array[Dictionary]:
+	var shared: Array[Dictionary] = []
+	var first: Dictionary = lanes[0]
+	for hole_row in first["holes"] as Array:
+		var hole: Dictionary = hole_row
+		var from := float(hole["from"])
+		var to := float(hole["to"])
+		var in_all := true
+		for i in range(1, lanes.size()):
+			var lane: Dictionary = lanes[i]
+			var overlap := _hole_overlap(lane, from, to)
+			if overlap.is_empty():
+				in_all = false
+				break
+			from = minf(from, float(overlap["from"]))
+			to = maxf(to, float(overlap["to"]))
+		if in_all:
+			shared.append({"from": from, "to": to, "lips": _lips(lanes, from, to)})
+	return shared
+
+
+## Course order runs toward −z, so a hole's `from` is its near (greater) edge and `to` its far
+## (lesser) one. Two openings overlap when each starts before the other ends.
+func _hole_overlap(lane: Dictionary, from: float, to: float) -> Dictionary:
+	for hole_row in lane["holes"] as Array:
+		var hole: Dictionary = hole_row
+		if float(hole["to"]) < from - CourseLaw.EPS and float(hole["from"]) > to + CourseLaw.EPS:
+			return hole
+	return {}
+
+
+## Span ids read `<near>><far>`, so a chasm names the two tiles forming its lips. The reference is
+## the lane crossing x = 0 — every marker in this course sits in the middle lane, so that is the
+## line the id should describe.
+func _lips(lanes: Array, from: float, to: float) -> String:
+	var reference: Dictionary = lanes[0]
+	for lane_row in lanes:
+		var lane: Dictionary = lane_row
+		if float(lane["x_min"]) <= 0.0 and float(lane["x_max"]) >= 0.0:
+			reference = lane
+			break
+	var hole := _hole_overlap(reference, from, to)
+	if hole.is_empty():
+		return str(reference["id"])
+	return "%s>%s" % [str(hole["near_tile"]), str(hole["far_tile"])]
+
+
+## Full-width solid metres past the far lip. A chasm landing into a staggered hole is the issue
+## #23 compound trap, so the runout stops at the first z where any lane is open again.
+func _runout(lanes: Array, far_lip: float, boxes: Array[Dictionary]) -> float:
+	var end := far_lip
+	for lane_row in lanes:
+		var lane: Dictionary = lane_row
+		var lane_end := float(lane["from"])
+		for hole_row in lane["holes"] as Array:
+			var hole: Dictionary = hole_row
+			if float(hole["from"]) < far_lip - CourseLaw.EPS:
+				lane_end = maxf(lane_end, float(hole["from"]))
+		end = maxf(end, lane_end)
+	var solid := far_lip - end
+
+	# The floor may simply end; whatever continues past it counts only while it is full width.
+	for row in boxes:
+		if not bool(row["level"]):
+			continue
+		if absf(float(row["z_max"]) - end) > CourseLaw.EPS:
+			continue
+		solid += float(row["z_max"]) - float(row["z_min"])
+		break
+	return solid
+
+
+func _floor_of(surface_name: String, floors_map: Dictionary) -> String:
+	for floor_id in floors_map:
+		for lane_id in floors_map[floor_id] as Dictionary:
+			if (floors_map[floor_id][lane_id] as Array).has(surface_name):
+				return str(floor_id)
+	return ""
+
+
+func _declared_tile_count() -> int:
+	var count := 0
+	for floor_id in (_manifest.get("floors", {}) as Dictionary):
+		for lane_id in (_manifest["floors"] as Dictionary)[floor_id] as Dictionary:
+			count += ((_manifest["floors"] as Dictionary)[floor_id][lane_id] as Array).size()
+	return count
+
+
+# --- shell containment ------------------------------------------------------------------------
+
+
+## The anti-skip cap: the longest unbroken lateral wall run per side, so no wall-jump chain buys a
+## zone skip. Merged z intervals over every wall-like box on that side — no sampling grid, no
+## height band, no floor requirement (issue #11).
+##
+## Three properties, and each one is why the method is this and not a probe. It is **exact**, so
+## there is no window to drift and no step to alias against. It is **loop-invariant by
+## construction**, because a run can only lengthen if a wall resizes and no wall is tagged
+## erodable. And it is **conservative**: merging can only ever over-report a run, so it may raise a
+## false `shell_segment` finding but can never hide a real one — the correct direction of error for
+## a safety cap. 3b's two figures were both artifacts of a probe that had none of the three.
+func _shell_runs(boxes: Array[Dictionary]) -> Array[Dictionary]:
+	var runs: Array[Dictionary] = []
+	for side in ["+x", "-x"]:
+		runs.append({"side": side, "length": _longest_run(boxes, side)})
+	return runs
+
+
+func _longest_run(boxes: Array[Dictionary], side: String) -> float:
+	var spans: Array[Vector2] = []
+	for row in boxes:
+		var size: Vector3 = row["size"]
+		if size.y < minf(size.x, size.z) * WALL_ASPECT:
+			continue
+		var centre := (float(row["x_min"]) + float(row["x_max"])) * 0.5
+		if (centre >= 0.0) != (side == "+x"):
+			continue
+		spans.append(Vector2(float(row["z_min"]), float(row["z_max"])))
+	if spans.is_empty():
+		return 0.0
+
+	spans.sort_custom(func(a: Vector2, b: Vector2) -> bool: return a.x < b.x)
+	var longest := 0.0
+	var lo := spans[0].x
+	var hi := spans[0].y
+	for i in range(1, spans.size()):
+		# Walls that touch are one run: a chain does not care that two boxes authored it.
+		if spans[i].x <= hi + CourseLaw.EPS:
+			hi = maxf(hi, spans[i].y)
+			continue
+		longest = maxf(longest, hi - lo)
+		lo = spans[i].x
+		hi = spans[i].y
+	return maxf(longest, hi - lo)
+
+
+# --- shared ----------------------------------------------------------------------------------
+
+
+func _overlaps(a: Dictionary, b: Dictionary, min_key: String, max_key: String) -> bool:
+	return (
+		float(a[min_key]) < float(b[max_key]) - CourseLaw.EPS
+		and float(a[max_key]) > float(b[min_key]) + CourseLaw.EPS
+	)
