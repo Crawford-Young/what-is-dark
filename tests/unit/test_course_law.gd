@@ -211,3 +211,36 @@ func test_level_kick_span_law_from_issue_16() -> void:
 		CourseLaw.level_kick_span_ok(7.0, -2.0),
 		"a descending kick span is not the level law — it declares its drop"
 	)
+
+
+func test_landing_width_fail_floor_is_two_capsule_diameters() -> void:
+	assert_true(CourseLaw.landing_width_ok(1.6, 0.70), "D2's shipped 1.6 m plateau clears")
+	assert_true(CourseLaw.landing_width_ok(1.40, 0.70))
+	assert_false(CourseLaw.landing_width_ok(1.3, 0.70))
+
+
+func test_compound_case_fires_on_issue_23_strips() -> void:
+	for span in [8.0, 8.2, 8.3]:
+		assert_true(
+			CourseLaw.compound_landing(span, 1.6), "D2Strip at plateau: %s m onto 1.6 m" % span
+		)
+
+
+func test_compound_case_fires_on_issue_33_pad() -> void:
+	assert_true(CourseLaw.compound_landing(7.50, 4.0), "Sh5FloorA in")
+	assert_true(CourseLaw.compound_landing(7.85, 4.0), "Sh5FloorA out")
+
+
+func test_compound_case_is_silent_on_a_wide_landing() -> void:
+	assert_false(CourseLaw.compound_landing(8.3, 12.0))
+
+
+func test_compound_case_is_silent_on_a_short_gap() -> void:
+	assert_false(CourseLaw.compound_landing(6.5, 1.6))
+
+
+func test_compound_gap_threshold_is_derived_from_flat_reach() -> void:
+	assert_almost_eq(
+		CourseLaw.COMPOUND_GAP_FRACTION * CourseLaw.FLAT_REACH, 7.4756, 0.001,
+		"7.48 m — below both #33 gaps, above every rest-beat gap"
+	)
