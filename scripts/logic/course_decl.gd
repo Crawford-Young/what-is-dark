@@ -40,6 +40,12 @@ const REQUIRED_KEYS := {
 	"gate_deploy": ["sightline_m"],
 }
 
+## The one required key that cannot be authored at a desk, because it is a MEASUREMENT
+## (spec 5.1). The schema gate below still demands it, so an author is told what to go and
+## measure; `CourseSweep` downgrades its absence to a WARN rather than failing a course over a
+## datum nobody has taken yet. Named here so neither side carries a copy of the string.
+const MEASURED_EXIT_KEY := "exit_h_speed"
+
 ## Only a plain floor may erode. `marker_floor` is excluded DELIBERATELY: a shrinking respawn
 ## floor is the softlock class (issue #12, confirmed by 3b probe P3) — the player returns to a
 ## surface that no longer holds them and the loop cannot continue.
@@ -61,20 +67,26 @@ static func validate_span(id: String, decl: Dictionary) -> Array[String]:
 		if not decl.has(key):
 			errors.append('%s: %s declaration is missing "%s"' % [id, decl_name, key])
 
-	# A kicker restores the flat arc (issue #12), so there the exit speed IS horizontal. Any
-	# other ramp exit leaves the ground at an angle, and its horizontal component has to be
-	# measured rather than assumed.
-	if decl_name == "surf_transfer" and not bool(decl.get("kicker", true)):
-		if not decl.has("exit_h_speed"):
-			errors.append(
-				(
-					'%s: surf_transfer with "kicker": false must declare a measured '
-					+ '"exit_h_speed" — only a kicker makes the exit all horizontal'
-				)
-				% id
+	if measured_exit_missing(decl):
+		errors.append(
+			(
+				'%s: surf_transfer with "kicker": false must declare a measured '
+				+ '"%s" — only a kicker makes the exit all horizontal'
 			)
+			% [id, MEASURED_EXIT_KEY]
+		)
 
 	return errors
+
+
+## A kicker restores the flat arc (issue #12), so there the exit speed IS horizontal. Any other
+## ramp exit leaves the ground at an angle and its horizontal component has to be measured.
+static func measured_exit_missing(decl: Dictionary) -> bool:
+	return (
+		str(decl.get("decl", "")) == "surf_transfer"
+		and not bool(decl.get("kicker", true))
+		and not decl.has(MEASURED_EXIT_KEY)
+	)
 
 
 static func validate_surface(surface_name: String, surface: Dictionary) -> Array[String]:

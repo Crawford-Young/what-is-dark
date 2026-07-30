@@ -129,6 +129,22 @@ func test_a_measured_non_kicker_transfer_is_clean() -> void:
 	assert_eq(errors.size(), 0, _joined(errors))
 
 
+## The sweep needs to recognise this one demand apart from the rest, because its severity
+## differs: a missing measurement is a WARN there and a schema error here.
+func test_the_measured_exit_demand_is_separately_recognisable() -> void:
+	var bare := {"decl": "surf_transfer", "entry_speed": 11.0, "drop": 3.0, "factor": 0.9}
+	assert_false(CourseDecl.measured_exit_missing(bare), "no kicker key means no claim yet")
+	var declared: Dictionary = bare.duplicate()
+	declared["kicker"] = false
+	assert_true(CourseDecl.measured_exit_missing(declared))
+	declared[CourseDecl.MEASURED_EXIT_KEY] = 12.0
+	assert_false(CourseDecl.measured_exit_missing(declared))
+	assert_false(
+		CourseDecl.measured_exit_missing({"decl": "bare_run", "kicker": false}),
+		"the demand belongs to surf_transfer alone"
+	)
+
+
 func test_gate_deploy_is_reserved_and_asks_for_its_sightline() -> void:
 	var errors := CourseDecl.validate_span("s1", {"decl": "gate_deploy"})
 	assert_eq(errors.size(), 1, _joined(errors))
