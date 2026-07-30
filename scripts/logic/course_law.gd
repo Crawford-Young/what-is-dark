@@ -73,3 +73,88 @@ static func staggered_hole_length_ok(length: float, loop: int) -> bool:
 
 static func shell_segment_ok(length: float) -> bool:
 	return length <= MAX_UNBROKEN_SHELL + EPS
+
+
+const RAMP_MIN_DEG := 38.0  ## mirrors Player.FLOOR_LIMIT_DEG — shallower reads as floor.
+## Asserted equal in the test rather than referenced, so this module keeps no dependency
+## on a node script.
+const RAMP_TARGET_MIN_DEG := 45.0
+const RAMP_TARGET_MAX_DEG := 55.0
+const RAMP_PATH_MIN := 12.0  ## m of ramp path — T3 surf-table design floor
+const SURF_ETA := 0.95  ## design efficiency; clean ride 0.98-1.0, sloppy floor 0.92
+const SURF_TRANSFER_FACTOR_MAX := 0.9  ## T3: 0.85 on a chain's first run, 0.9 on the second
+const RIDE_EXTENT_MARGIN := 1.0
+## Issue #16's level press-kick reach, derived: airtime 2*8.63/35.2 = 0.4903 s at RUN_SPEED.
+const LEVEL_KICK_REACH := (
+	SourceMove.RUN_SPEED * 2.0 * WallrunLogic.WALL_JUMP_VY / SourceMove.GRAVITY
+)
+
+
+static func sink_over_ride(length: float, along_speed: float) -> float:
+	return absf(WallrunLogic.SINK_CAP) * length / along_speed
+
+
+static func required_wall_extent(entry_height: float, length: float, along_speed: float) -> float:
+	return entry_height + sink_over_ride(length, along_speed) + RIDE_EXTENT_MARGIN
+
+
+static func ride_extent_ok(
+	extent: float, entry_height: float, length: float, along_speed: float
+) -> bool:
+	return extent + EPS >= required_wall_extent(entry_height, length, along_speed)
+
+
+static func ride_entry_speed_ok(along_speed: float) -> bool:
+	return along_speed > WallrunLogic.MIN_FORWARD_SPEED
+
+
+static func ride_covers_span(wall_length: float, span: float) -> bool:
+	return wall_length + EPS >= span
+
+
+## T3 law: exit = eta * sqrt(v_in^2 + 2*g*drop). The table's 70.4 is 2*GRAVITY.
+static func surf_exit_speed(entry_speed: float, drop: float, eta: float = SURF_ETA) -> float:
+	return eta * sqrt(entry_speed * entry_speed + 2.0 * SourceMove.GRAVITY * drop)
+
+
+## Transfer gaps take the HORIZONTAL component, never total speed (spec 5.1). A kicker
+## restores the flat arc (issue #12), so there the two are equal; any other exit needs a
+## measured value, and the sweep WARNs when one is absent rather than guessing.
+static func exit_horizontal_speed(
+	exit_total: float, kicker_terminated: bool, declared_h: float
+) -> float:
+	return exit_total if kicker_terminated else declared_h
+
+
+static func transfer_span_ok(
+	span: float, exit_h_speed: float, factor: float = SURF_TRANSFER_FACTOR_MAX
+) -> bool:
+	return exit_h_speed * AIRTIME * factor + EPS >= span
+
+
+static func transfer_factor_ok(factor: float) -> bool:
+	return factor <= SURF_TRANSFER_FACTOR_MAX + EPS
+
+
+static func ramp_angle_ok(angle_deg: float) -> bool:
+	return angle_deg > RAMP_MIN_DEG + EPS
+
+
+static func ramp_in_target_band(angle_deg: float) -> bool:
+	return angle_deg >= RAMP_TARGET_MIN_DEG - EPS and angle_deg <= RAMP_TARGET_MAX_DEG + EPS
+
+
+static func ramp_path_ok(path_length: float) -> bool:
+	return path_length >= RAMP_PATH_MIN - EPS
+
+
+static func ramp_never_rideable(normal_y: float) -> bool:
+	return absf(normal_y) > WallrunLogic.RIDE_MAX_NORMAL_Y
+
+
+## drop is negative when the far lip sits BELOW the kick. Only the level case has a
+## measured law; a descending span is legal and audited by its declared drop.
+static func level_kick_span_ok(span: float, drop: float) -> bool:
+	if drop < -EPS:
+		return true
+	return span <= LEVEL_KICK_REACH + EPS
