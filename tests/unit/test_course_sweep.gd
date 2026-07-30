@@ -468,6 +468,191 @@ func test_the_width_floor_reads_the_surveyed_capsule_not_a_constant() -> void:
 	)
 
 
+# --- perforation invariants ---------------------------------------------------------------
+#
+# Every law here is an invariant E4/E5/E6 established by hand and nothing has enforced since.
+# The floors below use THREE lanes, because a hole on a two-lane floor always leaves one solid
+# lane and so always trips `viable_lines` — see the two-lane case for that, deliberately.
+
+
+func _lane(lane_id: String, holes: Array) -> Dictionary:
+	return {"id": lane_id, "holes": holes}
+
+
+func _hole(from: float, to: float) -> Dictionary:
+	return {"from": from, "to": to}
+
+
+func _floor(lanes: Array, shipped := 90.0, solid := 90.0) -> Dictionary:
+	return {"id": "D6Floor", "shipped_span": shipped, "solid_span": solid, "lanes": lanes}
+
+
+## Three staggered 1 m holes: legal at loop 1, and the fixture every placement case builds on.
+func _staggered_lanes(length: float) -> Array:
+	return [
+		_lane("L", [_hole(-10.0, -10.0 + length)]),
+		_lane("M", [_hole(-20.0, -20.0 + length)]),
+		_lane("R", [_hole(-30.0, -30.0 + length)]),
+	]
+
+
+func test_a_broken_seam_in_the_shipped_course_fails_at_loop_zero() -> void:
+	var survey := _survey({"floors": [_floor([_lane("L", []), _lane("M", [])], 90.0, 89.0)]})
+	var findings := CourseSweep.sweep(survey, {})
+	assert_eq(_laws(findings), ["contiguity"] as Array[String])
+	assert_true(String(findings[0]["detail"]).contains("89"), String(findings[0]["detail"]))
+
+
+func test_an_intact_loop_zero_floor_is_silent() -> void:
+	var survey := _survey({"floors": [_floor([_lane("L", []), _lane("M", [])])]})
+	assert_eq(CourseSweep.sweep(survey, {}).size(), 0, "loop 0 has no holes by definition")
+
+
+func test_contiguity_is_a_loop_zero_law_only() -> void:
+	var survey := _survey({
+		"loop": 3,
+		"floors": [_floor(_staggered_lanes(3.0), 90.0, 81.0)],
+	})
+	var laws := _laws(CourseSweep.sweep(survey, {}))
+	assert_false(laws.has("contiguity"), "erosion is SUPPOSED to remove solid span after loop 0")
+	assert_eq(laws.size(), 0, "\n".join(laws))
+
+
+func test_a_hole_free_lane_at_a_shrunk_loop_is_a_bypass() -> void:
+	var lanes := [
+		_lane("L", [_hole(-10.0, -9.0)]),
+		_lane("M", [_hole(-20.0, -19.0)]),
+		_lane("R", []),
+	]
+	var findings := CourseSweep.sweep(_survey({"loop": 1, "floors": [_floor(lanes)]}), {})
+	assert_eq(_laws(findings), ["hole_free_lane"] as Array[String])
+	assert_true(String(findings[0]["detail"]).contains("R"), String(findings[0]["detail"]))
+
+
+func test_every_lane_carrying_a_hole_is_silent() -> void:
+	var survey := _survey({"loop": 1, "floors": [_floor(_staggered_lanes(1.0))]})
+	assert_eq(CourseSweep.sweep(survey, {}).size(), 0)
+
+
+func test_a_hole_whose_length_does_not_telegraph_the_loop_fails() -> void:
+	var lanes := _staggered_lanes(3.0)
+	lanes[0] = _lane("L", [_hole(-10.0, -9.0)])
+	var findings := CourseSweep.sweep(_survey({"loop": 3, "floors": [_floor(lanes)]}), {})
+	assert_eq(_laws(findings), ["staggered_telegraph"] as Array[String])
+	assert_true(
+		String(findings[0]["detail"]).contains("1.00"),
+		"the finding must quote the length it measured"
+	)
+
+
+## A hole that is part of a chasm seam follows the chasm growth law, not the telegraph
+## convention — 1.5 m per loop, aligned across every lane, which is the whole point of a chasm.
+func test_a_chasm_seam_is_exempt_from_the_telegraph_and_the_lane_law() -> void:
+	var lanes := [
+		_lane("L", [_hole(-104.5, -100.0)]),
+		_lane("M", [_hole(-104.5, -100.0)]),
+		_lane("R", [_hole(-104.5, -100.0)]),
+	]
+	var survey := _survey({
+		"loop": 3,
+		"floors": [_floor(lanes, 90.0, 85.5)],
+		"chasms": [{
+			"id": "A>B", "per_loop": 1.5, "gap": 4.5, "runout": 3.4, "full_width": true,
+			"from": -104.5, "to": -100.0,
+		}],
+	})
+	assert_eq(CourseSweep.sweep(survey, {}).size(), 0)
+
+
+func test_aligned_holes_leave_no_viable_line() -> void:
+	var lanes := [
+		_lane("L", [_hole(-10.0, -8.0)]),
+		_lane("M", [_hole(-10.0, -8.0)]),
+		_lane("R", [_hole(-10.0, -8.0)]),
+	]
+	var findings := CourseSweep.sweep(_survey({"loop": 2, "floors": [_floor(lanes)]}), {})
+	assert_eq(_laws(findings), ["viable_lines"] as Array[String])
+	assert_eq(String(findings[0]["severity"]), "FAIL")
+
+
+func test_a_single_lane_floor_is_skipped_not_failed() -> void:
+	var survey := _survey({"loop": 1, "floors": [_floor([_lane("L", [_hole(-10.0, -9.0)])])]})
+	assert_eq(
+		CourseSweep.sweep(survey, {}).size(),
+		0,
+		"the law is unsatisfiable on one lane, and such a floor is not a perforation grid"
+	)
+
+
+## Consequence of the law, worth pinning: perforation needs THREE lanes. On two lanes any hole
+## leaves a single solid line, so `viable_lines` fires on every hole — one finding per hole.
+func test_a_two_lane_floor_cannot_be_perforated_and_stay_fair() -> void:
+	var lanes := [_lane("L", [_hole(-10.0, -9.0)]), _lane("M", [_hole(-20.0, -19.0)])]
+	var findings := CourseSweep.sweep(_survey({"loop": 1, "floors": [_floor(lanes)]}), {})
+	assert_eq(_laws(findings), ["viable_lines", "viable_lines"] as Array[String])
+
+
+func test_a_hole_opening_under_a_prop_fails() -> void:
+	var survey := _survey({
+		"loop": 1,
+		"floors": [_floor(_staggered_lanes(1.0))],
+		"props": [{"name": "CBed1", "from": -9.5, "to": -8.0, "lane": "L"}],
+	})
+	var findings := CourseSweep.sweep(survey, {})
+	assert_eq(_laws(findings), ["hole_over_prop"] as Array[String])
+	assert_true(String(findings[0]["detail"]).contains("CBed1"), String(findings[0]["detail"]))
+
+
+func test_a_prop_in_another_lane_is_not_over_the_hole() -> void:
+	var survey := _survey({
+		"loop": 1,
+		"floors": [_floor(_staggered_lanes(1.0))],
+		"props": [{"name": "CBed1", "from": -9.5, "to": -8.0, "lane": "R"}],
+	})
+	assert_eq(CourseSweep.sweep(survey, {}).size(), 0, "a hole only threatens its own lane")
+
+
+func test_a_hole_opening_under_a_declared_landing_band_fails() -> void:
+	var survey := _survey({
+		"loop": 1,
+		"floors": [_floor(_staggered_lanes(1.0))],
+		"landing_bands": [{"id": "D4RampOut", "from": -20.5, "to": -18.0, "lane": "M"}],
+	})
+	var findings := CourseSweep.sweep(survey, {})
+	assert_eq(_laws(findings), ["hole_over_prop"] as Array[String])
+	assert_true(String(findings[0]["detail"]).contains("D4RampOut"), String(findings[0]["detail"]))
+
+
+## A marker has no lane: a respawn point over a hole is a softlock in whichever lane it opens.
+func test_a_hole_opening_under_a_respawn_marker_fails() -> void:
+	var survey := _survey({
+		"loop": 1,
+		"floors": [_floor(_staggered_lanes(1.0))],
+		"markers": [{"index": 5, "offsets_hit": 5, "offsets_total": 5, "z": -9.2}],
+	})
+	var findings := CourseSweep.sweep(survey, {})
+	assert_eq(_laws(findings), ["hole_over_prop"] as Array[String])
+	assert_true(String(findings[0]["detail"]).contains("marker"), String(findings[0]["detail"]))
+
+
+func test_an_erodable_surface_may_not_carry_anything() -> void:
+	var survey := _survey({
+		"surfaces": [
+			{"name": "D2StripA", "role": "floor", "erodable": true, "supports": ["CBed1"]}
+		],
+	})
+	var findings := CourseSweep.sweep(survey, {})
+	assert_eq(_laws(findings), ["shrink_target_carries"] as Array[String])
+	assert_true(String(findings[0]["detail"]).contains("CBed1"), String(findings[0]["detail"]))
+
+
+func test_a_static_surface_may_carry_freely() -> void:
+	var survey := _survey({
+		"surfaces": [{"name": "Sh1FloorA", "role": "floor", "supports": ["CBed1", "CDesk2"]}],
+	})
+	assert_eq(CourseSweep.sweep(survey, {}).size(), 0, "only a SHRINKING target is the hazard")
+
+
 # --- two-method disagreement --------------------------------------------------------------
 
 
