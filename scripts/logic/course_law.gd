@@ -158,3 +158,25 @@ static func level_kick_span_ok(span: float, drop: float) -> bool:
 	if drop < -EPS:
 		return true
 	return span <= LEVEL_KICK_REACH + EPS
+
+
+## Issue #23's standing remediation: gap and width are audited JOINTLY, because the
+## compound case is what kills. Neither half fails alone — an 8.3 m gap is legal (under
+## FLAT_REACH) and a 1.6 m strip is legal (over the capsule floor); landing one on the
+## other at plateau is the case that needs a human ruling. Hence WARN, not FAIL.
+const COMPOUND_GAP_FRACTION := 0.9  ## of FLAT_REACH = 7.48 m
+const COMPOUND_WIDTH_MAX := 5.0  ## m of landing width
+const LANDING_WIDTH_CAPSULE_FACTOR := 2.0
+
+
+## The hard floor: a landing narrower than two capsule diameters is not a landing.
+## capsule_diameter is READ from the player scene by the collector, never hardcoded.
+static func landing_width_ok(width: float, capsule_diameter: float) -> bool:
+	return width + EPS >= LANDING_WIDTH_CAPSULE_FACTOR * capsule_diameter
+
+
+static func compound_landing(span: float, landing_width: float) -> bool:
+	return (
+		span >= COMPOUND_GAP_FRACTION * FLAT_REACH - EPS
+		and landing_width <= COMPOUND_WIDTH_MAX + EPS
+	)
