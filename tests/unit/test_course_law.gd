@@ -102,6 +102,112 @@ func test_method_tolerance_is_not_eps() -> void:
 		"a box read and a 0.05 m ray grid cannot agree to 1 mm"
 	)
 
-# test_ramp_min_deg_mirrors_the_engine_floor_limit lands at T2 with RAMP_MIN_DEG itself:
-# a reference to a missing const on a KNOWN class is a parse error, not a failed assert,
-# so it would drop this whole script rather than showing one red case. See issue #5.
+func test_ramp_min_deg_mirrors_the_engine_floor_limit() -> void:
+	assert_almost_eq(CourseLaw.RAMP_MIN_DEG, Player.FLOOR_LIMIT_DEG, 0.0001)
+
+
+func test_sink_over_ride_uses_the_shipped_sink_cap() -> void:
+	assert_almost_eq(
+		CourseLaw.sink_over_ride(18.0, 11.0),
+		absf(WallrunLogic.SINK_CAP) * 18.0 / 11.0,
+		0.000001
+	)
+	assert_almost_eq(CourseLaw.sink_over_ride(10.0, 11.0), 1.818, 0.001)
+
+
+func test_required_wall_extent_is_entry_plus_sink_plus_margin() -> void:
+	assert_almost_eq(
+		CourseLaw.required_wall_extent(CourseLaw.JUMP_APEX, 10.0, 11.0), 5.327, 0.01
+	)
+
+
+func test_ride_extent_gate() -> void:
+	assert_true(CourseLaw.ride_extent_ok(8.0, CourseLaw.JUMP_APEX, 18.0, 11.0))
+	assert_false(CourseLaw.ride_extent_ok(6.0, CourseLaw.JUMP_APEX, 18.0, 11.0))
+
+
+func test_ride_entry_speed_gate_mirrors_min_forward_speed() -> void:
+	assert_true(CourseLaw.ride_entry_speed_ok(4.1))
+	assert_false(CourseLaw.ride_entry_speed_ok(WallrunLogic.MIN_FORWARD_SPEED))
+
+
+func test_ride_must_cover_the_whole_span() -> void:
+	assert_true(CourseLaw.ride_covers_span(9.0, 8.5))
+	assert_false(CourseLaw.ride_covers_span(8.0, 8.5))
+
+
+func test_level_kick_reach_is_derived_not_copied() -> void:
+	assert_almost_eq(
+		CourseLaw.LEVEL_KICK_REACH,
+		SourceMove.RUN_SPEED * 2.0 * WallrunLogic.WALL_JUMP_VY / SourceMove.GRAVITY,
+		0.000001
+	)
+	assert_almost_eq(CourseLaw.LEVEL_KICK_REACH, 5.39375, 0.0001)
+
+
+func test_surf_exit_speed_matches_the_t3_law() -> void:
+	assert_almost_eq(CourseLaw.surf_exit_speed(11.0, 3.0), 17.315, 0.01)
+	assert_almost_eq(CourseLaw.surf_exit_speed(17.31, 3.0), 21.472, 0.01)
+	assert_almost_eq(
+		CourseLaw.surf_exit_speed(11.0, 3.0, 1.0),
+		sqrt(11.0 * 11.0 + 2.0 * SourceMove.GRAVITY * 3.0),
+		0.000001
+	)
+
+
+func test_kicker_terminated_exit_is_all_horizontal() -> void:
+	assert_almost_eq(CourseLaw.exit_horizontal_speed(17.31, true, 0.0), 17.31, 0.0001)
+
+
+func test_non_kicker_exit_uses_the_declared_measured_horizontal() -> void:
+	assert_almost_eq(CourseLaw.exit_horizontal_speed(17.31, false, 12.0), 12.0, 0.0001)
+
+
+func test_transfer_span_carries_the_t3_safety_factor() -> void:
+	# Exact boundary at a 17.31 m/s horizontal exit: 17.31 * 0.7551136 * 0.9 = 11.7639 m.
+	assert_true(CourseLaw.transfer_span_ok(11.76, 17.31, 0.9))
+	assert_false(
+		CourseLaw.transfer_span_ok(11.8, 17.31, 0.9),
+		"spec 5.1's illustrative 11.8 m rounds 0.04 m PAST its own stated rule — issue #7"
+	)
+	assert_false(
+		CourseLaw.transfer_span_ok(13.0, 17.31, 0.9),
+		"13.07 m is v*AIRTIME with no factor — the measured law forbids it"
+	)
+
+
+func test_transfer_factor_ceiling() -> void:
+	assert_true(CourseLaw.transfer_factor_ok(0.85))
+	assert_true(CourseLaw.transfer_factor_ok(0.9))
+	assert_false(CourseLaw.transfer_factor_ok(0.95))
+
+
+func test_ramp_angle_must_be_steeper_than_the_floor_limit() -> void:
+	assert_false(CourseLaw.ramp_angle_ok(38.0))
+	assert_true(CourseLaw.ramp_angle_ok(45.31))
+
+
+func test_ramp_target_band_is_forty_five_to_fifty_five() -> void:
+	assert_true(CourseLaw.ramp_in_target_band(45.31))
+	assert_true(CourseLaw.ramp_in_target_band(51.34))
+	assert_false(CourseLaw.ramp_in_target_band(44.0))
+	assert_false(CourseLaw.ramp_in_target_band(56.0))
+
+
+func test_ramp_path_floor_is_twelve_metres() -> void:
+	assert_true(CourseLaw.ramp_path_ok(12.65))
+	assert_false(CourseLaw.ramp_path_ok(11.9))
+
+
+func test_ramp_normal_must_never_be_rideable() -> void:
+	assert_true(CourseLaw.ramp_never_rideable(cos(deg_to_rad(51.34))))
+	assert_false(CourseLaw.ramp_never_rideable(0.1))
+
+
+func test_level_kick_span_law_from_issue_16() -> void:
+	assert_true(CourseLaw.level_kick_span_ok(5.0, 0.0))
+	assert_false(CourseLaw.level_kick_span_ok(7.0, 0.0))
+	assert_true(
+		CourseLaw.level_kick_span_ok(7.0, -2.0),
+		"a descending kick span is not the level law — it declares its drop"
+	)
