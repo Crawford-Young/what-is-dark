@@ -24,6 +24,7 @@ static func sweep(survey: Dictionary, declarations: Dictionary) -> Array[Diction
 	findings.append_array(_sweep_ramps(survey))
 	findings.append_array(_sweep_chasms(survey))
 	findings.append_array(_sweep_markers(survey))
+	findings.append_array(_sweep_floors(survey))
 	findings.append_array(_sweep_shell(survey))
 	return findings
 
@@ -101,6 +102,23 @@ static func _sweep_surfaces(survey: Dictionary) -> Array[Dictionary]:
 		var surface_name := str(surface.get("name", "<unnamed>"))
 		for error in CourseDecl.validate_surface(surface_name, surface):
 			findings.append(_finding(survey, "surface_declaration", surface_name, error))
+
+		# Section 4.0.3's second obligation, and issue #19's finding: "does this shrink target
+		# carry anything?" is a scene-tree query, not something a review can be trusted to see.
+		if bool(surface.get("erodable", false)):
+			var supports := _rows(surface, "supports")
+			if not supports.is_empty():
+				findings.append(
+					_finding(
+						survey,
+						"shrink_target_carries",
+						surface_name,
+						(
+							"shrinks while carrying %s — the load has nowhere to go"
+							% ", ".join(supports)
+						)
+					)
+				)
 	return findings
 
 
@@ -592,6 +610,254 @@ static func _sweep_markers(survey: Dictionary) -> Array[Dictionary]:
 				)
 			)
 	return findings
+
+
+## Perforation invariants. Loop 0 is the shipped course and must be seamless; every later loop
+## must stay crossable, readable, and clear of everything that has to stay standable.
+static func _sweep_floors(survey: Dictionary) -> Array[Dictionary]:
+	var findings: Array[Dictionary] = []
+	var loop := int(survey.get("loop", 0))
+	var seams := _chasm_ranges(survey)
+	var blockers := _hole_blockers(survey)
+
+	for row in _rows(survey, "floors"):
+		var floor_row: Dictionary = row
+		var id := str(floor_row.get("id", "<unnamed>"))
+		var lanes := _rows(floor_row, "lanes")
+
+		# A tile's size and position may only change as a pair that preserves the seam. A broken
+		# seam opens a hole in the SHIPPED course, the one thing loop 0 must never contain.
+		if loop == 0:
+			var shipped := float(floor_row.get("shipped_span", 0.0))
+			var solid := float(floor_row.get("solid_span", 0.0))
+			if absf(solid - shipped) > CourseLaw.EPS:
+				findings.append(
+					_finding(
+						survey,
+						"contiguity",
+						id,
+						(
+							"%.2f m solid against a %.2f m shipped span — the seam is broken"
+							% [solid, shipped]
+						)
+					)
+				)
+
+		for lane_row in lanes:
+			var lane: Dictionary = lane_row
+			var lane_id := str(lane.get("id", "?"))
+			var holes := _rows(lane, "holes")
+
+			if loop > 0 and holes.is_empty():
+				findings.append(
+					_finding(
+						survey,
+						"hole_free_lane",
+						"%s lane %s" % [id, lane_id],
+						"carries no hole at loop %d — a hole-free lane is a hold-W bypass" % loop
+					)
+				)
+
+			for hole_row in holes:
+				var hole: Dictionary = hole_row
+				var from := minf(float(hole.get("from", 0.0)), float(hole.get("to", 0.0)))
+				var to := maxf(float(hole.get("from", 0.0)), float(hole.get("to", 0.0)))
+
+				# A hole that is part of a chasm seam answers to the chasm growth law instead:
+				# 1.5 m per loop, aligned across every lane, which is what a chasm IS.
+				if not _overlaps_any(seams, from, to):
+					if not CourseLaw.staggered_hole_length_ok(to - from, loop):
+						findings.append(
+							_finding(
+								survey,
+								"staggered_telegraph",
+								"%s lane %s" % [id, lane_id],
+								(
+									"%.2f m hole at loop %d; the convention reads %.2f m"
+									% [to - from, loop, CourseLaw.STAGGERED_GROWTH * float(loop)]
+								)
+							)
+						)
+
+				for blocker_row in blockers:
+					var blocker: Dictionary = blocker_row
+					var blocker_lane := str(blocker["lane"])
+					if blocker_lane != "" and blocker_lane != lane_id:
+						continue
+					if from > float(blocker["to"]) + CourseLaw.EPS:
+						continue
+					if to < float(blocker["from"]) - CourseLaw.EPS:
+						continue
+					findings.append(
+						_finding(
+							survey,
+							"hole_over_prop",
+							"%s lane %s" % [id, lane_id],
+							(
+								"opens %.2f..%.2f under %s %s"
+								% [from, to, str(blocker["kind"]), str(blocker["name"])]
+							)
+						)
+					)
+
+		# The law is unsatisfiable on one lane, and a one-lane floor is not a perforation grid.
+		if lanes.size() >= 2:
+			findings.append_array(_sweep_viable_lines(survey, id, lanes, seams))
+
+	return findings
+
+
+## At least two lanes must stay solid at every z, so there is a line to pick. Evaluated at the
+## midpoint of every interval between hole edges: holes are ranges, and any z where the count
+## drops is inside one of those intervals.
+static func _sweep_viable_lines(
+	survey: Dictionary, id: String, lanes: Array, seams: Array
+) -> Array[Dictionary]:
+	var findings: Array[Dictionary] = []
+
+	var edges: Array[float] = []
+	for lane_row in lanes:
+		for hole_row in _rows(lane_row, "holes"):
+			var hole: Dictionary = hole_row
+			edges.append(minf(float(hole.get("from", 0.0)), float(hole.get("to", 0.0))))
+			edges.append(maxf(float(hole.get("from", 0.0)), float(hole.get("to", 0.0))))
+	if edges.size() < 2:
+		return findings
+	edges.sort()
+
+	# Contiguous offending intervals merge into one finding: they are one unbroken stretch of
+	# course with no line through it, and reporting each slice separately reads as several.
+	var open_from := 0.0
+	var open_to := 0.0
+	var worst := lanes.size()
+	var offending := false
+
+	for i in edges.size() - 1:
+		var lo := edges[i]
+		var hi := edges[i + 1]
+		if hi - lo <= CourseLaw.EPS:
+			continue
+
+		var mid := (lo + hi) * 0.5
+		var solid := 0
+		if not _covers_any(seams, mid):
+			for lane_row in lanes:
+				if not _lane_open_at(lane_row, mid):
+					solid += 1
+
+		if _covers_any(seams, mid) or solid >= 2:
+			if offending:
+				findings.append(_viable_finding(survey, id, open_from, open_to, worst, lanes))
+				offending = false
+			continue
+
+		if offending and absf(lo - open_to) <= CourseLaw.EPS:
+			open_to = hi
+			worst = mini(worst, solid)
+		else:
+			if offending:
+				findings.append(_viable_finding(survey, id, open_from, open_to, worst, lanes))
+			open_from = lo
+			open_to = hi
+			worst = solid
+			offending = true
+
+	if offending:
+		findings.append(_viable_finding(survey, id, open_from, open_to, worst, lanes))
+
+	return findings
+
+
+static func _viable_finding(
+	survey: Dictionary, id: String, from: float, to: float, solid: int, lanes: Array
+) -> Dictionary:
+	return _finding(
+		survey,
+		"viable_lines",
+		id,
+		(
+			"%.2f..%.2f leaves %d of %d lanes solid; two must stay"
+			% [from, to, solid, lanes.size()]
+		)
+	)
+
+
+static func _lane_open_at(lane_row: Dictionary, z: float) -> bool:
+	for hole_row in _rows(lane_row, "holes"):
+		var hole: Dictionary = hole_row
+		var from := minf(float(hole.get("from", 0.0)), float(hole.get("to", 0.0)))
+		var to := maxf(float(hole.get("from", 0.0)), float(hole.get("to", 0.0)))
+		if z > from - CourseLaw.EPS and z < to + CourseLaw.EPS:
+			return true
+	return false
+
+
+## Everything a hole may not open under. Props and landing bands belong to a lane; a marker does
+## not, because a respawn point over a hole is a softlock in whichever lane it opens.
+static func _hole_blockers(survey: Dictionary) -> Array[Dictionary]:
+	var blockers: Array[Dictionary] = []
+
+	for row in _rows(survey, "props"):
+		var prop: Dictionary = row
+		blockers.append({
+			"kind": "prop",
+			"name": str(prop.get("name", "?")),
+			"lane": str(prop.get("lane", "")),
+			"from": minf(float(prop.get("from", 0.0)), float(prop.get("to", 0.0))),
+			"to": maxf(float(prop.get("from", 0.0)), float(prop.get("to", 0.0))),
+		})
+
+	for row in _rows(survey, "landing_bands"):
+		var band: Dictionary = row
+		blockers.append({
+			"kind": "landing band",
+			"name": str(band.get("id", "?")),
+			"lane": str(band.get("lane", "")),
+			"from": minf(float(band.get("from", 0.0)), float(band.get("to", 0.0))),
+			"to": maxf(float(band.get("from", 0.0)), float(band.get("to", 0.0))),
+		})
+
+	for row in _rows(survey, "markers"):
+		var marker: Dictionary = row
+		var z := float(marker.get("z", 0.0))
+		blockers.append({
+			"kind": "respawn",
+			"name": "marker %d" % int(marker.get("index", -1)),
+			"lane": "",
+			"from": z,
+			"to": z,
+		})
+
+	return blockers
+
+
+static func _chasm_ranges(survey: Dictionary) -> Array:
+	var ranges: Array[Dictionary] = []
+	for row in _rows(survey, "chasms"):
+		var chasm: Dictionary = row
+		if not (chasm.has("from") and chasm.has("to")):
+			continue
+		ranges.append({
+			"from": minf(float(chasm["from"]), float(chasm["to"])),
+			"to": maxf(float(chasm["from"]), float(chasm["to"])),
+		})
+	return ranges
+
+
+static func _overlaps_any(ranges: Array, from: float, to: float) -> bool:
+	for row in ranges:
+		var span: Dictionary = row
+		if from < float(span["to"]) + CourseLaw.EPS and to > float(span["from"]) - CourseLaw.EPS:
+			return true
+	return false
+
+
+static func _covers_any(ranges: Array, z: float) -> bool:
+	for row in ranges:
+		var span: Dictionary = row
+		if z > float(span["from"]) - CourseLaw.EPS and z < float(span["to"]) + CourseLaw.EPS:
+			return true
+	return false
 
 
 static func _sweep_shell(survey: Dictionary) -> Array[Dictionary]:
