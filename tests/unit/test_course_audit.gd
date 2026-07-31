@@ -411,3 +411,29 @@ func test_erosion_never_touches_a_wall_or_a_ramp() -> void:
 	assert_gt(erodable.size(), 0, "the fixture must see the erosion group at all")
 	for name_of in ["Sh2RideL", "Sh2Ramp"]:
 		assert_false(erodable.has(name_of), "%s must never erode" % name_of)
+
+
+## The baseline gate — builds the SAME deduped `law:subject` key set the CLI builds, including
+## disagreements at every loop, against the real manifest (not the fixture). RED until T8 declares
+## the course and T9 authors the baseline; do not weaken.
+func test_audit_findings_match_the_pinned_baseline() -> void:
+	var audit := CourseAudit.new(_slice)
+	assert_eq(audit.assert_setup(), [] as Array[String])
+	var declarations := audit.declarations()
+	var keys: Array[String] = []
+	for loop in ErosionLogic.PLATEAU_LOOP + 1:
+		var box := audit.survey_boxes(loop)
+		var ray: Dictionary = await audit.survey_rays(loop)
+		var findings: Array[Dictionary] = []
+		for survey in [box, ray]:
+			assert_gt(int(survey["sample_count"]), 0, "empty pass at loop %d" % loop)
+			findings.append_array(CourseSweep.sweep(survey, declarations))
+		findings.append_array(audit.disagreements(box, ray))
+		for f in findings:
+			var key := "%s:%s" % [f["law"], f["subject"]]
+			if not keys.has(key):
+				keys.append(key)
+	keys.sort()
+	var baseline: Array[String] = CourseAudit.BASELINE_FINDINGS.duplicate()
+	baseline.sort()
+	assert_eq(keys, baseline, "a NEW finding fails the gate; the baselined ones do not")
