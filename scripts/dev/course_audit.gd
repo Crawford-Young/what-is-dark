@@ -41,8 +41,16 @@ const WALL_ASPECT := 1.0
 ## that is the axis the lanes split and the holes open along.
 const MARKER_OFFSETS: Array[float] = [0.0, -0.5, 0.5, -1.0, 1.0]
 
+## Method B's grid: the interior of every span is walked at this step looking for a foreign
+## collider filling the gap — the one defect two box-metadata reads share a blind spot on.
+const RAY_STEP := 0.05
+## How far inside a surface a reference ray starts, and how far below a lip a fill counts.
+const RAY_MARGIN := 0.5
+const RAY_FILL_DEPTH := 0.4
+
 var _slice: Slice
 var _manifest: Dictionary
+var _rays_cast := 0
 
 
 static func load_manifest(path := DECL_PATH) -> Dictionary:
@@ -136,6 +144,248 @@ func survey_boxes(loop: int) -> Dictionary:
 	}
 
 
+## Method B: the same spans and markers, measured against the LIVE physics space instead of box
+## metadata. The two reads share a blind spot when both consult the same numbers, so nothing here
+## reads a `BoxShape3D.size` — every edge is bisected with identity-checked rays and every gap
+## interior is walked for foreign colliders. What rays cannot measure is intent: roles and the
+## floors map are declarations, so `surfaces` and `walls` are carried over for the span laws to
+## reference, and the manifest-topology families (`floors`, `chasms`, `props`, `ramps`,
+## `shell_runs`) stay empty — the box pass owns their laws, and the CLI dedups across passes.
+func survey_rays(loop: int) -> Dictionary:
+	set_loop(loop)
+	# Two physics frames: the first carries the eroded sizes into the physics server, the second
+	# guarantees the space sits between steps when the queries run.
+	await _slice.get_tree().physics_frame
+	await _slice.get_tree().physics_frame
+
+	_rays_cast = 0
+	var space := _slice.get_world_3d().direct_space_state
+	var boxes := _collect_boxes()
+	var surfaces := _surfaces(boxes)
+	var floor_boxes := _floor_boxes(boxes, surfaces)
+	var by_name := {}
+	for row in boxes:
+		by_name[str(row["name"])] = row
+
+	var spans: Array[Dictionary] = []
+	for row in _spans(floor_boxes, boxes):
+		var box_span: Dictionary = row
+		var id := str(box_span["id"])
+		var near: Dictionary = by_name.get(id.get_slice(">", 0), {})
+		var far: Dictionary = by_name.get(id.get_slice(">", 1), {})
+		if near.is_empty() or far.is_empty():
+			continue
+		spans.append(_ray_span(space, id, box_span, near, far))
+
+	var floors := _floors(boxes)
+	return {
+		"method": "ray",
+		"loop": loop,
+		"sample_count": _rays_cast,
+		"capsule_diameter": _capsule_diameter(),
+		"surfaces": surfaces,
+		"spans": spans,
+		"walls": _walls(boxes),
+		"ramps": [],
+		"chasms": _ray_chasms(space, _chasms(floors, boxes), floors),
+		"markers": _ray_markers(space),
+		"floors": [],
+		"props": [],
+		"landing_bands": _manifest.get("landing_bands", []) as Array,
+		"shell_runs": [],
+	}
+
+
+func disagreements(box_survey: Dictionary, ray_survey: Dictionary) -> Array[Dictionary]:
+	return CourseSweep.disagreements(box_survey, ray_survey)
+
+
+## The measured fields (`span`, `landing_width` — exactly the two the diff compares) come from
+## rays; the topology fields ride along from the box pairing, because a span's identity is which
+## two surfaces it separates, and the diff matches by id.
+func _ray_span(
+	space: PhysicsDirectSpaceState3D, id: String, box_span: Dictionary, near: Dictionary,
+	far: Dictionary
+) -> Dictionary:
+	var x := (maxf(float(near["x_min"]), float(far["x_min"]))
+		+ minf(float(near["x_max"]), float(far["x_max"]))) * 0.5
+
+	# Each lip is the physics edge of its OWN body, found by bisecting an identity-checked ray
+	# between the body's centre (a hit) and the gap's midpoint (a miss on a healthy course). A
+	# body secretly extending into the gap drags its lip with it, which is the point.
+	# Lip to lip and nothing else: that is the distance the reach laws consume, and it is what
+	# the box read reports. A ramp, kicker or lip legitimately standing INSIDE the gap does not
+	# shorten the jump — the first version of this method walked the interior for fillers and
+	# disagreed with the shipped course on 21 spans, every one of them course furniture doing its
+	# job (issue #13). The fill walk lives on where the two-method rule was born: the chasms.
+	var gap_mid := (float(near["z_min"]) + float(far["z_max"])) * 0.5
+	var near_lip := _bisect_z(
+		space, near, x, (float(near["z_min"]) + float(near["z_max"])) * 0.5, gap_mid
+	)
+	var far_lip := _bisect_z(
+		space, far, x, (float(far["z_min"]) + float(far["z_max"])) * 0.5, gap_mid
+	)
+	var span := near_lip - far_lip
+
+	# Landing width at half a metre past the far lip, edges bisected on the far body's identity.
+	var x_centre := (float(far["x_min"]) + float(far["x_max"])) * 0.5
+	var z_land := far_lip - RAY_MARGIN
+	var left := _bisect_x(space, far, z_land, x_centre, float(far["x_min"]) - 1.0)
+	var right := _bisect_x(space, far, z_land, x_centre, float(far["x_max"]) + 1.0)
+
+	return {
+		"id": id,
+		"span": span,
+		"drop": box_span["drop"],
+		"landing_width": absf(right - left),
+		"void_punished": box_span["void_punished"],
+		"marker_break_before": box_span["marker_break_before"],
+	}
+
+
+## The E6 rule, live: a chasm's opening is confirmed by walking every lane's aligned range with
+## rays at lip height, because "any OTHER collider silently filling a chasm reads as open" to any
+## number of box-metadata reads. The gap reported is the most-filled lane's clear run — a chasm is
+## only as open as its worst lane — so a foreign filler shrinks the ray gap and the two methods'
+## chasm rows stop matching.
+func _ray_chasms(
+	space: PhysicsDirectSpaceState3D, box_chasms: Array[Dictionary], floors: Array[Dictionary]
+) -> Array[Dictionary]:
+	var chasms: Array[Dictionary] = []
+	var loop := _slice.loop_logic.loop_count
+
+	for row in box_chasms:
+		var box_chasm: Dictionary = row
+		var from := float(box_chasm["from"])
+		var to := float(box_chasm["to"])
+		var owner := _floor_covering(floors, from, to)
+		if owner.is_empty():
+			continue
+
+		var gap := from - to
+		var full_width := true
+		for lane_row in owner["lanes"] as Array:
+			var lane: Dictionary = lane_row
+			var x := (float(lane["x_min"]) + float(lane["x_max"])) * 0.5
+			var lip := float(owner["top"])
+			var clear := _clear_run(space, x, lip, from, to)
+			gap = minf(gap, clear)
+			if clear < (from - to) - 2.0 * RAY_STEP:
+				full_width = false
+
+		chasms.append({
+			"id": box_chasm["id"],
+			"gap": gap,
+			"per_loop": (gap / float(loop) if loop > 0 else 0.0),
+			"from": from,
+			"to": to,
+			"runout": box_chasm["runout"],
+			"full_width": full_width,
+		})
+	return chasms
+
+
+func _clear_run(
+	space: PhysicsDirectSpaceState3D, x: float, lip: float, from: float, to: float
+) -> float:
+	var longest := 0.0
+	var run := 0.0
+	var z := from - RAY_STEP
+	while z > to:
+		if _ray_hits(space, x, z, lip + 1.0, lip - RAY_FILL_DEPTH, null):
+			run = 0.0
+		else:
+			run += RAY_STEP
+			longest = maxf(longest, run)
+		z -= RAY_STEP
+	return minf(longest + RAY_STEP, from - to)
+
+
+func _floor_covering(floors: Array[Dictionary], from: float, to: float) -> Dictionary:
+	for row in floors:
+		var floor_row: Dictionary = row
+		if from <= float(floor_row["to"]) + CourseLaw.EPS and to >= float(floor_row["from"]) - CourseLaw.EPS:
+			var top := -INF
+			for lane_row in floor_row["lanes"] as Array:
+				top = maxf(top, float((lane_row as Dictionary).get("top", -INF)))
+			var out := floor_row.duplicate()
+			out["top"] = top
+			return out
+	return {}
+
+
+## The 3b respawn sweep, live: a ray at every offset of every marker, in the running physics
+## space, so a collider the metadata never mentioned still counts as ground.
+func _ray_markers(space: PhysicsDirectSpaceState3D) -> Array[Dictionary]:
+	var markers: Array[Dictionary] = []
+	for i in Slice.MARKER_PROGRESSES.size():
+		var at := _slice.respawn_position(i)
+		var hit := 0
+		for dz in MARKER_OFFSETS:
+			# Ground counts down to the game's own fall plane: the respawn point rides 1 m above
+			# the path curve, and the curve's height above its floor varies per zone — a fixed
+			# shallow window under-reached every Grief and Depression marker on the first run.
+			if _ray_hits(space, at.x, at.z + dz, at.y + 0.5, Slice.FALL_Y, null):
+				hit += 1
+		markers.append({
+			"index": i,
+			"z": at.z,
+			"offsets_hit": hit,
+			"offsets_total": MARKER_OFFSETS.size(),
+		})
+	return markers
+
+
+func _ray_hits(
+	space: PhysicsDirectSpaceState3D, x: float, z: float, y_from: float, y_to: float,
+	target: Variant
+) -> bool:
+	_rays_cast += 1
+	var query := PhysicsRayQueryParameters3D.create(Vector3(x, y_from, z), Vector3(x, y_to, z))
+	var hit := space.intersect_ray(query)
+	if hit.is_empty():
+		return false
+	return target == null or hit["collider"] == target
+
+
+## A vertical probe window hugging the body's own top face. The window STARTS 2 cm above the
+## face rather than a metre up, and that offset is load-bearing: a prop resting on the surface
+## (the G5 gurneys) would intercept a taller ray and the identity test would never see its own
+## target — the ray's origin sits INSIDE the resting occluder instead, which `intersect_ray`
+## ignores (`hit_from_inside` defaults off), so the probe reaches the face beneath. Without this,
+## the bisection start on an occupied tile is false and the lip collapses to mid-tile.
+const _FACE_ABOVE := 0.02
+const _FACE_BELOW := 1.0
+
+
+func _bisect_z(
+	space: PhysicsDirectSpaceState3D, body_row: Dictionary, x: float, z_hit: float, z_miss: float
+) -> float:
+	var top := float(body_row["top"])
+	var target: Variant = body_row["node"]
+	for i in 20:
+		var mid := (z_hit + z_miss) * 0.5
+		if _ray_hits(space, x, mid, top + _FACE_ABOVE, top - _FACE_BELOW, target):
+			z_hit = mid
+		else:
+			z_miss = mid
+	return (z_hit + z_miss) * 0.5
+
+
+func _bisect_x(
+	space: PhysicsDirectSpaceState3D, body_row: Dictionary, z: float, x_hit: float, x_miss: float
+) -> float:
+	var top := float(body_row["top"])
+	var target: Variant = body_row["node"]
+	for i in 20:
+		var mid := (x_hit + x_miss) * 0.5
+		if _ray_hits(space, mid, z, top + _FACE_ABOVE, top - _FACE_BELOW, target):
+			x_hit = mid
+		else:
+			x_miss = mid
+	return (x_hit + x_miss) * 0.5
+
+
 # --- box collection --------------------------------------------------------------------------
 
 
@@ -187,6 +437,8 @@ func _box_row(
 	return {
 		"name": box_name,
 		"body": str(body.name),
+		# Transient scene ref for the ray pass's identity checks — never copied into survey output.
+		"node": body,
 		"role": str((_manifest.get("surfaces", {}) as Dictionary).get(box_name, {}).get("role", "")),
 		"aggregate": aggregate,
 		"erodable": body.is_in_group(Slice.EROSION_GROUP),
@@ -557,12 +809,16 @@ func _lane(lane_id: String, tiles: Array[Dictionary]) -> Dictionary:
 				"far_tile": str(next["name"]),
 			})
 
+	var top := -INF
+	for tile in tiles:
+		top = maxf(top, float(tile["top"]))
 	return {
 		"id": lane_id,
 		"holes": holes,
 		"solid": solid,
 		"x_min": x_min,
 		"x_max": x_max,
+		"top": top,
 		"from": float((tiles[tiles.size() - 1] as Dictionary)["z_min"]),
 		"to": float((tiles[0] as Dictionary)["z_max"]),
 	}
