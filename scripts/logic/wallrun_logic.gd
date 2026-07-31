@@ -39,3 +39,10 @@ static func jump_pressed(was_down: bool, down: bool) -> bool:
 
 static func is_rideable_normal(normal: Vector3) -> bool:
 	return normal != Vector3.ZERO and absf(normal.y) <= RIDE_MAX_NORMAL_Y
+
+
+## A RayCast3D reports the PREVIOUS frame's collision for one physics frame after any
+## position set, so a respawn that preserves velocity (shift_to) can otherwise ride or
+## kick off a wall it is no longer near. Issue #35.
+static func wall_normal_after_shift(rays_stale: bool, normal: Vector3) -> Vector3:
+	return Vector3.ZERO if rays_stale else normal

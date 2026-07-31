@@ -72,3 +72,11 @@ func test_surf_ramp_normals_not_rideable() -> void:
 
 func test_rideable_normal_zero_is_not_wall() -> void:
 	assert_false(WallrunLogic.is_rideable_normal(Vector3.ZERO))
+
+
+func test_wall_normal_after_shift_is_zero_while_rays_are_stale() -> void:
+	assert_eq(WallrunLogic.wall_normal_after_shift(true, Vector3(1, 0, 0)), Vector3.ZERO)
+
+
+func test_wall_normal_after_shift_passes_through_when_fresh() -> void:
+	assert_eq(WallrunLogic.wall_normal_after_shift(false, Vector3(1, 0, 0)), Vector3(1, 0, 0))
