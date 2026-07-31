@@ -305,6 +305,99 @@ func test_every_shell_run_stays_under_the_anti_skip_cap() -> void:
 			)
 
 
+# --- method B: live physics rays -------------------------------------------------------------
+
+
+func test_the_ray_pass_names_its_method_and_samples_something() -> void:
+	var survey: Dictionary = await _audit().survey_rays(0)
+	assert_eq(str(survey["method"]), "ray")
+	assert_eq(int(survey["loop"]), 0)
+	assert_gt(int(survey["sample_count"]), 0)
+
+
+## Five samples along z, reproducing 3b's "24 markers × 5 dz offsets". Revision 1 asked for ±1.0
+## in x AND z, which is 3 samples on the axis the lanes split and the holes open along — a coverage
+## regression wearing the same name. The offsets are floats, so an x delta is unrepresentable.
+func test_the_marker_offsets_are_five_samples_along_z() -> void:
+	assert_eq(CourseAudit.MARKER_OFFSETS.size(), 5)
+	assert_eq(CourseAudit.MARKER_OFFSETS[0], 0.0, "the marker itself is sampled first")
+	for dz in [-1.0, -0.5, 0.5, 1.0]:
+		assert_true(CourseAudit.MARKER_OFFSETS.has(dz), "missing offset %.1f" % dz)
+
+
+## The softlock class: a respawn point over a hole passes every other gate, and the geometry under
+## it is authored by later tasks than the one that placed it. Driven by real rays in the running
+## physics space, so a collider the box metadata never mentioned is included.
+func test_every_marker_stands_up_under_the_rays_at_every_loop() -> void:
+	var audit := _audit()
+	for loop in [0, PLATEAU]:
+		var survey: Dictionary = await audit.survey_rays(loop)
+		var markers := _rows(survey, "markers")
+		assert_eq(markers.size(), Slice.MARKER_PROGRESSES.size())
+		for row in markers:
+			var marker: Dictionary = row
+			assert_eq(
+				int(marker["offsets_hit"]),
+				int(marker["offsets_total"]),
+				"marker %d at z %.2f, loop %d" % [int(marker["index"]), float(marker["z"]), loop]
+			)
+
+
+## Two reads of one course must agree or neither is evidence. A disagreement here is a finding
+## about the COURSE — some other collider filling a gap the box read calls open — never a licence
+## to tune whichever surveyor is more convenient.
+func test_the_two_methods_agree_on_the_shipped_course() -> void:
+	var audit := _audit()
+	for loop in [0, PLATEAU]:
+		var box := audit.survey_boxes(loop)
+		var ray: Dictionary = await audit.survey_rays(loop)
+		var diffs := audit.disagreements(box, ray)
+		var detail := ""
+		for row in diffs:
+			detail += "\n" + str((row as Dictionary)["detail"])
+		assert_eq(diffs.size(), 0, "loop %d:%s" % [loop, detail])
+
+
+## The E6 two-method rule survives issue #13's restructure here: the ray pass confirms the
+## declared chasm by walking every lane at lip height, so a foreign collider filling the seam —
+## invisible to any number of box-metadata reads — shrinks the ray gap and the rows stop matching.
+func test_the_chasm_reads_identically_under_both_methods() -> void:
+	var audit := _audit()
+	var ray0: Dictionary = await audit.survey_rays(0)
+	assert_eq(_rows(ray0, "chasms").size(), 0, "the shipped course has no chasm to confirm")
+
+	var box := audit.survey_boxes(PLATEAU)
+	var ray: Dictionary = await audit.survey_rays(PLATEAU)
+	var box_chasm: Dictionary = _rows(box, "chasms")[0]
+	var chasms := _rows(ray, "chasms")
+	assert_eq(chasms.size(), 1, str(chasms))
+	var ray_chasm: Dictionary = chasms[0]
+	assert_eq(str(ray_chasm["id"]), str(box_chasm["id"]))
+	assert_almost_eq(
+		float(ray_chasm["gap"]), float(box_chasm["gap"]), CourseLaw.METHOD_TOLERANCE,
+		"the rays found the seam more filled or more open than the metadata claims"
+	)
+	assert_true(bool(ray_chasm["full_width"]), "every lane must confirm open")
+
+
+## The negative control. `assert_gte`, not `assert_eq(1)`: an exact count fails the moment any
+## second span also disagrees, which turns a control into a blocker.
+func test_an_injected_delta_is_seen_by_the_diff() -> void:
+	var audit := _audit()
+	var box := audit.survey_boxes(0)
+	var ray: Dictionary = await audit.survey_rays(0)
+	var victim: Dictionary = (ray["spans"] as Array)[0]
+	var id := str(victim["id"])
+	victim["span"] = float(victim["span"]) + 2.0
+
+	var diffs := audit.disagreements(box, ray)
+	assert_gte(diffs.size(), 1, "a 2 m delta must not pass the tolerance")
+	var subjects: Array[String] = []
+	for row in diffs:
+		subjects.append(str((row as Dictionary)["subject"]))
+	assert_true(subjects.has(id), "%s absent from %s" % [id, str(subjects)])
+
+
 ## Why the runs are loop-invariant, asserted structurally instead of by comparing two numbers:
 ## erosion can only lengthen a run by resizing a wall, and no wall is tagged. All 58 tagged
 ## bodies are floors, pads and tiles.
