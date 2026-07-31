@@ -18,6 +18,12 @@ extends RefCounted
 
 const DECL_PATH := "res://data/course_declarations.json"
 
+## The pinned finding set — deduped `law:subject` keys the audit is ALLOWED to report. `just audit`
+## and the GUT gate case both exit green only when the live set EQUALS this list, so a new defect
+## fails loudly and a silently fixed one fails loudly too (stale baseline). Authored at T9; empty
+## until the course is declared.
+const BASELINE_FINDINGS: Array[String] = []
+
 ## Role lookup resolves against the body for the 155 single-`Col` bodies and against the collision
 ## node for the 15 multi-shape aggregates (shells, prop clusters, the door frame) — issue #9. The
 ## manifest's `"CBed1": {"role": "prop"}` is the second form.

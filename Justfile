@@ -20,6 +20,14 @@ test:
 import:
     "{{godot}}" --headless --path . --import
 
+# audit the course against its declared intent (course-law harness)
+audit:
+    "{{godot}}" --headless --path . -s scripts/dev/audit_cli.gd
+
+# headless launch smoke — 600 frames, the gate CI runs
+launch:
+    "{{godot}}" --headless --path . --quit-after 600
+
 # run the momentum lab (Source-movement evaluation)
 momentum-lab:
     "{{godot}}" --path . scenes/momentum_lab.tscn
