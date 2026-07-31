@@ -623,6 +623,130 @@ func test_a_soft_landing_also_breaks_the_chain() -> void:
 	assert_false(laws.has("precision_chain"), "two then one — no run reaches the cap")
 
 
+## Parallel lanes are ALTERNATIVE lines, not consecutive jumps: three disjoint void-punished
+## spans share no surface, so no chain forms. Row-order counting glued these into a phantom
+## at-cap run, which is why the #34 gate's at_cap row was unreachable on any multi-lane
+## course (wave issue #23).
+func test_parallel_lane_spans_form_no_chain() -> void:
+	var spans: Array[Dictionary] = []
+	for lane in ["L", "M", "R"]:
+		spans.append({
+			"id": "%s0>%s1" % [lane, lane], "span": 8.0, "landing_width": 12.0,
+			"void_punished": true, "marker_break_before": false,
+		})
+	var laws := _laws(CourseSweep.sweep(_survey({"spans": spans}), _chain_decls(spans)))
+	assert_false(laws.has("precision_chain"), "disjoint spans are not consecutive")
+	assert_false(laws.has("precision_chain_at_cap"), "disjoint spans are not consecutive")
+
+
+## Ruling #28's count stops "before the wall-ride verb takes over": a declared ride closes
+## the chain and never counts as a jump itself.
+func test_a_declared_wall_ride_terminates_the_chain_uncounted() -> void:
+	var spans: Array[Dictionary] = []
+	for id in ["J0>J1", "J1>J2", "J2>J3", "J3>J4", "J4>J5"]:
+		spans.append({
+			"id": id, "span": 6.0, "landing_width": 12.0, "z_from": 0.0, "z_to": -6.0,
+			"void_punished": true, "marker_break_before": false,
+		})
+	var decls := _chain_decls(spans)
+	decls["J1>J2"] = {
+		"decl": "wall_ride", "wall": "W", "entry_height": 2.5, "along_speed": 11.0
+	}
+	var survey := _survey({
+		"spans": spans,
+		"walls": [
+			{
+				"name": "W", "length": 18.0, "extent": 20.0, "normal_y": 0.0,
+				"z_max": -0.2, "z_min": -18.2
+			}
+		],
+	})
+	var findings := CourseSweep.sweep(survey, decls)
+	var laws := _laws(findings)
+	assert_false(laws.has("precision_chain"), "the ride is relief — no five-run exists")
+	assert_true(laws.has("precision_chain_at_cap"), "J2>J3 through J4>J5 is exactly three")
+	for f in findings:
+		if str(f["law"]) == "precision_chain_at_cap":
+			assert_eq(str(f["subject"]), "J2>J3", "the chain restarts after the ride")
+
+
+## A surf transfer's ramp contact is relief for whatever came before it — but the kicker
+## jump is itself a void-punished commitment, so the transfer seeds a fresh chain.
+func test_a_transfer_closes_the_chain_and_seeds_a_new_one() -> void:
+	var spans: Array[Dictionary] = []
+	for id in ["A>B", "B>C", "C>D", "D>E", "E>F"]:
+		spans.append({
+			"id": id, "span": 6.0, "landing_width": 12.0,
+			"void_punished": true, "marker_break_before": false,
+		})
+	var decls := _chain_decls(spans)
+	decls["B>C"] = {
+		"decl": "surf_transfer", "entry_speed": 11.0, "drop": 3.5,
+		"kicker": true, "factor": 0.85
+	}
+	var findings := CourseSweep.sweep(_survey({"spans": spans}), decls)
+	assert_eq(_laws(findings), ["precision_chain"] as Array[String])
+	assert_eq(_subjects(findings), ["B>C"] as Array[String], "the kicker jump heads the chain")
+	assert_true(
+		String(findings[0]["detail"]).contains("4 consecutive"), String(findings[0]["detail"])
+	)
+
+
+## #27 and #28 both count the chasm's must-jump as a chain link, and the same-floor filter
+## dissolves that seam from the span graph — so the chain walk restores it from the lane
+## holes aligned with a chasm seam. Staggered holes stay out: a sidestep is not commitment.
+func test_a_chasm_jump_counts_in_the_chain_through_its_lane() -> void:
+	var floors := [
+		{
+			"id": "F", "shipped_span": 30.0, "solid_span": 28.5,
+			"lanes": [
+				{
+					"id": "L", "tiles": 2,
+					"holes": [
+						{"from": -10.0, "to": -11.5, "near_tile": "L2", "far_tile": "L3"}
+					]
+				},
+			],
+		}
+	]
+	var spans: Array[Dictionary] = []
+	for row in [["L3>S1", -12.0], ["S1>S2", -20.0]]:
+		spans.append({
+			"id": str(row[0]), "span": 6.0, "landing_width": 12.0,
+			"z_from": float(row[1]), "z_to": float(row[1]) - 6.0,
+			"void_punished": true, "marker_break_before": false,
+		})
+	var survey := _survey({
+		"loop": 1,
+		"spans": spans,
+		"floors": floors,
+		"chasms": [
+			{
+				"id": "L2>L3", "per_loop": 1.5, "gap": 1.5, "runout": 3.4,
+				"full_width": true, "from": -10.0, "to": -11.5,
+			}
+		],
+	})
+	var findings := CourseSweep.sweep(survey, _chain_decls(spans))
+	assert_eq(_laws(findings), ["precision_chain_at_cap"] as Array[String])
+	assert_eq(_subjects(findings), ["L2>L3"] as Array[String], "the chasm heads the chain")
+
+
+## Fan-in: two chains converging on one surface continue as ONE line counted at its longest;
+## the shorter branch's total is strictly below the longest's, so it is subsumed, never
+## separately reported.
+func test_fan_in_counts_the_longest_line_once() -> void:
+	var spans: Array[Dictionary] = []
+	for id in ["P0>P1", "P1>P2", "Q0>P2", "P2>P3"]:
+		spans.append({
+			"id": id, "span": 8.0, "landing_width": 12.0,
+			"void_punished": true, "marker_break_before": false,
+		})
+	var findings := CourseSweep.sweep(_survey({"spans": spans}), _chain_decls(spans))
+	assert_eq(_laws(findings), ["precision_chain_at_cap"] as Array[String])
+	assert_eq(_subjects(findings), ["P0>P1"] as Array[String], "the longest line's first span")
+
+
 # --- width --------------------------------------------------------------------------------
 
 
@@ -740,6 +864,16 @@ func test_a_hole_free_lane_at_a_shrunk_loop_is_a_bypass() -> void:
 
 func test_every_lane_carrying_a_hole_is_silent() -> void:
 	var survey := _survey({"loop": 1, "floors": [_floor(_staggered_lanes(1.0))]})
+	assert_eq(CourseSweep.sweep(survey, {}).size(), 0)
+
+
+## A single-tile lane can never open an intra-lane seam, so the hole law's premise excludes
+## it: the x-finger triples perforate by width shrink and their anti-bypass mechanism is the
+## jump BETWEEN pad rows (wave issue #22). An ABSENT tile count keeps the law armed — a
+## collector regression dropping the field must not retire the law silently (issue #12's class).
+func test_a_single_tile_lane_is_exempt_from_the_hole_law() -> void:
+	var lanes := [{"id": "L", "holes": [], "tiles": 1}]
+	var survey := _survey({"loop": 1, "floors": [_floor(lanes)]})
 	assert_eq(CourseSweep.sweep(survey, {}).size(), 0)
 
 
