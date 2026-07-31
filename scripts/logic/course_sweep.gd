@@ -169,8 +169,10 @@ static func _sweep_spans(survey: Dictionary, declarations: Dictionary) -> Array[
 		findings.append_array(_sweep_width(survey, id, span_row, capsule))
 
 		# Span ids are `<near>><far>`, so the launch surface's role is readable without a new
-		# declaration key: off a kicker, issue #16's measured level reach is the budget.
-		if str(roles.get(_near_of(id), "")) == "kicker":
+		# declaration key: off a kicker, issue #16's measured level reach is the budget —
+		# but ONLY for a bare_run declaration, the case the reach was measured for (issue
+		# #17). A surf/carried span off a kicker is governed by its own declared arithmetic.
+		if str(decl.get("decl", "")) == "bare_run" and str(roles.get(_near_of(id), "")) == "kicker":
 			if not CourseLaw.level_kick_span_ok(length, drop):
 				findings.append(
 					_finding(
@@ -237,7 +239,7 @@ static func _sweep_verb(
 			findings.append_array(_sweep_carried_source(survey, id, entry, decl, declarations))
 
 		"wall_ride":
-			findings.append_array(_sweep_ride(survey, id, length, decl, walls))
+			findings.append_array(_sweep_ride(survey, id, span_row, decl, walls))
 
 		"surf_transfer":
 			findings.append_array(_sweep_transfer(survey, id, length, decl))
@@ -298,61 +300,148 @@ static func _sweep_carried_source(
 	return findings
 
 
+## The `wall` value is a String (single wall — the pre-chain form, byte-identical laws) or an
+## Array of Strings; the normalizer owns the shape because `CourseDecl.validate_span` checks
+## key presence only. Returns empty on a malformed value so the caller FAILs before geometry.
+static func _wall_chain_names(wall_value: Variant) -> Array[String]:
+	var names: Array[String] = []
+	if wall_value is String and str(wall_value) != "":
+		names.append(str(wall_value))
+		return names
+	if wall_value is Array:
+		for element: Variant in wall_value:
+			if not (element is String):
+				return [] as Array[String]
+			names.append(str(element))
+	return names
+
+
 static func _sweep_ride(
-	survey: Dictionary, id: String, length: float, decl: Dictionary, walls: Dictionary
+	survey: Dictionary, id: String, span_row: Dictionary, decl: Dictionary, walls: Dictionary
 ) -> Array[Dictionary]:
 	var findings: Array[Dictionary] = []
-	var wall_name := str(decl.get("wall", ""))
+	var names := _wall_chain_names(decl.get("wall"))
 
-	if not walls.has(wall_name):
+	if names.is_empty():
 		findings.append(
 			_finding(
 				survey,
 				"wall_ride_wall",
 				id,
-				'declares wall "%s", which this pass never surveyed' % wall_name
+				"declares no usable wall — the wall value must be a name or a list of names"
 			)
 		)
 		return findings
 
-	var wall: Dictionary = walls[wall_name]
-	var wall_length := float(wall.get("length", 0.0))
-	var extent := float(wall.get("extent", 0.0))
+	var chain: Array[Dictionary] = []
+	for wall_name in names:
+		if not walls.has(wall_name):
+			findings.append(
+				_finding(
+					survey,
+					"wall_ride_wall",
+					id,
+					'declares wall "%s", which this pass never surveyed' % wall_name
+				)
+			)
+			continue
+		chain.append(walls[wall_name])
+	if not findings.is_empty():
+		return findings
+
+	# Ride order is geometric, not declarative: the course descends -z, so the chain runs
+	# from the highest z_max down.
+	chain.sort_custom(
+		func(a: Dictionary, b: Dictionary) -> bool: return float(a["z_max"]) > float(b["z_max"])
+	)
+
 	var entry_height := float(decl.get("entry_height", 0.0))
 	var along := float(decl.get("along_speed", 0.0))
+	var z_from := float(span_row.get("z_from", 0.0))
+	var z_to := float(span_row.get("z_to", 0.0))
 
-	if not CourseLaw.ride_covers_span(wall_length, length):
+	# The first hop is a FLOOR jump (vy 13.29) off the launch lip, so the measured flat-reach
+	# budget applies and a hard FAIL is justified.
+	var entry_gap := z_from - float(chain[0]["z_max"])
+	if entry_gap > CourseLaw.FLAT_REACH + CourseLaw.EPS:
 		findings.append(
 			_finding(
 				survey,
 				"wall_ride_span",
 				id,
 				(
-					'wall "%s" runs %.2f m against a %.2f m span'
-					% [wall_name, wall_length, length]
+					'%.2f m from the lip to wall "%s"; the floor-jump budget is %.5f m'
+					% [entry_gap, str(chain[0]["name"]), CourseLaw.FLAT_REACH]
 				)
 			)
 		)
 
-	if along > 0.0 and not CourseLaw.ride_extent_ok(extent, entry_height, wall_length, along):
+	# Inter-wall and exit hops are WALL KICKS (vy 8.63) — an unmeasured wall-contact mechanic.
+	# 5.39 m is the measured LEVEL press-kick reach and contact can legitimately happen below
+	# launch height, so an over-budget gap surfaces as WARN for a human ruling, never a FAIL
+	# on a derived-only ceiling.
+	for i in range(chain.size() - 1):
+		var gap := float(chain[i]["z_min"]) - float(chain[i + 1]["z_max"])
+		if gap > CourseLaw.LEVEL_KICK_REACH + CourseLaw.EPS:
+			findings.append(
+				_finding(
+					survey,
+					"wall_chain_gap",
+					id,
+					(
+						'%.2f m between walls "%s" and "%s"; the level kick reach is %.5f m'
+						% [
+							gap,
+							str(chain[i]["name"]),
+							str(chain[i + 1]["name"]),
+							CourseLaw.LEVEL_KICK_REACH,
+						]
+					),
+					SEV_WARN
+				)
+			)
+
+	var exit_gap := float(chain[chain.size() - 1]["z_min"]) - z_to
+	if exit_gap > CourseLaw.LEVEL_KICK_REACH + CourseLaw.EPS:
 		findings.append(
 			_finding(
 				survey,
-				"wall_ride_extent",
+				"wall_chain_gap",
 				id,
 				(
-					'wall "%s" stands %.2f m; the ride needs %.2f m (entry %.3f + %.3f sink + %.1f margin)'
-					% [
-						wall_name,
-						extent,
-						CourseLaw.required_wall_extent(entry_height, wall_length, along),
-						entry_height,
-						CourseLaw.sink_over_ride(wall_length, along),
-						CourseLaw.RIDE_EXTENT_MARGIN,
-					]
-				)
+					'%.2f m exit gap off wall "%s" to the landing; the level kick reach is %.5f m'
+					% [exit_gap, str(chain[chain.size() - 1]["name"]), CourseLaw.LEVEL_KICK_REACH]
+				),
+				SEV_WARN
 			)
 		)
+
+	# The DECLARED entry_height budgets EVERY wall in the chain — conservative premise: a
+	# mid-chain kick re-entry never enters higher than the initial entry (kick vy 8.63 <
+	# jump vy 13.29, and the chain descends under sink).
+	if along > 0.0:
+		for wall in chain:
+			var wall_length := float(wall.get("length", 0.0))
+			var extent := float(wall.get("extent", 0.0))
+			if not CourseLaw.ride_extent_ok(extent, entry_height, wall_length, along):
+				findings.append(
+					_finding(
+						survey,
+						"wall_ride_extent",
+						id,
+						(
+							'wall "%s" stands %.2f m; the ride needs %.2f m (entry %.3f + %.3f sink + %.1f margin)'
+							% [
+								str(wall["name"]),
+								extent,
+								CourseLaw.required_wall_extent(entry_height, wall_length, along),
+								entry_height,
+								CourseLaw.sink_over_ride(wall_length, along),
+								CourseLaw.RIDE_EXTENT_MARGIN,
+							]
+						)
+					)
+				)
 
 	if not CourseLaw.ride_entry_speed_ok(along):
 		findings.append(

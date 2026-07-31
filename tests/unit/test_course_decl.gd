@@ -16,8 +16,8 @@ func test_declaration_enum_is_the_six_verbs() -> void:
 		assert_true(CourseDecl.DECLARATIONS.has(decl_name), "missing declaration: %s" % decl_name)
 
 
-func test_role_enum_is_the_nine_roles() -> void:
-	assert_eq(CourseDecl.ROLES.size(), 9)
+func test_role_enum_is_the_ten_roles() -> void:
+	assert_eq(CourseDecl.ROLES.size(), 10)
 	for role_name in [
 		"floor",
 		"kicker",
@@ -27,7 +27,8 @@ func test_role_enum_is_the_nine_roles() -> void:
 		"feed_platform",
 		"prop",
 		"door",
-		"gate_path"
+		"gate_path",
+		"ceiling"
 	]:
 		assert_true(CourseDecl.ROLES.has(role_name), "missing role: %s" % role_name)
 
@@ -79,6 +80,20 @@ func test_wall_ride_needs_three_keys() -> void:
 	assert_eq(errors.size(), 3, _joined(errors))
 	for key in ["wall", "entry_height", "along_speed"]:
 		assert_true(_joined(errors).contains(key), "no error for missing %s" % key)
+
+
+## `validate_span` checks key presence only, so a chain array is schema-legal as-is — the
+## sweep's normalizer owns the shape (empty / non-String elements). Pinned so a future
+## schema tightening cannot silently outlaw chains.
+func test_a_wall_ride_declaring_a_wall_chain_array_is_schema_legal() -> void:
+	var errors := CourseDecl.validate_span(
+		"s1",
+		{
+			"decl": "wall_ride", "wall": ["Sh2RideL", "Sh2RideR"], "entry_height": 2.5,
+			"along_speed": 11.0
+		}
+	)
+	assert_eq(errors.size(), 0, _joined(errors))
 
 
 func test_chasm_needs_its_per_loop_growth() -> void:
@@ -166,6 +181,12 @@ func test_an_unknown_role_is_an_error() -> void:
 
 func test_a_plain_floor_surface_is_clean() -> void:
 	assert_eq(CourseDecl.validate_surface("Sh1FloorA", {"role": "floor"}).size(), 0)
+
+
+## Declarative at 4.0 like `door` — 4.1's lowering-ceiling verbs are why it is a role and not
+## a collector heuristic (issue #13 tail).
+func test_a_ceiling_surface_is_a_legal_role() -> void:
+	assert_eq(CourseDecl.validate_surface("D1CeilA", {"role": "ceiling"}).size(), 0)
 
 
 func test_erodable_is_legal_for_floor_only() -> void:

@@ -108,10 +108,6 @@ static func ride_entry_speed_ok(along_speed: float) -> bool:
 	return along_speed > WallrunLogic.MIN_FORWARD_SPEED
 
 
-static func ride_covers_span(wall_length: float, span: float) -> bool:
-	return wall_length + EPS >= span
-
-
 ## T3 law: exit = eta * sqrt(v_in^2 + 2*g*drop). The table's 70.4 is 2*GRAVITY.
 static func surf_exit_speed(entry_speed: float, drop: float, eta: float = SURF_ETA) -> float:
 	return eta * sqrt(entry_speed * entry_speed + 2.0 * SourceMove.GRAVITY * drop)
@@ -152,10 +148,12 @@ static func ramp_never_rideable(normal_y: float) -> bool:
 	return absf(normal_y) > WallrunLogic.RIDE_MAX_NORMAL_Y
 
 
-## drop is negative when the far lip sits BELOW the kick. Only the level case has a
-## measured law; a descending span is legal and audited by its declared drop.
+## drop follows the collector convention (`course_audit.gd` `_spans`): drop = near.top −
+## far.top, POSITIVE when the far lip sits BELOW the kick. Only the level case has a
+## measured law; a descending span is legal and audited by its declared drop. An
+## ascending span (negative drop) is harder than level and stays under the law.
 static func level_kick_span_ok(span: float, drop: float) -> bool:
-	if drop < -EPS:
+	if drop > EPS:
 		return true
 	return span <= LEVEL_KICK_REACH + EPS
 

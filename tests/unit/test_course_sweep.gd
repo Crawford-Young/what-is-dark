@@ -151,7 +151,9 @@ func test_carried_speed_from_a_declared_surf_source_is_verified_against_its_exit
 
 
 func test_a_wall_ride_naming_no_surveyed_wall_fails() -> void:
-	var survey := _survey({"spans": [{"id": "A>B", "span": 8.5, "landing_width": 12.0}]})
+	var survey := _survey({
+		"spans": [{"id": "A>B", "span": 8.5, "landing_width": 12.0, "z_from": 0.0, "z_to": -8.5}]
+	})
 	var decls := {
 		"A>B": {
 			"decl": "wall_ride", "wall": "NoSuchWall", "entry_height": 2.5, "along_speed": 11.0
@@ -160,10 +162,18 @@ func test_a_wall_ride_naming_no_surveyed_wall_fails() -> void:
 	assert_eq(_laws(CourseSweep.sweep(survey, decls)), ["wall_ride_wall"] as Array[String])
 
 
-func test_a_wall_shorter_than_the_span_it_crosses_fails() -> void:
+## The ride is entered by a FLOOR jump, so the flat-reach budget is the measured one for the
+## hop from the launch lip onto the first wall. (The old wall-covers-span law this test used
+## to exercise retired with the chain arithmetic — the exact per-gap form replaces it.)
+func test_a_wall_starting_past_flat_reach_from_the_lip_fails() -> void:
 	var survey := _survey({
-		"spans": [{"id": "A>B", "span": 8.5, "landing_width": 12.0}],
-		"walls": [{"name": "W", "length": 8.0, "extent": 20.0, "normal_y": 0.0}],
+		"spans": [{"id": "A>B", "span": 8.5, "landing_width": 12.0, "z_from": 0.0, "z_to": -8.5}],
+		"walls": [
+			{
+				"name": "W", "length": 8.0, "extent": 20.0, "normal_y": 0.0,
+				"z_max": -9.0, "z_min": -17.0
+			}
+		],
 	})
 	var decls := {
 		"A>B": {"decl": "wall_ride", "wall": "W", "entry_height": 2.5, "along_speed": 11.0}
@@ -173,8 +183,13 @@ func test_a_wall_shorter_than_the_span_it_crosses_fails() -> void:
 
 func test_a_wall_too_short_vertically_for_the_ride_sink_fails() -> void:
 	var survey := _survey({
-		"spans": [{"id": "A>B", "span": 8.5, "landing_width": 12.0}],
-		"walls": [{"name": "W", "length": 18.0, "extent": 4.0, "normal_y": 0.0}],
+		"spans": [{"id": "A>B", "span": 8.5, "landing_width": 12.0, "z_from": 0.0, "z_to": -8.5}],
+		"walls": [
+			{
+				"name": "W", "length": 18.0, "extent": 4.0, "normal_y": 0.0,
+				"z_max": -0.2, "z_min": -18.2
+			}
+		],
 	})
 	var decls := {
 		"A>B": {
@@ -187,8 +202,13 @@ func test_a_wall_too_short_vertically_for_the_ride_sink_fails() -> void:
 
 func test_a_ride_entered_at_or_below_the_minimum_forward_speed_fails() -> void:
 	var survey := _survey({
-		"spans": [{"id": "A>B", "span": 8.5, "landing_width": 12.0}],
-		"walls": [{"name": "W", "length": 18.0, "extent": 20.0, "normal_y": 0.0}],
+		"spans": [{"id": "A>B", "span": 8.5, "landing_width": 12.0, "z_from": 0.0, "z_to": -8.5}],
+		"walls": [
+			{
+				"name": "W", "length": 18.0, "extent": 20.0, "normal_y": 0.0,
+				"z_max": -0.2, "z_min": -18.2
+			}
+		],
 	})
 	var decls := {
 		"A>B": {
@@ -197,6 +217,178 @@ func test_a_ride_entered_at_or_below_the_minimum_forward_speed_fails() -> void:
 		}
 	}
 	assert_eq(_laws(CourseSweep.sweep(survey, decls)), ["wall_ride_entry"] as Array[String])
+
+
+func test_a_single_wall_ride_with_sound_geometry_is_silent() -> void:
+	var survey := _survey({
+		"spans": [{"id": "A>B", "span": 8.0, "landing_width": 12.0, "z_from": 0.0, "z_to": -8.0}],
+		"walls": [
+			{
+				"name": "W", "length": 18.0, "extent": 20.0, "normal_y": 0.0,
+				"z_max": -0.2, "z_min": -18.2
+			}
+		],
+	})
+	var decls := {
+		"A>B": {"decl": "wall_ride", "wall": "W", "entry_height": 2.5, "along_speed": 11.0}
+	}
+	assert_eq(_laws(CourseSweep.sweep(survey, decls)), [] as Array[String])
+
+
+## Declared out of ride order on purpose — the sweep sorts the chain by z_max descending, so
+## declaration order carries no geometry.
+func test_a_two_wall_chain_with_tight_gaps_is_silent() -> void:
+	var survey := _survey({
+		"spans": [
+			{"id": "A>B", "span": 20.0, "landing_width": 12.0, "z_from": 0.0, "z_to": -20.0}
+		],
+		"walls": [
+			{
+				"name": "W1", "length": 9.0, "extent": 20.0, "normal_y": 0.0,
+				"z_max": -1.0, "z_min": -10.0
+			},
+			{
+				"name": "W2", "length": 9.0, "extent": 20.0, "normal_y": 0.0,
+				"z_max": -12.0, "z_min": -21.0
+			},
+		],
+	})
+	var decls := {
+		"A>B": {
+			"decl": "wall_ride", "wall": ["W2", "W1"], "entry_height": 2.5, "along_speed": 11.0
+		}
+	}
+	assert_eq(_laws(CourseSweep.sweep(survey, decls)), [] as Array[String])
+
+
+## 5.39 m is the measured LEVEL press-kick reach; wall-to-wall contact can legitimately
+## exceed it (contact happens below launch height) and no lab measurement of wall-contact
+## reach exists — so an over-budget inter-wall gap surfaces as WARN for a human ruling,
+## never a FAIL on a derived-only ceiling.
+func test_an_inter_wall_gap_past_the_kick_reach_warns() -> void:
+	var survey := _survey({
+		"spans": [
+			{"id": "A>B", "span": 23.0, "landing_width": 12.0, "z_from": 0.0, "z_to": -23.0}
+		],
+		"walls": [
+			{
+				"name": "W1", "length": 9.0, "extent": 20.0, "normal_y": 0.0,
+				"z_max": -1.0, "z_min": -10.0
+			},
+			{
+				"name": "W2", "length": 8.0, "extent": 20.0, "normal_y": 0.0,
+				"z_max": -16.0, "z_min": -24.0
+			},
+		],
+	})
+	var decls := {
+		"A>B": {
+			"decl": "wall_ride", "wall": ["W1", "W2"], "entry_height": 2.5, "along_speed": 11.0
+		}
+	}
+	var findings := CourseSweep.sweep(survey, decls)
+	assert_eq(_laws(findings), ["wall_chain_gap"] as Array[String])
+	assert_eq(_sev(findings, "wall_chain_gap"), "WARN")
+	assert_true(String(findings[0]["detail"]).contains("W1"), String(findings[0]["detail"]))
+	assert_true(String(findings[0]["detail"]).contains("W2"), String(findings[0]["detail"]))
+
+
+## The exit from the last wall is a WALL KICK (vy 8.63) — the same unmeasured wall-contact
+## mechanic as the inter-wall hop, so the same WARN-for-a-human treatment.
+func test_an_exit_gap_past_the_kick_reach_warns() -> void:
+	var survey := _survey({
+		"spans": [
+			{"id": "A>B", "span": 16.0, "landing_width": 12.0, "z_from": 0.0, "z_to": -16.0}
+		],
+		"walls": [
+			{
+				"name": "W", "length": 9.8, "extent": 20.0, "normal_y": 0.0,
+				"z_max": -0.2, "z_min": -10.0
+			}
+		],
+	})
+	var decls := {
+		"A>B": {"decl": "wall_ride", "wall": "W", "entry_height": 2.5, "along_speed": 11.0}
+	}
+	var findings := CourseSweep.sweep(survey, decls)
+	assert_eq(_laws(findings), ["wall_chain_gap"] as Array[String])
+	assert_eq(_sev(findings, "wall_chain_gap"), "WARN")
+	assert_true(String(findings[0]["detail"]).contains("exit"), String(findings[0]["detail"]))
+
+
+func test_a_chain_naming_an_unsurveyed_wall_fails_before_any_geometry() -> void:
+	var survey := _survey({
+		"spans": [
+			{"id": "A>B", "span": 20.0, "landing_width": 12.0, "z_from": 0.0, "z_to": -20.0}
+		],
+		"walls": [
+			{
+				"name": "W1", "length": 9.0, "extent": 20.0, "normal_y": 0.0,
+				"z_max": -1.0, "z_min": -10.0
+			}
+		],
+	})
+	var decls := {
+		"A>B": {
+			"decl": "wall_ride", "wall": ["W1", "Ghost"], "entry_height": 2.5,
+			"along_speed": 11.0
+		}
+	}
+	var findings := CourseSweep.sweep(survey, decls)
+	assert_eq(_laws(findings), ["wall_ride_wall"] as Array[String])
+	assert_true(String(findings[0]["detail"]).contains("Ghost"), String(findings[0]["detail"]))
+
+
+func test_an_empty_or_malformed_wall_chain_declares_no_usable_wall() -> void:
+	var survey := _survey({
+		"spans": [{"id": "A>B", "span": 8.0, "landing_width": 12.0, "z_from": 0.0, "z_to": -8.0}],
+		"walls": [
+			{
+				"name": "W", "length": 18.0, "extent": 20.0, "normal_y": 0.0,
+				"z_max": -0.2, "z_min": -18.2
+			}
+		],
+	})
+	for bad_wall in [[], [12.0], ["W", 3]]:
+		var decls := {
+			"A>B": {
+				"decl": "wall_ride", "wall": bad_wall, "entry_height": 2.5, "along_speed": 11.0
+			}
+		}
+		var findings := CourseSweep.sweep(survey, decls)
+		assert_eq(_laws(findings), ["wall_ride_wall"] as Array[String], str(bad_wall))
+		assert_true(
+			String(findings[0]["detail"]).contains("no usable wall"), String(findings[0]["detail"])
+		)
+
+
+## The declared entry_height applies to EVERY wall in the chain — a mid-chain kick re-entry
+## never enters higher than the initial entry (kick vy 8.63 < jump vy 13.29, and the chain
+## descends under sink).
+func test_a_chain_member_too_short_vertically_is_named_in_the_finding() -> void:
+	var survey := _survey({
+		"spans": [
+			{"id": "A>B", "span": 20.0, "landing_width": 12.0, "z_from": 0.0, "z_to": -20.0}
+		],
+		"walls": [
+			{
+				"name": "W1", "length": 9.0, "extent": 20.0, "normal_y": 0.0,
+				"z_max": -1.0, "z_min": -10.0
+			},
+			{
+				"name": "W2", "length": 9.0, "extent": 1.0, "normal_y": 0.0,
+				"z_max": -12.0, "z_min": -21.0
+			},
+		],
+	})
+	var decls := {
+		"A>B": {
+			"decl": "wall_ride", "wall": ["W1", "W2"], "entry_height": 2.5, "along_speed": 11.0
+		}
+	}
+	var findings := CourseSweep.sweep(survey, decls)
+	assert_eq(_laws(findings), ["wall_ride_extent"] as Array[String])
+	assert_true(String(findings[0]["detail"]).contains("W2"), String(findings[0]["detail"]))
 
 
 ## The near surface's ROLE is what marks a span as kick-launched — span ids are `<near>><far>`
@@ -217,10 +409,27 @@ func test_a_level_kick_span_past_the_measured_kick_reach_fails() -> void:
 
 func test_a_descending_kick_span_is_not_the_level_law() -> void:
 	var survey := _survey({
-		"spans": [{"id": "K>Far", "span": 6.0, "landing_width": 12.0, "drop": -2.0}],
+		"spans": [{"id": "K>Far", "span": 6.0, "landing_width": 12.0, "drop": 2.0}],
 		"surfaces": [{"name": "K", "role": "kicker"}],
 	})
 	assert_eq(CourseSweep.sweep(survey, {"K>Far": {"decl": "bare_run"}}).size(), 0)
+
+
+## Issue #17: the 5.39 m press-kick reach was measured for the BARE-RUN-off-a-kicker case
+## (3b #16). A span declared surf_transfer off a kicker is governed by its own T3 arithmetic
+## with the declared factor, not by the press-kick budget.
+func test_a_surf_declared_kicker_span_is_not_the_level_kick_law() -> void:
+	var survey := _survey({
+		"spans": [{"id": "K>Far", "span": 7.0, "landing_width": 12.0, "drop": 0.0}],
+		"surfaces": [{"name": "K", "role": "kicker"}],
+	})
+	var decls := {
+		"K>Far": {
+			"decl": "surf_transfer", "entry_speed": 11.0, "drop": 3.0, "kicker": true,
+			"factor": 0.9
+		}
+	}
+	assert_eq(_laws(CourseSweep.sweep(survey, decls)), [] as Array[String])
 
 
 # --- surf transfers -----------------------------------------------------------------------

@@ -33,6 +33,8 @@ func _fixture() -> Dictionary:
 		"surfaces": {
 			"Sh2RideL": {"role": "ride_wall"},
 			"Sh2Ramp": {"role": "surf_ramp"},
+			"G2Ramp1": {"role": "surf_ramp"},
+			"G2Ramp2": {"role": "surf_ramp"},
 			"CBed1": {"role": "prop"},
 			"CDresser1": {"role": "prop"},
 			"CStand1": {"role": "prop"},
@@ -152,12 +154,117 @@ func test_the_declared_wall_and_ramp_are_the_ones_surveyed() -> void:
 
 
 ## Classification is role-declared, never slope-derived: a 3b recon child's own slope formula
-## mislabelled yaw-only vertical walls as FLOOR. A declared wall is therefore not also a span
-## endpoint, or the ride's budget would compete with a bare-run reach on the same geometry.
-func test_a_declared_wall_is_not_also_surveyed_as_a_course_surface() -> void:
-	var surfaces := _by_id(_audit().survey_boxes(0), "surfaces", "name")
-	assert_false(surfaces.has("Sh2RideL"), "a ride wall is not a floor")
-	assert_false(surfaces.has("Sh2Ramp"), "a surf ramp is not a floor")
+## mislabelled yaw-only vertical walls as FLOOR. Since T8a a declared wall IS a validated
+## surface — an `erodable` tag on it must fire, which it cannot from outside `_surfaces`
+## (cold-review finding 5) — but it is never a floor-graph node: the ride's budget would
+## compete with a bare-run reach on the same geometry. That is the property the old
+## "not also surveyed" name actually guarded.
+func test_a_declared_wall_is_validated_but_never_a_floor_graph_node() -> void:
+	var survey := _audit().survey_boxes(0)
+	var surfaces := _by_id(survey, "surfaces", "name")
+	assert_true(surfaces.has("Sh2RideL"), "a roled box must reach validation — finding 5")
+	for row in _rows(survey, "spans"):
+		var id := str((row as Dictionary)["id"])
+		assert_false(
+			id.begins_with("Sh2RideL>") or id.ends_with(">Sh2RideL"),
+			"a ride wall must never be a span endpoint: %s" % id
+		)
+
+
+# --- the traversable span graph (T8a, issue #15) -----------------------------------------------
+
+
+## The defining defect of issue #15: the level-only graph read every walk lift as void, so the
+## span jumped from the floor BELOW the lift to the lip ABOVE it and reported a 16-18 m "gap"
+## the shipped course crosses on foot. A traversable slope joins the graph and hands off to its
+## abutting neighbours, so the phantom ids must be gone — and gone the RIGHT way: the near
+## floor hands off to the lift (no span at all), it does not re-key to a nearer far.
+func test_a_walkable_lift_joins_the_graph_and_dissolves_the_phantom_span() -> void:
+	var spans := _by_id(_audit().survey_boxes(0), "spans", "id")
+	assert_false(spans.has("Sh1FloorC>Sh2Lip"), "Sh2Ramp fills this 16 m 'gap' — issue #15")
+	assert_false(spans.has("Sh7Floor>Sh8Lip"), "Sh8Lift fills this 18 m 'gap' — issue #15")
+	assert_false(spans.has("G1Floor>G2PadLeft"), "G2Lift fills this 16 m 'gap' — issue #15")
+	for id in spans:
+		assert_false(
+			str(id).begins_with("Sh1FloorC>"),
+			"Sh1FloorC abuts Sh2Ramp at height — a handoff, never a span: %s" % str(id)
+		)
+
+
+## The cold-review finding-1 guard, pinned on shipped geometry: the Sh8 tiles sit 6 m BELOW
+## the lip and tuck under it in z. Stacked geometry with no height abutment must neither
+## become the endpoint (their z-overlap makes any such span degenerate) nor terminate the
+## search (that silently deletes the real span past the ledge).
+func test_a_height_mismatched_overlap_is_skipped_not_handed_off() -> void:
+	var spans := _by_id(_audit().survey_boxes(0), "spans", "id")
+	var from_lip: Array[String] = []
+	for id in spans:
+		if str(id).begins_with("Sh8Lip>"):
+			from_lip.append(str(id))
+	assert_eq(from_lip.size(), 1, str(from_lip))
+	for tile in ["Sh8FloorTileL1", "Sh8FloorTileM1", "Sh8FloorTileR1"]:
+		assert_false(
+			from_lip[0].ends_with(">" + tile),
+			"a tile 6 m below the lip is stacked geometry, not the lip's continuation"
+		)
+
+
+## Surf spans re-key to ramp endpoints: the kicker's real flight lands on G2Ramp2 ~10 m out,
+## not on G2Exit 26 m out past a ramp the level-only graph refused to see. The value is the
+## FACE-lip distance at the probe line (the ray pass confirmed ~9.89 m); the raw AABB gap
+## reads 9.04 because a tilted box's footprint carries its thickness term.
+func test_a_surf_span_measures_the_real_flight_to_the_ramp() -> void:
+	var spans := _by_id(_audit().survey_boxes(0), "spans", "id")
+	assert_false(spans.has("G2Kick1>G2Exit"), "the 26 m 'span' skipped both surf ramps — issue #15")
+	assert_true(spans.has("G2Kick1>G2Ramp2"), str(spans.keys()))
+	assert_between(float((spans["G2Kick1>G2Ramp2"] as Dictionary)["span"]), 9.5, 10.5)
+
+
+## Part 3's chain arithmetic consumes exact span z coordinates, and the sweep runs over BOTH
+## surveys — a ray row without them would read z 0.0 and manufacture a spurious FAIL on every
+## ride at every loop (cold-review finding 3).
+func test_span_rows_carry_their_z_interval_under_both_methods() -> void:
+	var audit := _audit()
+	var box_row: Dictionary = _by_id(audit.survey_boxes(0), "spans", "id")["Sh1FloorA>Sh1FloorB"]
+	assert_almost_eq(float(box_row["z_from"]), -34.0, CourseLaw.EPS)
+	assert_almost_eq(float(box_row["z_to"]), -40.5, CourseLaw.EPS)
+
+	var ray_survey: Dictionary = await audit.survey_rays(0)
+	var ray_row: Dictionary = _by_id(ray_survey, "spans", "id")["Sh1FloorA>Sh1FloorB"]
+	assert_almost_eq(float(ray_row["z_from"]), -34.0, CourseLaw.METHOD_TOLERANCE)
+	assert_almost_eq(float(ray_row["z_to"]), -40.5, CourseLaw.METHOD_TOLERANCE)
+
+
+func test_wall_rows_carry_their_z_extent() -> void:
+	var walls := _by_id(_audit().survey_boxes(0), "walls", "name")
+	var wall: Dictionary = walls["Sh2RideL"]
+	assert_almost_eq(float(wall["z_max"]), -101.0, CourseLaw.EPS)
+	assert_almost_eq(float(wall["z_min"]), -119.0, CourseLaw.EPS)
+
+
+## Part 2 of the T8a design: a `ceiling` leaves the floor graph ONLY — it stays a validated
+## surface, which is what makes an `erodable` tag on it finally fire (cold-review finding 5:
+## an excluded role left `_surfaces` entirely, so the legality check was unreachable). Roles
+## are manifest facts, so an erodable shipped tile stands in as the victim — no scene edit.
+func test_a_ceiling_roled_box_is_validated_but_leaves_the_floor_graph() -> void:
+	var manifest := _fixture()
+	(manifest["surfaces"] as Dictionary)["Sh8FloorTileM2"] = {"role": "ceiling"}
+	var survey := CourseAudit.new(_slice, manifest).survey_boxes(0)
+
+	assert_true(_by_id(survey, "surfaces", "name").has("Sh8FloorTileM2"))
+	for row in _rows(survey, "spans"):
+		var id := str((row as Dictionary)["id"])
+		assert_false(
+			id.begins_with("Sh8FloorTileM2>") or id.ends_with(">Sh8FloorTileM2"),
+			"a ceiling is never a floor-graph node: %s" % id
+		)
+
+	var fired := false
+	for f in CourseSweep.sweep(survey, {}):
+		var finding: Dictionary = f
+		if str(finding["subject"]) == "Sh8FloorTileM2" and str(finding["detail"]).contains("erodable"):
+			fired = true
+	assert_true(fired, "an erodable tag on a ceiling must fire — cold-review finding 5")
 
 
 func test_props_carry_their_own_z_extent_so_a_hole_cannot_open_under_one() -> void:
