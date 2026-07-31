@@ -24,6 +24,9 @@ const DECL_PATH := "res://data/course_declarations.json"
 ## run8 against commit e0592e0's manifest. Every key is a documented read of the RETIRING course;
 ## issue numbers cite `docs/games/what-is-dark/issues/2026-07-29-phase4-w0-issues.md`, where every
 ## FAIL's ACCEPT verdict lives in the "T9 ruling round" entry (2026-07-31) plus the cited issue.
+## Number namespaces: bare #18-#21 are that wave log's own entries; #23/#27/#28/#33/#34 (and any
+## number tagged "course") are phase-3b course issues from `issues/done/2026-07-25-phase3b-issues.md`
+## — the wave log tags its own 23rd entry "#23 (wave)" to keep the two apart.
 const BASELINE_FINDINGS: Array[String] = [
 	"bare_run_reach:G2PadRight>G2Ramp1",  # #20 companion — ray reads the bank face 12 m down its diagonal
 	"compound_landing:D1TileM2>D2StripA",  # #23 — near-ceiling gap onto a strip eroding 2.5 -> 1.6 m

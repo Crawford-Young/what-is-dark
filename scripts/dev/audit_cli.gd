@@ -31,6 +31,8 @@ func _run() -> void:
 			)
 			findings.append_array(CourseSweep.sweep(survey, declarations))
 		findings.append_array(audit.disagreements(box, ray))
+	# Key-set construction duplicated VERBATIM in test_course_audit.gd's baseline gate on
+	# purpose — the GUT copy is CI's independent pin of this CLI; do not DRY them together.
 	var keys: Array[String] = []
 	for f in findings:
 		print("%s %s %s — %s" % [f["severity"], f["law"], f["subject"], f["detail"]])

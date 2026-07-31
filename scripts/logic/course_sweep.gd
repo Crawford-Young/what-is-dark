@@ -4,8 +4,10 @@ extends RefCounted
 ## collector (`scripts/dev/course_audit.gd`) does the looking and hands the numbers here.
 ##
 ## Severity policy: FAIL means a law was broken. WARN means a human has to rule on it — the
-## compound gap-and-width case, a chain sitting at its cap, an exit nobody has measured. The
-## harness's job on those is to make the class visible, not to overturn a ruling already made.
+## compound gap-and-width case, a chain sitting at its cap, an exit nobody has measured, a
+## chain-walk gap at level kick reach (the walk cannot see below-launch contact assists), a
+## ramp angle outside the measured surf band. The harness's job on those is to make the class
+## visible, not to overturn a ruling already made.
 
 const SEV_FAIL := "FAIL"
 const SEV_WARN := "WARN"
