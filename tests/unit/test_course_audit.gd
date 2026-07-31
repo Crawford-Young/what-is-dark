@@ -549,7 +549,9 @@ func test_erosion_never_touches_a_wall_or_a_ramp() -> void:
 
 ## The baseline gate — builds the SAME deduped `law:subject` key set the CLI builds, including
 ## disagreements at every loop, against the real manifest (not the fixture). RED until T8 declares
-## the course and T9 authors the baseline; do not weaken.
+## the course and T9 authors the baseline; do not weaken. The key-set construction duplicates
+## `audit_cli.gd` VERBATIM on purpose: this copy is CI's independent pin of the CLI's gate, and
+## DRYing the two into one helper would retire that independence.
 func test_audit_findings_match_the_pinned_baseline() -> void:
 	var audit := CourseAudit.new(_slice)
 	assert_eq(audit.assert_setup(), [] as Array[String])
@@ -571,3 +573,9 @@ func test_audit_findings_match_the_pinned_baseline() -> void:
 	var baseline: Array[String] = CourseAudit.BASELINE_FINDINGS.duplicate()
 	baseline.sort()
 	assert_eq(keys, baseline, "a NEW finding fails the gate; the baselined ones do not")
+
+
+## Pins the derivation `CourseLaw`'s comment claims — 2x the ray-grid step. The purity split
+## forces the 0.10 literal in the law module; this is the one place both classes are in scope.
+func test_method_tolerance_is_twice_the_ray_step() -> void:
+	assert_eq(CourseLaw.METHOD_TOLERANCE, 2.0 * CourseAudit.RAY_STEP)
