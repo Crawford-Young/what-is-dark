@@ -13,6 +13,7 @@ const FLOOR_LIMIT_DEG := 38.0  ## lab-parity classification boundary: steeper th
 var frozen := false
 var glancing := false
 var _jump_was_down := false
+var _rays_stale := false
 
 var _yaw := 0.0
 var _pitch := 0.0
@@ -92,14 +93,16 @@ func _physics_process(delta: float) -> void:
 		# Source clip semantics (lab lesson, 9822c47).
 		velocity = SourceMove.clip_multi(pre_slide_velocity, steep)
 	_jump_was_down = jump_down
+	_rays_stale = false
 
 
 func _wall_normal() -> Vector3:
+	var raw := Vector3.ZERO
 	if $RayWallLeft.is_colliding():
-		return $RayWallLeft.get_collision_normal()
-	if $RayWallRight.is_colliding():
-		return $RayWallRight.get_collision_normal()
-	return Vector3.ZERO
+		raw = $RayWallLeft.get_collision_normal()
+	elif $RayWallRight.is_colliding():
+		raw = $RayWallRight.get_collision_normal()
+	return WallrunLogic.wall_normal_after_shift(_rays_stale, raw)
 
 
 func camera_forward() -> Vector3:
@@ -114,8 +117,10 @@ func teleport(pos: Vector3, face_dir: Vector3) -> void:
 	_pitch = 0.0
 	_glance_amount = 0.0
 	_jump_was_down = false
+	_rays_stale = true
 	_yaw_drain.reset()
 
 
 func shift_to(pos: Vector3) -> void:
 	global_position = pos
+	_rays_stale = true
