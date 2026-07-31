@@ -21,6 +21,7 @@ static func sweep(survey: Dictionary, declarations: Dictionary) -> Array[Diction
 	findings.append_array(_sweep_samples(survey))
 	findings.append_array(_sweep_surfaces(survey))
 	findings.append_array(_sweep_spans(survey, declarations))
+	findings.append_array(_sweep_chains(survey, declarations))
 	findings.append_array(_sweep_ramps(survey))
 	findings.append_array(_sweep_chasms(survey))
 	findings.append_array(_sweep_markers(survey))
@@ -127,20 +128,12 @@ static func _sweep_spans(survey: Dictionary, declarations: Dictionary) -> Array[
 	var roles := _roles_by_surface(survey)
 	var walls := _rows_by_key(survey, "walls", "name")
 	var capsule := float(survey.get("capsule_diameter", 0.0))
-	var run: Array[String] = []
 
 	for row in _rows(survey, "spans"):
 		var span_row: Dictionary = row
 		var id := str(span_row.get("id", "<unnamed>"))
 		var length := float(span_row.get("span", 0.0))
 		var drop := float(span_row.get("drop", 0.0))
-
-		# Ruling #27 (2026-07-27): the marker breaks the chain. Solid floor between two gaps is
-		# not a span, so resetting only on a soft landing would emit four consecutive jumps for
-		# a stretch already adjudicated legal.
-		if bool(span_row.get("marker_break_before", false)):
-			findings.append_array(_close_run(survey, run))
-			run = []
 
 		var decl: Dictionary = declarations.get(id, {})
 		var errors := CourseDecl.validate_span(id, decl)
@@ -186,13 +179,102 @@ static func _sweep_spans(survey: Dictionary, declarations: Dictionary) -> Array[
 					)
 				)
 
-		if bool(span_row.get("void_punished", false)):
-			run.append(id)
-		else:
-			findings.append_array(_close_run(survey, run))
-			run = []
+	return findings
 
-	findings.append_array(_close_run(survey, run))
+
+## Ruling #7's chain, counted along the successor GRAPH: consecutive means you land the far
+## surface and its own span is the next jump — row-order counting glued parallel lanes and
+## fan-outs into phantom runs, which made the at-cap law unreachable on any multi-lane course
+## (wave issue #23, forced by the #34 gate row). What counts and what breaks comes verbatim
+## from the phase-3b adjudications: a marker is relief (#27); the chain stops "before the
+## wall-ride verb takes over", uncounted (#28); a surf transfer's ramp contact is relief but
+## its kicker jump seeds a fresh chain; and a chasm's must-jump counts in every lane (#27 and
+## #28 both count it) — those seams are dissolved from the span graph by the same-floor
+## filter, so they re-enter here from the lane holes aligned with a chasm seam. Staggered
+## holes stay out: a sidestep is not commitment.
+static func _sweep_chains(survey: Dictionary, declarations: Dictionary) -> Array[Dictionary]:
+	var findings: Array[Dictionary] = []
+	var edges: Array[Dictionary] = []
+	for row in _rows(survey, "spans"):
+		var span_row: Dictionary = row
+		var id := str(span_row.get("id", "<unnamed>"))
+		edges.append({
+			"id": id,
+			"key": float(span_row.get("z_from", 0.0)),
+			"void": bool(span_row.get("void_punished", false)),
+			"break": bool(span_row.get("marker_break_before", false)),
+			"verb": str((declarations.get(id, {}) as Dictionary).get("decl", "")),
+		})
+	var seams := _chasm_ranges(survey)
+	for row in _rows(survey, "floors"):
+		for lane_row in _rows(row as Dictionary, "lanes"):
+			var lane: Dictionary = lane_row
+			for hole_row in _rows(lane, "holes"):
+				var hole: Dictionary = hole_row
+				var from := minf(float(hole.get("from", 0.0)), float(hole.get("to", 0.0)))
+				var to := maxf(float(hole.get("from", 0.0)), float(hole.get("to", 0.0)))
+				if not _overlaps_any(seams, from, to):
+					continue
+				edges.append({
+					"id": (
+						"%s>%s"
+						% [str(hole.get("near_tile", "?")), str(hole.get("far_tile", "?"))]
+					),
+					"key": to,
+					"void": true,
+					"break": false,
+					"verb": "",
+				})
+
+	# DP order: lip z descending, so every fan-in lands before its surface's own outgoing
+	# edge. Ties keep insertion order — unit surveys carry no z and rely on row order.
+	for i in edges.size():
+		edges[i]["idx"] = i
+	edges.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		if float(a["key"]) != float(b["key"]):
+			return float(a["key"]) > float(b["key"])
+		return int(a["idx"]) < int(b["idx"]))
+
+	var runs := {}
+	var handled := {}
+	for edge_row in edges:
+		var edge: Dictionary = edge_row
+		var id := str(edge["id"])
+		var near := _near_of(id)
+		var chain: Array[String] = []
+		if runs.has(near):
+			chain.assign(runs[near] as Array)
+		handled[near] = true
+
+		if bool(edge["break"]):
+			findings.append_array(_close_run(survey, chain))
+			chain = []
+
+		var verb := str(edge["verb"])
+		if verb == "wall_ride":
+			findings.append_array(_close_run(survey, chain))
+			continue
+		if verb == "surf_transfer":
+			findings.append_array(_close_run(survey, chain))
+			chain = []
+		if not bool(edge["void"]):
+			findings.append_array(_close_run(survey, chain))
+			continue
+
+		chain.append(id)
+		# Fan-in keeps the LONGEST arriving chain: both branches continue through the same
+		# tail, so the shorter one's total is strictly below the longest's — subsumed.
+		var far := _far_of(id)
+		var prior := (runs[far] as Array).size() if runs.has(far) else 0
+		if chain.size() > prior:
+			runs[far] = chain
+
+	for surface in runs:
+		if handled.has(surface):
+			continue
+		var tail: Array[String] = []
+		tail.assign(runs[surface] as Array)
+		findings.append_array(_close_run(survey, tail))
 	return findings
 
 
@@ -737,7 +819,11 @@ static func _sweep_floors(survey: Dictionary) -> Array[Dictionary]:
 			var lane_id := str(lane.get("id", "?"))
 			var holes := _rows(lane, "holes")
 
-			if loop > 0 and holes.is_empty():
+			# A single-tile lane can never open an intra-lane seam — the x-finger triples
+			# perforate by width shrink, and their anti-bypass mechanism is the jump between
+			# pad rows (wave issue #22). The default keeps the law ARMED when the field is
+			# absent: a collector regression must not retire it silently (issue #12's class).
+			if loop > 0 and holes.is_empty() and int(lane.get("tiles", 2)) >= 2:
 				findings.append(
 					_finding(
 						survey,
@@ -1025,6 +1111,10 @@ static func _deliverable_speed(source: String, declarations: Dictionary) -> floa
 
 static func _near_of(id: String) -> String:
 	return id.get_slice(">", 0)
+
+
+static func _far_of(id: String) -> String:
+	return id.get_slice(">", 1)
 
 
 static func _rows(survey: Dictionary, key: String) -> Array:

@@ -361,6 +361,33 @@ func test_the_chasm_grows_at_the_shipped_rate_from_the_first_loop() -> void:
 ## exactly and reproduce the shipped solid box. Both numbers are measured live — the lane extent is
 ## erosion-invariant by design (outer tiles pin the outer edges) while the solid metres inside it
 ## shrink — so this compares two independent reads, not a value against a cached copy of itself.
+## Ruling #27: a checkpoint is relief. Marker 16 stands ON `G7Exit`'s solid (z −1140, box
+## −1138.2..−1157.2) between the G7 approach and the #34 triple, so the triple's first span
+## carries the break even though no marker floats inside its gap — a gap-only marker test
+## would leave every on-floor checkpoint invisible to ruling #7's chain.
+func test_a_marker_on_the_near_surface_breaks_the_chain_before_its_span() -> void:
+	var spans := _by_id(_audit().survey_boxes(0), "spans", "id")
+	assert_true(
+		bool((spans["G7Exit>G8PadALeft"] as Dictionary)["marker_break_before"]),
+		"marker 16 stands on G7Exit"
+	)
+	assert_false(
+		bool((spans["G8PadALeft>G8PadBLeft"] as Dictionary)["marker_break_before"]),
+		"no marker on G8PadALeft — #34's triple runs unbroken"
+	)
+
+
+## The sweep's single-tile hole-law exemption (wave issue #22) reads this field; a lane row
+## without it would fall back to the armed default and re-fire on every finger triple.
+func test_lane_rows_carry_their_tile_count() -> void:
+	var floor_row: Dictionary = _by_id(_audit().survey_boxes(0), "floors", "id")["Sh6Exit"]
+	var counts := {}
+	for lane_row in floor_row["lanes"] as Array:
+		var lane: Dictionary = lane_row
+		counts[str(lane["id"])] = int(lane["tiles"])
+	assert_eq(counts, {"L": 2, "M": 3, "R": 3})
+
+
 func test_loop_zero_is_seamless_and_plateau_is_not() -> void:
 	var audit := _audit()
 	var shipped: Dictionary = _by_id(audit.survey_boxes(0), "floors", "id")["Sh6Exit"]
