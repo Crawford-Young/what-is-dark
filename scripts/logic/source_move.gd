@@ -13,8 +13,8 @@ const GRAVITY := 35.2  ## ratio match — along-face accel / run speed = 35.2*si
 const JUMP_SPEED := 13.29  ## airtime match over height parity: airtime = 2*13.29/35.2 ≈ 0.755s
 ## = CS's flat-jump airtime (301.99u/800), giving air-strafe a full 360° turn window in one hop
 ## (was 0.641s / ~300° max at 11.28). DELIBERATE height-parity break: jump height rises 1.81 ->
-## 2.51 m (13.29^2/(2*35.2)) — user-approved tradeoff (R12d). Lab-scope only; main game's
-## scripts/player.gd JUMP_SPEED is untouched.
+## 2.51 m (13.29^2/(2*35.2)) — user-approved tradeoff (R12d). Game-wide since the phase-3a
+## adoption: scripts/player.gd delegates all movement math here and carries no jump constant.
 const FRICTION := 4.0  ## surf-server sv_friction (CS2 matchmaking default is 5.2)
 const STOP_SPEED := 3.5
 const GROUND_ACCEL := 5.5
@@ -24,7 +24,7 @@ const AIR_CAP := 1.5  ## R14: widened air turn window, deliberate parity break (
 ## v=48: 107 -> 215 deg/s). R13 telemetry showed authentic sync-window overrun at surf
 ## speeds -- physics verified faithful to the sync-window math, feel rejected. Was 0.75
 ## (gravity-ratio-matched to CS2's per-tick hold-vs-slide ratio, ~3.3:1 at 120 Hz); that
-## match is now intentionally broken in favor of feel. Lab-scope only.
+## match is now intentionally broken in favor of feel. Game-wide since the phase-3a adoption.
 const OVERBOUNCE := 1.0
 
 

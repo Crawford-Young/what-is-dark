@@ -40,11 +40,20 @@ Derived from `project.godot` `[input]` and `scripts/player.gd`.
 
 Wall traversal has no dedicated bind. Hitting a side wall while airborne and above minimum speed rides it **automatically** — no input required. **Press** Jump during the ride to kick off it; holding Jump through the ride fires nothing, since the kick reads the press edge. Riding preserves along-wall speed with a capped sink; the kick keeps your horizontal speed and adds upward velocity.
 
+## Course-law harness (phase 4)
+
+The shipped course is audited against its own declared intent. `just audit` instantiates the live course scene headlessly and walks it at every erosion loop (0–5) with two independent survey methods — a box-metadata read and a physics ray grid — then applies the course laws (reach, chasm growth/plateau/runout, precision chains, ride budgets, shell breaks) and prints per-pass sample counts, every finding, and a verdict.
+
+- **Declaration contract** — every traversal span names its intended verb in `data/course_declarations.json` (`bare_run`, `carried_speed`, `wall_ride`, `chasm`, `surf_transfer`; `gate_deploy` is reserved for phase 4.1). An undeclared span is itself a finding: the harness checks geometry against an intent, and absent an intent there is nothing to check.
+- **Baseline pin** — `CourseAudit.BASELINE_FINDINGS` pins the 46 adjudicated findings the audit is allowed to report, each inline-commented with its issue number and ruling. `just audit` exits 0 only when the live finding set equals the pin, so a new defect fails loudly — and a silently fixed one fails loudly too (stale baseline).
+
 ## How to run / test
 
 - `just run` — play
 - `just edit` — open the Godot editor
 - `just test` — headless GUT unit tests
+- `just audit` — course-law audit: walk the live course against its declared intent (see below)
+- `just launch` — 600-frame headless launch smoke, fails on any error or warning (the same gate CI runs)
 - `just import` — import assets headlessly (after adding new assets, or after any `.tscn` edit)
 - `just momentum-lab` — run the momentum lab scene directly
 
