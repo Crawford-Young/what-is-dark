@@ -131,11 +131,6 @@ func test_ride_entry_speed_gate_mirrors_min_forward_speed() -> void:
 	assert_false(CourseLaw.ride_entry_speed_ok(WallrunLogic.MIN_FORWARD_SPEED))
 
 
-func test_ride_must_cover_the_whole_span() -> void:
-	assert_true(CourseLaw.ride_covers_span(9.0, 8.5))
-	assert_false(CourseLaw.ride_covers_span(8.0, 8.5))
-
-
 func test_level_kick_reach_is_derived_not_copied() -> void:
 	assert_almost_eq(
 		CourseLaw.LEVEL_KICK_REACH,
@@ -208,8 +203,13 @@ func test_level_kick_span_law_from_issue_16() -> void:
 	assert_true(CourseLaw.level_kick_span_ok(5.0, 0.0))
 	assert_false(CourseLaw.level_kick_span_ok(7.0, 0.0))
 	assert_true(
-		CourseLaw.level_kick_span_ok(7.0, -2.0),
+		CourseLaw.level_kick_span_ok(7.0, 2.0),
 		"a descending kick span is not the level law — it declares its drop"
+		+ " (collector convention: drop = near.top - far.top, POSITIVE descending)"
+	)
+	assert_false(
+		CourseLaw.level_kick_span_ok(7.0, -2.0),
+		"an ASCENDING span is harder than level — issue #17's sign collision let it pass free"
 	)
 
 

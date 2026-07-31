@@ -32,6 +32,7 @@ const COL_NAME := "Col"
 const ROLE_WALL := "ride_wall"
 const ROLE_RAMP := "surf_ramp"
 const ROLE_PROP := "prop"
+const ROLE_CEILING := "ceiling"
 
 ## Subtrees that are not course geometry: the player carries the capsule the laws measure against,
 ## and the void wall is a moving hazard, not a surface anyone stands on.
@@ -213,29 +214,34 @@ func _ray_span(
 	space: PhysicsDirectSpaceState3D, id: String, box_span: Dictionary, near: Dictionary,
 	far: Dictionary
 ) -> Dictionary:
-	var x := (maxf(float(near["x_min"]), float(far["x_min"]))
-		+ minf(float(near["x_max"]), float(far["x_max"]))) * 0.5
+	var x := _span_probe_x(near, far)
 
 	# Each lip is the physics edge of its OWN body, found by bisecting an identity-checked ray
-	# between the body's centre (a hit) and the gap's midpoint (a miss on a healthy course). A
-	# body secretly extending into the gap drags its lip with it, which is the point.
+	# between a point ON its face at the probe x (a hit — the face z MID there, because on a
+	# diagonal face the box's z centre can lie off the face entirely) and the gap's midpoint
+	# (a miss on a healthy course). A body secretly extending into the gap drags its lip with
+	# it, which is the point.
 	# Lip to lip and nothing else: that is the distance the reach laws consume, and it is what
 	# the box read reports. A ramp, kicker or lip legitimately standing INSIDE the gap does not
 	# shorten the jump — the first version of this method walked the interior for fillers and
 	# disagreed with the shipped course on 21 spans, every one of them course furniture doing its
 	# job (issue #13). The fill walk lives on where the two-method rule was born: the chasms.
 	var gap_mid := (float(near["z_min"]) + float(far["z_max"])) * 0.5
-	var near_lip := _bisect_z(
-		space, near, x, (float(near["z_min"]) + float(near["z_max"])) * 0.5, gap_mid
-	)
-	var far_lip := _bisect_z(
-		space, far, x, (float(far["z_min"]) + float(far["z_max"])) * 0.5, gap_mid
-	)
+	var near_anchor := (
+		_face_edge_z(near, x, true) + _face_edge_z(near, x, false)
+	) * 0.5
+	var far_anchor := (
+		_face_edge_z(far, x, true) + _face_edge_z(far, x, false)
+	) * 0.5
+	var near_lip := _bisect_z(space, near, x, near_anchor, gap_mid)
+	var far_lip := _bisect_z(space, far, x, far_anchor, gap_mid)
 	var span := near_lip - far_lip
 
-	# Landing width at half a metre past the far lip, edges bisected on the far body's identity.
+	# Landing width along the shared `_landing_z` line, edges bisected on the far body's
+	# identity — the box pass measures the same line, so the two reads stay comparable on
+	# rotated faces too.
 	var x_centre := (float(far["x_min"]) + float(far["x_max"])) * 0.5
-	var z_land := far_lip - RAY_MARGIN
+	var z_land := _landing_z(far, far_lip)
 	var left := _bisect_x(space, far, z_land, x_centre, float(far["x_min"]) - 1.0)
 	var right := _bisect_x(space, far, z_land, x_centre, float(far["x_max"]) + 1.0)
 
@@ -244,6 +250,12 @@ func _ray_span(
 		"span": span,
 		"drop": box_span["drop"],
 		"landing_width": absf(right - left),
+		# From this pass's OWN bisected lips (cold-review finding 3): the sweep runs over both
+		# surveys, and a ray row defaulting these to 0.0 would manufacture hundreds-of-metres
+		# chain gaps and a spurious ride FAIL at every loop. Populating from the lips also keeps
+		# the two-method comparison honest for chain geometry.
+		"z_from": near_lip,
+		"z_to": far_lip,
 		"void_punished": box_span["void_punished"],
 		"marker_break_before": box_span["marker_break_before"],
 	}
@@ -360,18 +372,28 @@ func _ray_hits(
 ## target — the ray's origin sits INSIDE the resting occluder instead, which `intersect_ray`
 ## ignores (`hit_from_inside` defaults off), so the probe reaches the face beneath. Without this,
 ## the bisection start on an occupied tile is false and the lip collapses to mid-tile.
+##
+## The window is SHALLOW below the face too (T8a): `surface_y_at` tracks the face exactly, so
+## depth buys nothing on the face itself — what a deep window did buy, wrongly, was hits on the
+## SIDE silhouette of a rotated box past the face lip, which read as "still on the face" and
+## dragged the bisected lip up to a thickness-term away from where the top face actually ends.
+## Both passes must mean the same edge: the top face's.
 const _FACE_ABOVE := 0.02
-const _FACE_BELOW := 1.0
+const _FACE_BELOW := 0.1
 
 
+## Both bisections recompute the window PER PROBE from `surface_y_at` (cold-review finding 2):
+## a fixed `top`-anchored window fails on a sloped box from step 0, because the identity anchor
+## sits at the box's centre where a rising face puts the surface above `edge + 0.02` — the ray
+## origin lands inside the body, `hit_from_inside` is off, and the anchor reads MISS.
 func _bisect_z(
 	space: PhysicsDirectSpaceState3D, body_row: Dictionary, x: float, z_hit: float, z_miss: float
 ) -> float:
-	var top := float(body_row["top"])
 	var target: Variant = body_row["node"]
 	for i in 20:
 		var mid := (z_hit + z_miss) * 0.5
-		if _ray_hits(space, x, mid, top + _FACE_ABOVE, top - _FACE_BELOW, target):
+		var face := surface_y_at(body_row, mid, x)
+		if _ray_hits(space, x, mid, face + _FACE_ABOVE, face - _FACE_BELOW, target):
 			z_hit = mid
 		else:
 			z_miss = mid
@@ -381,11 +403,11 @@ func _bisect_z(
 func _bisect_x(
 	space: PhysicsDirectSpaceState3D, body_row: Dictionary, z: float, x_hit: float, x_miss: float
 ) -> float:
-	var top := float(body_row["top"])
 	var target: Variant = body_row["node"]
 	for i in 20:
 		var mid := (x_hit + x_miss) * 0.5
-		if _ray_hits(space, mid, z, top + _FACE_ABOVE, top - _FACE_BELOW, target):
+		var face := surface_y_at(body_row, z, mid)
+		if _ray_hits(space, mid, z, face + _FACE_ABOVE, face - _FACE_BELOW, target):
 			x_hit = mid
 		else:
 			x_miss = mid
@@ -478,10 +500,19 @@ func _capsule_diameter() -> float:
 ## The course's own surfaces: one row per single-`Col` body. The aggregates are reached through
 ## `props` and the shell scan instead — issue #9. Erosion metadata lives on the body, and role is
 ## a property of a surface, not of a collider.
+##
+## Membership is VALIDATION membership, not graph membership (T8a, cold-review finding 5): every
+## roled box gets a row — `ride_wall` and `ceiling` included — because `validate_surface` and the
+## erodable-legality check run over these rows and nothing else; a role excluded here was a role
+## the laws could never reach. Un-roled boxes get a row when the course can stand on them (level,
+## or a walkable slope), which is what puts them on the authoring worklist demanding a role.
+## Graph exclusion lives wholly in `_floor_boxes`.
 func _surfaces(boxes: Array[Dictionary]) -> Array[Dictionary]:
 	var surfaces: Array[Dictionary] = []
 	for row in boxes:
-		if bool(row["aggregate"]) or _is_wall(row) or not bool(row["level"]):
+		if bool(row["aggregate"]):
+			continue
+		if str(row["role"]) == "" and not bool(row["level"]) and not _traversable(row):
 			continue
 		var floors_map := _manifest.get("floors", {}) as Dictionary
 		var declared: Dictionary = (_manifest.get("surfaces", {}) as Dictionary).get(row["name"], {})
@@ -538,6 +569,9 @@ func _walls(boxes: Array[Dictionary]) -> Array[Dictionary]:
 			# basis column for that axis — level on an unrotated wall, which is what the ride gate
 			# (|normal.y| ≤ 0.2) is measured against.
 			"normal_y": _face_normal_y(row),
+			# T8a part 3: the chain law's gap arithmetic needs each wall's course-axis extent.
+			"z_min": row["z_min"],
+			"z_max": row["z_max"],
 		})
 	return walls
 
@@ -596,9 +630,9 @@ func _lane_at(floors: Array[Dictionary], x_min: float, x_max: float) -> String:
 # --- spans -----------------------------------------------------------------------------------
 
 
-## Floor tops in course order (−z). A declared wall or ramp is excluded, and so is anything
-## standing taller than its own footprint — the aspect test is what stops a yaw-only wall from
-## entering the span graph as a floor.
+## Floor tops in course order (−z): every traversable surface the graph may route across.
+## `ride_wall` and `ceiling` are excluded by ROLE — a ride's budget must never compete with a
+## bare-run reach on the same geometry — and everything else by the traversable test below.
 func _floor_boxes(boxes: Array[Dictionary], surfaces: Array[Dictionary]) -> Array[Dictionary]:
 	var by_name := {}
 	for row in surfaces:
@@ -608,13 +642,29 @@ func _floor_boxes(boxes: Array[Dictionary], surfaces: Array[Dictionary]) -> Arra
 	for row in boxes:
 		if not by_name.has(str(row["name"])):
 			continue
-		var size: Vector3 = row["size"]
-		if size.y >= minf(size.x, size.z) * WALL_ASPECT:
+		var role := str(row["role"])
+		if role == ROLE_WALL or role == ROLE_CEILING:
+			continue
+		if not _traversable(row):
 			continue
 		floor_boxes.append(row)
 	floor_boxes.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		return float(a["z_max"]) > float(b["z_max"]))
 	return floor_boxes
+
+
+## T8a (issue #15): a box the course crosses ON — walkably tilted (the threshold reuses
+## `RAMP_MIN_DEG` because it mirrors the game's own `FLOOR_LIMIT_DEG`, so the collector is
+## exactly as strict as the game it audits) or a declared surf ramp, ridden at any angle. The
+## aspect test is what stops a yaw-only wall from entering the span graph as a floor; an
+## un-roled steep slope stays out, exactly as before.
+func _traversable(row: Dictionary) -> bool:
+	var size: Vector3 = row["size"]
+	if size.y >= minf(size.x, size.z) * WALL_ASPECT:
+		return false
+	if str(row["role"]) == ROLE_RAMP:
+		return true
+	return float(row["normal_y"]) >= cos(deg_to_rad(CourseLaw.RAMP_MIN_DEG))
 
 
 ## Each floor surface offers exactly one successor: the nearest floor ahead along −z whose x
@@ -631,7 +681,14 @@ func _spans(floor_boxes: Array[Dictionary], boxes: Array[Dictionary]) -> Array[D
 		if far.is_empty():
 			continue
 
-		var length := float(near["z_min"]) - float(far["z_max"])
+		# Measured face lip to face lip at the same x the ray pass probes: the AABB footprint
+		# overstates a tilted box by its thickness term (sy·sinθ), and a yawed face's lip is
+		# DIAGONAL, so the physical gap is a function of x. The successor CLASSIFICATION above
+		# stays on the AABB — conservative — but the measurement must match the physics.
+		var probe_x := _span_probe_x(near, far)
+		var z_from := _face_edge_z(near, probe_x, true)
+		var z_to := _face_edge_z(far, probe_x, false)
+		var length := z_from - z_to
 		if length < CourseLaw.MIN_SPAN:
 			continue
 		# Two tiles of one logical floor are a seam, not a span — the perforation laws own them,
@@ -643,24 +700,198 @@ func _spans(floor_boxes: Array[Dictionary], boxes: Array[Dictionary]) -> Array[D
 		spans.append({
 			"id": "%s>%s" % [str(near["name"]), str(far["name"])],
 			"span": length,
+			# Collector sign convention, consumed by `level_kick_span_ok`: POSITIVE = descending.
+			# Sloped endpoints feed their AABB `top` here — a documented approximation (T8a design
+			# part 1); the only law reading a collector drop is scoped to `bare_run`, which never
+			# legitimately launches onto a ramp face.
 			"drop": float(near["top"]) - float(far["top"]),
-			"landing_width": float(far["x_max"]) - float(far["x_min"]),
+			"landing_width": (
+				_face_edge_x(far, _landing_z(far, z_to), false)
+				- _face_edge_x(far, _landing_z(far, z_to), true)
+			),
+			"z_from": z_from,
+			"z_to": z_to,
 			"void_punished": _void_between(near, far, boxes),
 			"marker_break_before": _marker_between(marker_zs, near, far),
 		})
 	return spans
 
 
+## The handoff rule (T8a design part 1). Walking candidates ahead in z_max-descending order,
+## the first x-overlapping one that is not skipped decides:
+## - abuts/overlaps in z AND the top faces meet at the shared edge → HANDOFF: the course
+##   continues on foot, `near` offers no span at all;
+## - abuts/overlaps WITHOUT height abutment → stacked geometry (a catch ledge below, a raised
+##   lip above): neither an endpoint nor a terminator — skip and keep searching, or the real
+##   span past the ledge is silently deleted (cold-review finding 1);
+## - clear z gap → the span.
 func _successor(floor_boxes: Array[Dictionary], index: int) -> Dictionary:
 	var near: Dictionary = floor_boxes[index]
 	for j in range(index + 1, floor_boxes.size()):
 		var far: Dictionary = floor_boxes[j]
-		if float(far["z_max"]) > float(near["z_min"]) + CourseLaw.EPS:
-			continue
 		if not _overlaps(near, far, "x_min", "x_max"):
+			continue
+		if float(far["z_max"]) >= float(near["z_min"]) - CourseLaw.MIN_SPAN:
+			if _faces_meet(near, far):
+				return {}
 			continue
 		return far
 	return {}
+
+
+## Face heights are linear in x at fixed z, so the interval over the x overlap is spanned by
+## its two ends; the faces meet when the two intervals come within `METHOD_TOLERANCE` (its
+## "two reads agree" semantics — the course is authored to abut exactly, the tolerance covers
+## float drift and the face computation). The interval form, not a centre-line sample, is what
+## lets a roll-tilted surf ramp hand off to the level floor its LOW edge feeds.
+func _faces_meet(near: Dictionary, far: Dictionary) -> bool:
+	var x_lo := maxf(float(near["x_min"]), float(far["x_min"]))
+	var x_hi := minf(float(near["x_max"]), float(far["x_max"]))
+	var near_a := INF
+	var near_b := -INF
+	var far_a := INF
+	var far_b := -INF
+	for x in [x_lo, x_hi]:
+		# Heights read at near's FACE lip for this x, never at its AABB edge: a tilted box's
+		# AABB overhangs the face by its thickness term, and the plane extrapolated there
+		# overstates the lip height by tanθ times that overhang.
+		var edge := _face_edge_z(near, float(x), true)
+		var near_h := surface_y_at(near, edge, float(x))
+		var far_h := surface_y_at(far, edge, float(x))
+		near_a = minf(near_a, near_h)
+		near_b = maxf(near_b, near_h)
+		far_a = minf(far_a, far_h)
+		far_b = maxf(far_b, far_h)
+	return (
+		near_a <= far_b + CourseLaw.METHOD_TOLERANCE
+		and far_a <= near_b + CourseLaw.METHOD_TOLERANCE
+	)
+
+
+## The top face's height at a footprint point, from the box basis: `top` for a level box, the
+## face plane elsewhere. Both coordinates are clamped into the footprint so an edge query never
+## extrapolates past the face. The x term is a deliberate extension of the design's z-only
+## signature: the shipped surf ramps carry compound rotations, and on a rolled face the height
+## varies across x by metres — a z-only read misses the probe point by up to the half-width.
+func surface_y_at(row: Dictionary, z: float, x: float) -> float:
+	var up: Vector3 = (row["basis"] as Basis).y.normalized()
+	if bool(row["level"]) or absf(up.y) < CourseLaw.EPS:
+		return float(row["top"])
+	var size: Vector3 = row["size"]
+	var face := Vector3(
+		(float(row["x_min"]) + float(row["x_max"])) * 0.5,
+		(float(row["top"]) + float(row["bottom"])) * 0.5,
+		(float(row["z_min"]) + float(row["z_max"])) * 0.5,
+	) + up * (size.y * 0.5)
+	var cx := clampf(x, float(row["x_min"]), float(row["x_max"]))
+	var cz := clampf(z, float(row["z_min"]), float(row["z_max"]))
+	return face.y - (up.x * (cx - face.x) + up.z * (cz - face.z)) / up.y
+
+
+## The top face's plan-projected boundary z at a given x — the physical lip a span departs
+## from (`toward_min` true, the −z side) or arrives at (false, the +z side). Identical to the
+## AABB for an unrotated box; for a rotated one the face projects to a parallelogram narrower
+## than the AABB (by the thickness term on a tilted box, diagonally on a yawed one).
+func _face_edge_z(row: Dictionary, x: float, toward_min: bool) -> float:
+	return _face_edge(row, x, true, toward_min)
+
+
+## The transpose: the face's boundary x at a given z — the physical width of a landing line.
+func _face_edge_x(row: Dictionary, z: float, toward_min: bool) -> float:
+	return _face_edge(row, z, false, toward_min)
+
+
+## The face's plan projection is the parallelogram `fc ± u ± v` (u, v its half-axes in plan).
+## The boundary along one axis at a fixed value of the other is found by clipping that line
+## against the (a, b) ∈ [−1, 1]² parameter square: the output is linear along the clipped
+## segment, so its extremes sit at the segment's ends. A probe outside the face's own plan
+## range clamps to the nearest boundary point.
+func _face_edge(row: Dictionary, at: float, solve_x: bool, toward_min: bool) -> float:
+	var basis: Basis = row["basis"]
+	var up := basis.y.normalized()
+	var lo_key := "z_min" if solve_x else "x_min"
+	var hi_key := "z_max" if solve_x else "x_max"
+	if absf(basis.x.x) > 1.0 - CourseLaw.EPS and up.y > 1.0 - CourseLaw.EPS:
+		return float(row[lo_key]) if toward_min else float(row[hi_key])
+
+	var size: Vector3 = row["size"]
+	var fcx := (float(row["x_min"]) + float(row["x_max"])) * 0.5 + up.x * size.y * 0.5
+	var fcz := (float(row["z_min"]) + float(row["z_max"])) * 0.5 + up.z * size.y * 0.5
+	# S = the axis the probe fixes, O = the axis whose boundary is reported.
+	var fc_s := fcx if solve_x else fcz
+	var fc_o := fcz if solve_x else fcx
+	var u_s := (basis.x.x if solve_x else basis.x.z) * size.x * 0.5
+	var u_o := (basis.x.z if solve_x else basis.x.x) * size.x * 0.5
+	var v_s := (basis.z.x if solve_x else basis.z.z) * size.z * 0.5
+	var v_o := (basis.z.z if solve_x else basis.z.x) * size.z * 0.5
+	# Solve the fixed axis with the parameter that actually moves it; the other sweeps.
+	if absf(u_s) < absf(v_s):
+		var swap_s := u_s
+		var swap_o := u_o
+		u_s = v_s
+		u_o = v_o
+		v_s = swap_s
+		v_o = swap_o
+
+	var d := at - fc_s
+	var out_lo := INF
+	var out_hi := -INF
+	if absf(u_s) < CourseLaw.EPS:
+		# The projection is degenerate along the fixed axis — a line; extremes at b = ±1.
+		for b in [-1.0, 1.0]:
+			var out := fc_o + float(b) * v_o
+			out_lo = minf(out_lo, out)
+			out_hi = maxf(out_hi, out)
+	else:
+		var b_lo := -1.0
+		var b_hi := 1.0
+		if absf(v_s) >= CourseLaw.EPS:
+			b_lo = clampf(minf((d - u_s) / v_s, (d + u_s) / v_s), -1.0, 1.0)
+			b_hi = clampf(maxf((d - u_s) / v_s, (d + u_s) / v_s), -1.0, 1.0)
+		for b in [b_lo, b_hi]:
+			var a := clampf((d - float(b) * v_s) / u_s, -1.0, 1.0)
+			var out := fc_o + a * u_o + float(b) * v_o
+			out_lo = minf(out_lo, out)
+			out_hi = maxf(out_hi, out)
+	return out_lo if toward_min else out_hi
+
+
+## The x both passes measure a span along: the middle of the two FACES' plan x overlap. The
+## AABB overlap is wrong on a rotated endpoint — its extra thickness width admits probe lines
+## the face never reaches, where a ray has nothing to hit and the box read returns a corner
+## clamp; the G2 pads' right edge against the diagonal G2Ramp1 face is the shipped case.
+func _span_probe_x(near: Dictionary, far: Dictionary) -> float:
+	var near_range := _face_x_range(near)
+	var far_range := _face_x_range(far)
+	return (maxf(near_range.x, far_range.x) + minf(near_range.y, far_range.y)) * 0.5
+
+
+## The face's overall plan x extent — the AABB's for an unrotated box, the parallelogram's
+## (`fcx ± (|ux| + |vx|)`) otherwise.
+func _face_x_range(row: Dictionary) -> Vector2:
+	var basis: Basis = row["basis"]
+	var up := basis.y.normalized()
+	if absf(basis.x.x) > 1.0 - CourseLaw.EPS and up.y > 1.0 - CourseLaw.EPS:
+		return Vector2(float(row["x_min"]), float(row["x_max"]))
+	var size: Vector3 = row["size"]
+	var fcx := (float(row["x_min"]) + float(row["x_max"])) * 0.5 + up.x * size.y * 0.5
+	var half := absf(basis.x.x) * size.x * 0.5 + absf(basis.z.x) * size.z * 0.5
+	return Vector2(fcx - half, fcx + half)
+
+
+## Where a landing width is measured: half a metre inside the arrival lip for a plain level
+## box, the face's own plan centre-line for a rotated one — a lip-hugging line on a diagonal
+## face runs straight off it. BOTH methods measure this same line, or their widths diverge by
+## construction.
+func _landing_z(far: Dictionary, lip: float) -> float:
+	var basis: Basis = far["basis"]
+	if absf(basis.x.x) > 1.0 - CourseLaw.EPS and bool(far["level"]):
+		return lip - RAY_MARGIN
+	var up := basis.y.normalized()
+	return (
+		(float(far["z_min"]) + float(far["z_max"])) * 0.5
+		+ up.z * (far["size"] as Vector3).y * 0.5
+	)
 
 
 ## A gap is void-punished when nothing catches a short landing: no box reaching into the OPEN
