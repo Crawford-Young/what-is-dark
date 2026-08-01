@@ -31,3 +31,7 @@ launch:
 # run the momentum lab (Source-movement evaluation)
 momentum-lab:
     "{{godot}}" --path . scenes/momentum_lab.tscn
+
+# run the surf lab (T3 hop-chain array)
+surf-lab:
+    "{{godot}}" --path . scenes/surf_lab.tscn
