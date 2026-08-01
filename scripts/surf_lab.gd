@@ -26,6 +26,16 @@ const HALF_WIDTH := 6.0         ## hop-chain trough half-width (narrower than mo
 ## 18 m surf run -- this is a single-line hop chain, not a wide carve field).
 const PAD_CLEARANCE := 0.5      ## entry pads sit above the ramp entry centreline (3b #15).
 
+## T2 seam array (R1 #23 sanctioned rig): lip-to-lip ramp seams swept across a
+## spine-pitch delta, at two entry-speed bands. Face angle stays FACE_ANGLE_DEG
+## throughout -- only the pitch changes, so the seam risk under measurement is
+## purely the along-path direction change at the lip.
+const SEAM_DELTAS_DEG := [5.0, 10.0, 15.0, 20.0, 25.0, 30.0]
+const BAND_A_ENTRY_X := 60.0    ## Band A (~17 m/s) clusters, spaced away from the T1 chain at x=0.
+const BAND_B_ENTRY_X := -60.0   ## Band B (~27 m/s) clusters, opposite side.
+const CLUSTER_X_SPACING := 50.0 ## lateral spread from FACE_ANGLE_DEG banking is ~20 m at most;
+## 50 m keeps every cluster clear of its neighbours.
+
 var _station := 0
 var _lowest_geometry_y := INF
 var _kill_y := -1000.0
@@ -39,7 +49,9 @@ var STATIONS: Array = []  ## populated by _build_hop_chain(): [{"label","spawn",
 
 func _ready() -> void:
 	_build_hop_chain()
-	_kill_y = _lowest_geometry_y - 10.0
+	_build_seam_array()
+	_kill_y = _lowest_geometry_y - 10.0  # recomputed from the FINAL built geometry (T1's
+	## builder rule) -- Band B's lead-in alone descends ~12 m, R1 #14.
 	_reset_to_station()
 
 
@@ -111,6 +123,85 @@ func _build_hop_chain() -> void:
 
 	STATIONS.append({"label": "LANDING", "spawn": Vector3(x, y + 1.0, z - 4.0), "face": FACE_FORWARD})
 	_add_box(Vector3(x, y - 0.5, z - 6.0), Vector3(HALF_WIDTH * 2.0, 1.0, 12.0), Color(0.24, 0.33, 0.27))
+
+
+## T2 seam array: builds both bands' six angle clusters. Each cluster is its
+## own entry pad + standard-T1-style lead-in (kicker-terminated, computed gap)
+## feeding a lip-to-lip Δ-cluster -- no gaps once the seam sweep starts, that's
+## the whole point of the rig. Station labels: "A-5°".."A-30°", "B-5°".."B-30°".
+func _build_seam_array() -> void:
+	for j in range(SEAM_DELTAS_DEG.size()):
+		_build_band_cluster("A", BAND_A_ENTRY_X + j * CLUSTER_X_SPACING, SEAM_DELTAS_DEG[j], 1)
+	for j in range(SEAM_DELTAS_DEG.size()):
+		_build_band_cluster("B", BAND_B_ENTRY_X - j * CLUSTER_X_SPACING, SEAM_DELTAS_DEG[j], 4)
+
+
+## One band+angle cluster: entry pad, `lead_in_count` standard T1 ramps (1 for
+## Band A's exit-17.31 lead-in, 4 for Band B's exit-27.17 lead-in), then the
+## lip-shared Δ-cluster fed by the lead-in's final exit speed.
+func _build_band_cluster(label_prefix: String, x: float, delta_deg: float, lead_in_count: int) -> void:
+	var y := 30.0
+	var z := 0.0
+	var entry_speed := 11.0  # SourceMove.RUN_SPEED -- entry_1 (source_move.gd:9)
+
+	STATIONS.append({"label": "%s-%d°" % [label_prefix, int(delta_deg)], "spawn": Vector3(x, y + 1.0, z + 2.0), "face": FACE_FORWARD})
+	_add_box(Vector3(x, y + PAD_CLEARANCE - 0.5, z + 2.0), Vector3(HALF_WIDTH * 2.0, 1.0, 4.0), Color(0.5, 0.4, 0.3))
+
+	for _i in range(lead_in_count):
+		var result := _build_lead_in_ramp(x, y, z, entry_speed)
+		z = result["z"]
+		y = result["y"]
+		entry_speed = result["exit_speed"]
+
+	_build_seam_cluster(x, y, z, entry_speed, delta_deg)
+
+
+## A single standard T1 ramp: pitch SPINE_PITCH_DEG, drop RAMP_DROP, face
+## FACE_ANGLE_DEG, kicker-terminated, T3-law computed gap onto a landing pad.
+## Same construction as _build_hop_chain()'s loop body, kept as its own
+## function here rather than refactored into T1's tested loop (T2 modifies
+## this file only to ADD the seam array, not to alter T1's built geometry).
+func _build_lead_in_ramp(x: float, y: float, z: float, entry_speed: float) -> Dictionary:
+	var path_len := RAMP_DROP / sin(deg_to_rad(SPINE_PITCH_DEG))
+	var horiz_span := path_len * cos(deg_to_rad(SPINE_PITCH_DEG))
+	var exit_speed: float = ETA * sqrt(entry_speed * entry_speed + 70.4 * RAMP_DROP)
+	var h_speed: float = exit_speed * cos(deg_to_rad(SPINE_PITCH_DEG))
+	var gap: float = GAP_FRACTION * 0.755 * h_speed
+
+	var peak_mid_z := z - horiz_span / 2.0
+	var peak_mid_y := y - RAMP_DROP / 2.0
+	_ramp_pair(x, peak_mid_z, FACE_ANGLE_DEG, peak_mid_y, HALF_WIDTH, path_len, SPINE_PITCH_DEG)
+
+	var low_z := z - horiz_span
+	var low_y := y - RAMP_DROP
+	_add_box_x(Vector3(x, low_y - 0.25, low_z - 1.5), Vector3(HALF_WIDTH * 2.0, 0.5, 3.0), KICKER_ANGLE_DEG, Color(0.9, 0.3, 0.3))
+
+	var pad_z := low_z - gap
+	_add_box(Vector3(x, low_y + PAD_CLEARANCE - 0.5, pad_z), Vector3(HALF_WIDTH * 2.0, 1.0, 4.0), Color(0.5, 0.4, 0.3))
+
+	return {"z": pad_z, "y": low_y, "exit_speed": exit_speed}
+
+
+## The measurement rig itself (R1 #23 sanctioned exemption): 4 ramps sharing
+## lips (no gaps, no kickers between them), spine pitches
+## SPINE_PITCH_DEG -> +delta -> SPINE_PITCH_DEG -> +delta so every ramp still
+## descends (R2 #11) and each of the 3 seams is a ±delta step. Face angle
+## stays FACE_ANGLE_DEG throughout -- pitch is the only swept parameter.
+## Exit speed at drop RAMP_DROP is independent of pitch (T3's energy-
+## normalized law), so entry speed climbs through the cluster exactly as it
+## would through any other T1-style chain -- no control ramp needed (R3 M1/M2).
+func _build_seam_cluster(x: float, y: float, z: float, entry_speed: float, delta_deg: float) -> void:
+	var pitches := [SPINE_PITCH_DEG, SPINE_PITCH_DEG + delta_deg, SPINE_PITCH_DEG, SPINE_PITCH_DEG + delta_deg]
+	for pitch in pitches:
+		var path_len: float = RAMP_DROP / sin(deg_to_rad(pitch))
+		var horiz_span: float = path_len * cos(deg_to_rad(pitch))
+		var peak_mid_z := z - horiz_span / 2.0
+		var peak_mid_y := y - RAMP_DROP / 2.0
+		_ramp_pair(x, peak_mid_z, FACE_ANGLE_DEG, peak_mid_y, HALF_WIDTH, path_len, pitch)
+
+		entry_speed = ETA * sqrt(entry_speed * entry_speed + 70.4 * RAMP_DROP)
+		z -= horiz_span
+		y -= RAMP_DROP
 
 
 ## Compound X+Z rotation builder, same math as momentum_lab.gd's _ramp_pair
