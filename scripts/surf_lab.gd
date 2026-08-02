@@ -14,8 +14,9 @@ const FACE_ANGLE_DEG := 51.34   # ramp face steepness (surfable: |normal.y| = co
 const SPINE_PITCH_DEG := 12.0   # along-path descent (T3: "~12 deg along-path descent")
 const RAMP_DROP := 3.0          # m vertical drop per ramp -> path = DROP / sin(12deg) = 14.43 m,
 								 # above the T3 12 m path-length design floor by construction
-const GAP_FRACTION := 0.85      # authored gap = fraction of the 0.755*h_speed ceiling (T3 run-1 factor;
-								 # commitment-first, feel gate tunes)
+const GAP_FRACTION := 0.65      # authored gap = fraction of the 0.755*h_speed ceiling, cut from
+								 # 0.85 after the 2026-08-02 hop feel gate (measured exits ~11-13 m/s h
+								 # vs law 16.94; probe-verified)
 const N_HOP_RAMPS := 5
 const FACE_FORWARD := Vector3(0.0, 0.0, -1.0)
 
@@ -25,6 +26,8 @@ const KICKER_ANGLE_DEG := 42.0  ## same value + reasoning as momentum_lab.gd KIC
 const HALF_WIDTH := 6.0         ## hop-chain trough half-width (narrower than momentum_lab's
 ## 18 m surf run -- this is a single-line hop chain, not a wide carve field).
 const PAD_CLEARANCE := 0.5      ## entry pads sit above the ramp entry centreline (3b #15).
+const PAD_LEN := 6.0            ## entry-pad z-length, widened 4.0 -> 6.0 at the same 2026-08-02
+## feel gate -- landing window vs void on both sides.
 
 ## T2 seam array (R1 #23 sanctioned rig): lip-to-lip ramp seams swept across a
 ## spine-pitch delta, at two entry-speed bands. Face angle stays FACE_ANGLE_DEG
@@ -104,7 +107,7 @@ func _reset_to_station() -> void:
 ## Builds the 5-ramp hop chain per the T3 law above: each ramp's exit speed
 ## feeds the next ramp as entry speed, the horizontal component of that exit
 ## speed (never total speed -- parent spec 5.1 rule 1) sets the transfer gap
-## via GAP_FRACTION * 0.755 * h_i. Gaps: 10.9 / 13.4 / 15.4 / 17.0 / 18.3 m,
+## via GAP_FRACTION * 0.755 * h_i. Gaps: 8.3 / 10.3 / 11.8 / 13.0 / 14.1 m,
 ## monotonic by construction (asserted below, T1 Step 1 requirement).
 func _build_hop_chain() -> void:
 	var path_len := RAMP_DROP / sin(deg_to_rad(SPINE_PITCH_DEG))
@@ -117,7 +120,7 @@ func _build_hop_chain() -> void:
 	var z := 0.0
 
 	STATIONS.append({"label": "START", "spawn": Vector3(x, y + 1.0, z + 2.0), "face": FACE_FORWARD})
-	_add_box(Vector3(x, y + PAD_CLEARANCE - 0.5, z + 2.0), Vector3(HALF_WIDTH * 2.0, 1.0, 4.0), Color(0.5, 0.4, 0.3))
+	_add_box(Vector3(x, y + PAD_CLEARANCE - 0.5, z + 2.0), Vector3(HALF_WIDTH * 2.0, 1.0, PAD_LEN), Color(0.5, 0.4, 0.3))
 
 	for i in range(N_HOP_RAMPS):
 		var exit_speed: float = ETA * sqrt(entry_speed * entry_speed + 70.4 * RAMP_DROP)
@@ -135,7 +138,7 @@ func _build_hop_chain() -> void:
 		_add_box_x(Vector3(x, low_y - 0.25, low_z - 1.5), Vector3(HALF_WIDTH * 2.0, 0.5, 3.0), KICKER_ANGLE_DEG, Color(0.9, 0.3, 0.3))
 
 		var pad_z := low_z - gap
-		_add_box(Vector3(x, low_y + PAD_CLEARANCE - 0.5, pad_z), Vector3(HALF_WIDTH * 2.0, 1.0, 4.0), Color(0.5, 0.4, 0.3))
+		_add_box(Vector3(x, low_y + PAD_CLEARANCE - 0.5, pad_z), Vector3(HALF_WIDTH * 2.0, 1.0, PAD_LEN), Color(0.5, 0.4, 0.3))
 		STATIONS.append({"label": "R%d" % (i + 1), "spawn": Vector3(x, low_y + 1.0, pad_z), "face": FACE_FORWARD})
 
 		entry_speed = exit_speed
@@ -166,7 +169,7 @@ func _build_band_cluster(label_prefix: String, x: float, delta_deg: float, lead_
 	var entry_speed := 11.0  # SourceMove.RUN_SPEED -- entry_1 (source_move.gd:9)
 
 	STATIONS.append({"label": "%s-%d°" % [label_prefix, int(delta_deg)], "spawn": Vector3(x, y + 1.0, z + 2.0), "face": FACE_FORWARD})
-	_add_box(Vector3(x, y + PAD_CLEARANCE - 0.5, z + 2.0), Vector3(HALF_WIDTH * 2.0, 1.0, 4.0), Color(0.5, 0.4, 0.3))
+	_add_box(Vector3(x, y + PAD_CLEARANCE - 0.5, z + 2.0), Vector3(HALF_WIDTH * 2.0, 1.0, PAD_LEN), Color(0.5, 0.4, 0.3))
 
 	for _i in range(lead_in_count):
 		var result := _build_lead_in_ramp(x, y, z, entry_speed)
@@ -199,7 +202,7 @@ func _build_lead_in_ramp(x: float, y: float, z: float, entry_speed: float) -> Di
 	_add_box_x(Vector3(x, low_y - 0.25, low_z - 1.5), Vector3(HALF_WIDTH * 2.0, 0.5, 3.0), KICKER_ANGLE_DEG, Color(0.9, 0.3, 0.3))
 
 	var pad_z := low_z - gap
-	_add_box(Vector3(x, low_y + PAD_CLEARANCE - 0.5, pad_z), Vector3(HALF_WIDTH * 2.0, 1.0, 4.0), Color(0.5, 0.4, 0.3))
+	_add_box(Vector3(x, low_y + PAD_CLEARANCE - 0.5, pad_z), Vector3(HALF_WIDTH * 2.0, 1.0, PAD_LEN), Color(0.5, 0.4, 0.3))
 
 	return {"z": pad_z, "y": low_y, "exit_speed": exit_speed}
 
