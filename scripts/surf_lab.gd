@@ -40,6 +40,12 @@ var _station := 0
 var _lowest_geometry_y := INF
 var _kill_y := -1000.0
 
+## DEBUG PROBE — remove before gates (T3 seam measurement campaign).
+var _probe_tick := 0
+var _probe_header_done := false
+var _probe_cluster_label := ""
+var _probe_seam_lips: Array = []  # [{"id": "A-5°#1", "pos": Vector3}, ...]
+
 var STATIONS: Array = []  ## populated by _build_hop_chain(): [{"label","spawn","face"}, ...]
 
 @onready var _player: Player = $Player
@@ -72,12 +78,27 @@ func _physics_process(_delta: float) -> void:
 	if _player.global_position.y < _kill_y:
 		var s: Dictionary = STATIONS[_station]
 		_player.teleport(s["spawn"], s["face"])
+	## DEBUG PROBE — remove before gates: per-tick campaign telemetry (T3).
+	if not _probe_header_done:
+		_probe_header_done = true
+		print("PROBE-CRITERIA: RETENTION := v_out / sqrt(v_in^2 + 2*35.2*drop_w), energy form, drop_w = measured window y-descent from position rows; RETENTION_MIN 0.98/seam; SEAM_WINDOW 24 ticks @ 120 Hz centred on the lip-crossing tick; STALL_FRAME = any window tick with h_speed < 0.5 * window-entry h_speed; RUNS_PER_CELL 5 (actual N reported per cell); entry speeds binned at 22 m/s by MEASURED entry speed")
+	var _probe_nearest := ""
+	var _probe_dist := INF
+	for lip in _probe_seam_lips:
+		var d: float = _player.global_position.distance_to(lip["pos"])
+		if d < _probe_dist:
+			_probe_dist = d
+			_probe_nearest = lip["id"]
+	print("PROBE,%d,%.4f,%.4f,%.4f,%.4f,%.4f,%s,%.3f" % [_probe_tick, _player.global_position.x, _player.global_position.y, _player.global_position.z, _player.velocity.length(), speed, _probe_nearest, _probe_dist])
+	_probe_tick += 1
 
 
 func _reset_to_station() -> void:
 	var s: Dictionary = STATIONS[_station]
 	_player.teleport(s["spawn"], s["face"])
 	_station_label.text = s["label"]
+	print("PROBE-RUN: station=%s ticks_captured=%d" % [s["label"], _probe_tick])  ## DEBUG PROBE — remove before gates
+	_probe_tick = 0  ## DEBUG PROBE — remove before gates
 
 
 ## Builds the 5-ramp hop chain per the T3 law above: each ramp's exit speed
@@ -153,6 +174,7 @@ func _build_band_cluster(label_prefix: String, x: float, delta_deg: float, lead_
 		y = result["y"]
 		entry_speed = result["exit_speed"]
 
+	_probe_cluster_label = "%s-%d°" % [label_prefix, int(delta_deg)]  ## DEBUG PROBE — remove before gates
 	_build_seam_cluster(x, y, z, entry_speed, delta_deg)
 
 
@@ -192,7 +214,11 @@ func _build_lead_in_ramp(x: float, y: float, z: float, entry_speed: float) -> Di
 ## would through any other T1-style chain -- no control ramp needed (R3 M1/M2).
 func _build_seam_cluster(x: float, y: float, z: float, entry_speed: float, delta_deg: float) -> void:
 	var pitches := [SPINE_PITCH_DEG, SPINE_PITCH_DEG + delta_deg, SPINE_PITCH_DEG, SPINE_PITCH_DEG + delta_deg]
+	var _probe_i := 0  ## DEBUG PROBE — remove before gates
 	for pitch in pitches:
+		if _probe_i > 0:  ## DEBUG PROBE — remove before gates: seam lip = entry of ramps 2/3/4
+			_probe_seam_lips.append({"id": "%s#%d" % [_probe_cluster_label, _probe_i], "pos": Vector3(x, y, z)})
+		_probe_i += 1  ## DEBUG PROBE — remove before gates
 		var path_len: float = RAMP_DROP / sin(deg_to_rad(pitch))
 		var horiz_span: float = path_len * cos(deg_to_rad(pitch))
 		var peak_mid_z := z - horiz_span / 2.0
