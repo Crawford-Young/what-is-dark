@@ -1,12 +1,21 @@
 extends Node3D
-## Surf lab: T3 hop-chain array -- 5 kicker-terminated ramps, each a steep-FACE
-## trough (momentum_lab.gd _ramp_pair style) descending RAMP_DROP along a
-## shallow SPINE_PITCH_DEG spine, separated by air-transfer gaps computed from
-## the T3 law so each transfer lands cleanly on the next ramp's entry pad.
+## Surf lab: a range rig (one runway, one ramp, one striped landing field) plus
+## the T2 seam-sweep arrays. The rig measures real flight distance -- the
+## player flies off the ramp's lip carrying full velocity (no kicker) and
+## reads how far they land off the field's distance stripes; a real hop
+## chain's gaps get authored from THAT measured data later, never from a
+## law-predicted range (range-rig ruling, 2026-08-02, supersedes the earlier
+## 5-ramp ballistic-transfer chain).
 ## Station cycling follows the momentum_lab pattern (there N/1/2/3, here N/P).
 ## Keys: N/P = next/previous station.
 
 ## T3 law: exit = ETA * sqrt(v_in^2 + 2 * GRAVITY * drop); GRAVITY 35.2 -> 70.4 factor.
+## Still governs every ramp's exit speed (the range rig's single ramp included) --
+## only the CHAIN geometry between ramps has changed across rulings. Kickers
+## REMOVED 2026-08-02 (feel gate): a 42deg plate off a 12deg spine is a 54deg
+## direction change, and clip retains only ~cos(54deg) ~= 0.59 of speed --
+## measured 11 vs law 17 m/s. Kickers are now a deliberate speed-kill tool for
+## future course design, never used in this lab.
 const ETA := 0.95
 const FACE_ANGLE_DEG := 51.34   # ramp face steepness (surfable: |normal.y| = cos(51.34deg) ~ 0.62,
 								 # above FLOOR_LIMIT_DEG 38 so it classifies wall, and >> RIDE_MAX_NORMAL_Y
@@ -14,20 +23,20 @@ const FACE_ANGLE_DEG := 51.34   # ramp face steepness (surfable: |normal.y| = co
 const SPINE_PITCH_DEG := 12.0   # along-path descent (T3: "~12 deg along-path descent")
 const RAMP_DROP := 3.0          # m vertical drop per ramp -> path = DROP / sin(12deg) = 14.43 m,
 								 # above the T3 12 m path-length design floor by construction
-const GAP_FRACTION := 0.65      # authored gap = fraction of the 0.755*h_speed ceiling, cut from
-								 # 0.85 after the 2026-08-02 hop feel gate (measured exits ~11-13 m/s h
-								 # vs law 16.94; probe-verified)
-const N_HOP_RAMPS := 5
+const BAND_B_LEADIN_DROP := 9.9 # single-ramp Band B lead-in drop (law: 0.95*sqrt(11^2+70.4*9.9)
+								 # = 27.17, replaces the old 4-ramp kicker-terminated chain)
 const FACE_FORWARD := Vector3(0.0, 0.0, -1.0)
 
-const KICKER_ANGLE_DEG := 42.0  ## same value + reasoning as momentum_lab.gd KICKER_ANGLE:
-## 4deg steeper than FLOOR_LIMIT_DEG (38, scripts/player.gd) so wall/floor classification
-## never grazes the boundary -- reused as-is, not re-tuned (that's feel-gate scope, later).
 const HALF_WIDTH := 6.0         ## hop-chain trough half-width (narrower than momentum_lab's
 ## 18 m surf run -- this is a single-line hop chain, not a wide carve field).
-const PAD_CLEARANCE := 0.5      ## entry pads sit above the ramp entry centreline (3b #15).
+const PAD_CLEARANCE := 0.5      ## entry pads sit above the ramp entry centreline (3b #15);
+## pads end FLUSH at the ramp entry (fixed 2026-08-02 -- a ramp starting at its pad's
+## CENTER buried the pad's far half under the trough's top; ramps now start at the
+## pad's far edge, jump distances unchanged, only the ramp start shifted).
 const PAD_LEN := 6.0            ## entry-pad z-length, widened 4.0 -> 6.0 at the same 2026-08-02
-## feel gate -- landing window vs void on both sides.
+## feel gate -- landing window vs void on both sides. Under CS-surf transfers every
+## runway pad is a STATION SPAWN ONLY, never a landing target -- the ballistic arc
+## clears each pad by ~3.4 m at its near edge and lands on the next ramp's trough.
 
 ## T2 seam array (R1 #23 sanctioned rig): lip-to-lip ramp seams swept across a
 ## spine-pitch delta, at two entry-speed bands. Face angle stays FACE_ANGLE_DEG
@@ -49,7 +58,7 @@ var _probe_header_done := false
 var _probe_cluster_label := ""
 var _probe_seam_lips: Array = []  # [{"id": "A-5°#1", "pos": Vector3}, ...]
 
-var STATIONS: Array = []  ## populated by _build_hop_chain(): [{"label","spawn","face"}, ...]
+var STATIONS: Array = []  ## populated by _build_range_rig() + _build_seam_array(): [{"label","spawn","face"}, ...]
 
 @onready var _player: Player = $Player
 @onready var _speed_label: Label = $HUD/SpeedLabel
@@ -57,7 +66,8 @@ var STATIONS: Array = []  ## populated by _build_hop_chain(): [{"label","spawn",
 
 
 func _ready() -> void:
-	_build_hop_chain()
+	_build_range_rig()
+	_build_transfer_lane()
 	_build_seam_array()
 	_kill_y = _lowest_geometry_y - 10.0  # recomputed from the FINAL built geometry (T1's
 	## builder rule) -- Band B's lead-in alone descends ~12 m, R1 #14.
@@ -104,107 +114,165 @@ func _reset_to_station() -> void:
 	_probe_tick = 0  ## DEBUG PROBE — remove before gates
 
 
-## Builds the 5-ramp hop chain per the T3 law above: each ramp's exit speed
-## feeds the next ramp as entry speed, the horizontal component of that exit
-## speed (never total speed -- parent spec 5.1 rule 1) sets the transfer gap
-## via GAP_FRACTION * 0.755 * h_i. Gaps: 8.3 / 10.3 / 11.8 / 13.0 / 14.1 m,
-## monotonic by construction (asserted below, T1 Step 1 requirement).
-func _build_hop_chain() -> void:
-	var path_len := RAMP_DROP / sin(deg_to_rad(SPINE_PITCH_DEG))
+## Range rig (replaces the 5-ramp authored chain, 2026-08-02 ruling round 4):
+## two lanes -- the standard 3.0 m ramp (station "RAMP", x=0) and a long lane
+## using the Band B lead-in drop (9.9 m, station "RAMP-L", x=-30, to
+## demonstrate max flight) -- each a runway + one ramp + an open striped
+## landing field. The player flies off the lip carrying full velocity (no
+## kicker, no authored gap) and reads their flight distance straight off the
+## stripes; a real hop chain's gaps get authored from THAT measured data
+## later, never from a law-predicted range.
+func _build_range_rig() -> void:
+	_build_range_lane(0.0, RAMP_DROP, 12, "RAMP")
+	_build_range_lane(-30.0, BAND_B_LEADIN_DROP, 20, "RAMP-L")
+
+
+## One range-rig lane: a runway + one ramp of `ramp_drop` vertical drop + a
+## striped landing field of `n_stripes` 10 m segments. Parameterized so both
+## lanes share identical construction -- only lane x, drop, and stripe count
+## differ.
+func _build_range_lane(lane_x: float, ramp_drop: float, n_stripes: int, station_label: String) -> void:
+	var start_y := 30.0
+
+	# Runway: 12 m of flush ground so the player reaches RUN_SPEED (bhop timing)
+	# before the ramp entry. Spans z=12 (spawn end) to z=0 (ramp entry, flush).
+	_add_box(Vector3(lane_x, start_y + PAD_CLEARANCE - 0.5, 6.0), Vector3(HALF_WIDTH * 2.0, 1.0, 12.0), Color(0.5, 0.4, 0.3))
+	STATIONS.append({"label": station_label, "spawn": Vector3(lane_x, start_y + 1.0, 12.0), "face": FACE_FORWARD})
+
+	# One ramp: entry flush at z=0 (the runway's far edge), lip below.
+	var path_len := ramp_drop / sin(deg_to_rad(SPINE_PITCH_DEG))
 	var horiz_span := path_len * cos(deg_to_rad(SPINE_PITCH_DEG))
+	var peak_mid_z := -horiz_span / 2.0
+	var peak_mid_y := start_y - ramp_drop / 2.0
+	_ramp_pair(lane_x, peak_mid_z, FACE_ANGLE_DEG, peak_mid_y, HALF_WIDTH, path_len, SPINE_PITCH_DEG)
 
-	var entry_speed := 11.0  # SourceMove.RUN_SPEED -- entry_1 (source_move.gd:9)
-	var gap_prev := -INF
-	var x := 0.0
-	var y := 30.0
-	var z := 0.0
+	var low_z := -horiz_span  # the lip
+	var low_y := start_y - ramp_drop
 
-	STATIONS.append({"label": "START", "spawn": Vector3(x, y + 1.0, z + 2.0), "face": FACE_FORWARD})
-	_add_box(Vector3(x, y + PAD_CLEARANCE - 0.5, z + 2.0), Vector3(HALF_WIDTH * 2.0, 1.0, PAD_LEN), Color(0.5, 0.4, 0.3))
+	# Landing field: open, no authored gap -- n_stripes abutting 10 m stripes
+	# (alternating dark/light) so flight distance reads directly off the
+	# ground. The first stripe boundary is the lip's own z, so
+	# distance-from-lip = stripes crossed.
+	var field_drop := 4.0  # field top sits this far below the lip -- tunable, not a law
+	var field_top := low_y - field_drop
+	var stripe_len := 10.0
+	for i in range(n_stripes):
+		var stripe_center_z := low_z - i * stripe_len - stripe_len / 2.0
+		var color := Color(0.3, 0.3, 0.3) if i % 2 == 0 else Color(0.55, 0.55, 0.55)
+		_add_box(Vector3(lane_x, field_top - 0.5, stripe_center_z), Vector3(30.0, 1.0, stripe_len), color)
 
-	for i in range(N_HOP_RAMPS):
-		var exit_speed: float = ETA * sqrt(entry_speed * entry_speed + 70.4 * RAMP_DROP)
-		var h_speed: float = exit_speed * cos(deg_to_rad(SPINE_PITCH_DEG))
-		var gap: float = GAP_FRACTION * 0.755 * h_speed
-		assert(gap > gap_prev, "hop-chain gaps must grow monotonically (T3 law)")
-		gap_prev = gap
 
-		var peak_mid_z := z - horiz_span / 2.0
-		var peak_mid_y := y - RAMP_DROP / 2.0
-		_ramp_pair(x, peak_mid_z, FACE_ANGLE_DEG, peak_mid_y, HALF_WIDTH, path_len, SPINE_PITCH_DEG)
+## Transfer rig: measures ramp-to-ramp CS-surf momentum carry -- fly off
+## ramp-1's lip, clear an 8.0 m gap (measured min flight in this speed band is
+## 10.1 m, so the min clears), land in ramp-2's trough, ride out, and fly onto
+## an open striped range field. Station "XFER". Modeled on
+## _build_range_lane's conventions (runway top, spawn at +z end, striped
+## field, _track_lowest via every _add_box*/_ramp_pair call) but built
+## directly rather than through that helper -- the two-ramp-plus-gap shape
+## doesn't fit its single-ramp parameterization.
+func _build_transfer_lane() -> void:
+	var cx := 30.0
+	var start_y := 30.0
+	var drop := 6.0  # deepened from RAMP_DROP's 3.0 -- user feedback 2026-08-03: 3 m gave too
+	## little face time to strafe. Both transfer-rig ramps only; the range lanes keep RAMP_DROP.
 
-		var low_z := z - horiz_span
-		var low_y := y - RAMP_DROP
-		_add_box_x(Vector3(x, low_y - 0.25, low_z - 1.5), Vector3(HALF_WIDTH * 2.0, 0.5, 3.0), KICKER_ANGLE_DEG, Color(0.9, 0.3, 0.3))
+	# Runway: identical construction to _build_range_lane's, shifted to cx.
+	_add_box(Vector3(cx, start_y + PAD_CLEARANCE - 0.5, 6.0), Vector3(HALF_WIDTH * 2.0, 1.0, 12.0), Color(0.5, 0.4, 0.3))
+	STATIONS.append({"label": "XFER", "spawn": Vector3(cx, start_y + 1.0, 12.0), "face": FACE_FORWARD})
 
-		var pad_z := low_z - gap
-		_add_box(Vector3(x, low_y + PAD_CLEARANCE - 0.5, pad_z), Vector3(HALF_WIDTH * 2.0, 1.0, PAD_LEN), Color(0.5, 0.4, 0.3))
-		STATIONS.append({"label": "R%d" % (i + 1), "spawn": Vector3(x, low_y + 1.0, pad_z), "face": FACE_FORWARD})
+	# Ramp-1: same construction as the RAMP lane's ramp -- entry flush at z=0.
+	var path_len := drop / sin(deg_to_rad(SPINE_PITCH_DEG))
+	var horiz_span := path_len * cos(deg_to_rad(SPINE_PITCH_DEG))
+	var peak1_mid_z := -horiz_span / 2.0
+	var peak1_mid_y := start_y - drop / 2.0
+	_ramp_pair(cx, peak1_mid_z, FACE_ANGLE_DEG, peak1_mid_y, HALF_WIDTH, path_len, SPINE_PITCH_DEG)
 
-		entry_speed = exit_speed
-		z = pad_z
-		y = low_y
+	var lip1_z := -horiz_span              # -28.2278
+	var lip1_y := start_y - drop           # 24.0
 
-	STATIONS.append({"label": "LANDING", "spawn": Vector3(x, y + 1.0, z - 4.0), "face": FACE_FORWARD})
-	_add_box(Vector3(x, y - 0.5, z - 6.0), Vector3(HALF_WIDTH * 2.0, 1.0, 12.0), Color(0.24, 0.33, 0.27))
+	# Gap: 8.0 m of nothing -- measured min flight in this speed band is
+	# 10.1 m, so the min clears.
+	var gap := 8.0
+	var entry2_z := lip1_z - gap           # -36.2278
+	var entry2_y := lip1_y - 2.0           # 22.0 -- user pick 2026-08-03: 4.0 read as too far down for an 8 m gap
+
+	# Ramp-2: HALF_WIDTH 10.0, not 6.0 -- measured landing-x drift from
+	# airstrafe spans ~9 m either side; the wide trough is deliberate
+	# measurement-rig latitude. _ramp_pair already takes half_width as a
+	# parameter (it does not hardcode HALF_WIDTH), so no signature change
+	# was needed to widen just this one ramp.
+	var peak2_mid_z := entry2_z - horiz_span / 2.0
+	var peak2_mid_y := entry2_y - drop / 2.0
+	_ramp_pair(cx, peak2_mid_z, FACE_ANGLE_DEG, peak2_mid_y, 10.0, path_len, SPINE_PITCH_DEG)
+
+	var lip2_z := entry2_z - horiz_span     # -64.4556
+	var lip2_y := entry2_y - drop           # 16.0
+
+	# Field: striped, same two colors as the other lanes' fields, top 4.0 m
+	# below lip-2. Spans z=[-28.2278,-184.4556] -- back under the gap and
+	# ramp-2 (so a short flight lands measurable instead of dying in void;
+	# ramp-2's plates sit at y=16-22, well above the field's y=12.0). The
+	# stripe grid is anchored on lip2_z (a boundary lands exactly there, for
+	# a distance-past-lip-2 readout), which puts one short lead-in stripe
+	# nearest the ramp and full 10 m stripes after it.
+	var field_top := lip2_y - 4.0           # 12.0
+	var stripe_len := 10.0
+	var field_near_z := lip1_z              # -28.2278
+	var field_far_z := lip2_z - 120.0       # -184.4556, 12 full stripes past lip-2
+
+	var boundaries: Array[float] = [field_near_z]
+	var k: int = floori((field_near_z - lip2_z) / stripe_len)
+	var b: float = lip2_z + stripe_len * k
+	while b > field_far_z + 0.001:
+		boundaries.append(b)
+		b -= stripe_len
+	boundaries.append(field_far_z)
+
+	for i in range(boundaries.size() - 1):
+		var seg_len: float = boundaries[i] - boundaries[i + 1]
+		var seg_center_z: float = (boundaries[i] + boundaries[i + 1]) / 2.0
+		var color := Color(0.3, 0.3, 0.3) if i % 2 == 0 else Color(0.55, 0.55, 0.55)
+		_add_box(Vector3(cx, field_top - 0.5, seg_center_z), Vector3(30.0, 1.0, seg_len), color)
 
 
 ## T2 seam array: builds both bands' six angle clusters. Each cluster is its
-## own entry pad + standard-T1-style lead-in (kicker-terminated, computed gap)
-## feeding a lip-to-lip Δ-cluster -- no gaps once the seam sweep starts, that's
-## the whole point of the rig. Station labels: "A-5°".."A-30°", "B-5°".."B-30°".
+## own entry pad + ONE continuous lead-in ramp joined lip-to-lip into the
+## Δ-cluster (CS-surf rework, 2026-08-02 -- no kicker, no gap, no pad between
+## the lead-in and the cluster's first seam). Station labels: "A-5°".."A-30°",
+## "B-5°".."B-30°".
 func _build_seam_array() -> void:
 	for j in range(SEAM_DELTAS_DEG.size()):
-		_build_band_cluster("A", BAND_A_ENTRY_X + j * CLUSTER_X_SPACING, SEAM_DELTAS_DEG[j], 1)
+		_build_band_cluster("A", BAND_A_ENTRY_X + j * CLUSTER_X_SPACING, SEAM_DELTAS_DEG[j], RAMP_DROP)
 	for j in range(SEAM_DELTAS_DEG.size()):
-		_build_band_cluster("B", BAND_B_ENTRY_X - j * CLUSTER_X_SPACING, SEAM_DELTAS_DEG[j], 4)
+		_build_band_cluster("B", BAND_B_ENTRY_X - j * CLUSTER_X_SPACING, SEAM_DELTAS_DEG[j], BAND_B_LEADIN_DROP)
 
 
-## One band+angle cluster: entry pad, `lead_in_count` standard T1 ramps (1 for
-## Band A's exit-17.31 lead-in, 4 for Band B's exit-27.17 lead-in), then the
-## lip-shared Δ-cluster fed by the lead-in's final exit speed.
-func _build_band_cluster(label_prefix: String, x: float, delta_deg: float, lead_in_count: int) -> void:
+## One band+angle cluster: entry pad, then a single lead-in ramp of
+## `lead_in_drop` vertical drop (RAMP_DROP=3.0 for Band A's exit-17.31 lead-in,
+## BAND_B_LEADIN_DROP=9.9 for Band B's exit-27.17 lead-in), same face angle and
+## 12deg spine pitch as every other ramp. The lead-in's low end IS the
+## cluster's first lip -- no gap, no pad, no kicker between them.
+func _build_band_cluster(label_prefix: String, x: float, delta_deg: float, lead_in_drop: float) -> void:
 	var y := 30.0
 	var z := 0.0
 	var entry_speed := 11.0  # SourceMove.RUN_SPEED -- entry_1 (source_move.gd:9)
 
 	STATIONS.append({"label": "%s-%d°" % [label_prefix, int(delta_deg)], "spawn": Vector3(x, y + 1.0, z + 2.0), "face": FACE_FORWARD})
 	_add_box(Vector3(x, y + PAD_CLEARANCE - 0.5, z + 2.0), Vector3(HALF_WIDTH * 2.0, 1.0, PAD_LEN), Color(0.5, 0.4, 0.3))
+	z += 2.0 - PAD_LEN / 2.0  # lead-in ramp starts at the entry pad's far edge, not its centre
 
-	for _i in range(lead_in_count):
-		var result := _build_lead_in_ramp(x, y, z, entry_speed)
-		z = result["z"]
-		y = result["y"]
-		entry_speed = result["exit_speed"]
-
-	_probe_cluster_label = "%s-%d°" % [label_prefix, int(delta_deg)]  ## DEBUG PROBE — remove before gates
-	_build_seam_cluster(x, y, z, entry_speed, delta_deg)
-
-
-## A single standard T1 ramp: pitch SPINE_PITCH_DEG, drop RAMP_DROP, face
-## FACE_ANGLE_DEG, kicker-terminated, T3-law computed gap onto a landing pad.
-## Same construction as _build_hop_chain()'s loop body, kept as its own
-## function here rather than refactored into T1's tested loop (T2 modifies
-## this file only to ADD the seam array, not to alter T1's built geometry).
-func _build_lead_in_ramp(x: float, y: float, z: float, entry_speed: float) -> Dictionary:
-	var path_len := RAMP_DROP / sin(deg_to_rad(SPINE_PITCH_DEG))
+	var path_len := lead_in_drop / sin(deg_to_rad(SPINE_PITCH_DEG))
 	var horiz_span := path_len * cos(deg_to_rad(SPINE_PITCH_DEG))
-	var exit_speed: float = ETA * sqrt(entry_speed * entry_speed + 70.4 * RAMP_DROP)
-	var h_speed: float = exit_speed * cos(deg_to_rad(SPINE_PITCH_DEG))
-	var gap: float = GAP_FRACTION * 0.755 * h_speed
-
 	var peak_mid_z := z - horiz_span / 2.0
-	var peak_mid_y := y - RAMP_DROP / 2.0
+	var peak_mid_y := y - lead_in_drop / 2.0
 	_ramp_pair(x, peak_mid_z, FACE_ANGLE_DEG, peak_mid_y, HALF_WIDTH, path_len, SPINE_PITCH_DEG)
 
 	var low_z := z - horiz_span
-	var low_y := y - RAMP_DROP
-	_add_box_x(Vector3(x, low_y - 0.25, low_z - 1.5), Vector3(HALF_WIDTH * 2.0, 0.5, 3.0), KICKER_ANGLE_DEG, Color(0.9, 0.3, 0.3))
+	var low_y := y - lead_in_drop
+	var exit_speed: float = ETA * sqrt(entry_speed * entry_speed + 70.4 * lead_in_drop)
 
-	var pad_z := low_z - gap
-	_add_box(Vector3(x, low_y + PAD_CLEARANCE - 0.5, pad_z), Vector3(HALF_WIDTH * 2.0, 1.0, PAD_LEN), Color(0.5, 0.4, 0.3))
-
-	return {"z": pad_z, "y": low_y, "exit_speed": exit_speed}
+	_probe_cluster_label = "%s-%d°" % [label_prefix, int(delta_deg)]  ## DEBUG PROBE — remove before gates
+	_build_seam_cluster(x, low_y, low_z, exit_speed, delta_deg)
 
 
 ## The measurement rig itself (R1 #23 sanctioned exemption): 4 ramps sharing
@@ -246,27 +314,6 @@ func _ramp_pair(cx: float, peak_mid_z: float, angle_deg: float, peak_mid_y: floa
 			peak_mid_z + half_width * sin(a) * sin(phi))
 		_add_box_xz(center, Vector3(half_width * 2.0, 0.5, length),
 			-pitch_deg, -side * angle_deg, Color(0.45, 0.3, 0.5))
-
-
-func _add_box_x(pos: Vector3, size: Vector3, rot_x_deg: float, color: Color) -> void:
-	var body := StaticBody3D.new()
-	body.position = pos
-	body.rotation.x = deg_to_rad(rot_x_deg)
-	var col := CollisionShape3D.new()
-	var shape := BoxShape3D.new()
-	shape.size = size
-	col.shape = shape
-	body.add_child(col)
-	var mesh := MeshInstance3D.new()
-	var box := BoxMesh.new()
-	box.size = size
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = color
-	box.material = mat
-	mesh.mesh = box
-	body.add_child(mesh)
-	$Geometry.add_child(body)
-	_track_lowest(pos.y - size.y / 2.0)
 
 
 func _add_box_xz(pos: Vector3, size: Vector3, rot_x_deg: float, rot_z_deg: float, color: Color) -> void:
