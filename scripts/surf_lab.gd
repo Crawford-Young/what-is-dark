@@ -69,6 +69,7 @@ var STATIONS: Array = []  ## populated by _build_range_rig() + _build_seam_array
 func _ready() -> void:
 	_build_range_rig()
 	_build_transfer_lane()
+	_build_chain_lane()
 	_build_seam_array()
 	_kill_y = _lowest_geometry_y - 10.0  # recomputed from the FINAL built geometry (T1's
 	## builder rule) -- Band B's lead-in alone descends ~12 m, R1 #14.
@@ -237,6 +238,80 @@ func _build_transfer_lane() -> void:
 	var boundaries: Array[float] = [field_near_z]
 	var k: int = floori((field_near_z - lip2_z) / stripe_len)
 	var b: float = lip2_z + stripe_len * k
+	while b > field_far_z + 0.001:
+		boundaries.append(b)
+		b -= stripe_len
+	boundaries.append(field_far_z)
+
+	for i in range(boundaries.size() - 1):
+		var seg_len: float = boundaries[i] - boundaries[i + 1]
+		var seg_center_z: float = (boundaries[i] + boundaries[i + 1]) / 2.0
+		var color := Color(0.3, 0.3, 0.3) if i % 2 == 0 else Color(0.55, 0.55, 0.55)
+		_add_box(Vector3(cx, field_top - 0.5, seg_center_z), Vector3(30.0, 1.0, seg_len), color)
+
+
+## Chain rig: the 5-ramp CHAIN station, built from the measured transfer unit
+## (issue #12, user-approved option A -- constant gaps). Drops are a
+## PROGRESSIVE schedule, not constant 6.0 -- measured per-hop launch h
+## climbing 33.9/41/47/51 m/s through the chain, drop_i = 6.0 * v_i/v_1, so
+## face TIME holds ~0.85 s as chain speed builds rather than shrinking on
+## faster ramps. Gap 8.0 m, each next entry 2.0 m below the previous lip
+## (unchanged). Built with a loop, not five copies of the same math -- ramp 1
+## uses HALF_WIDTH (matches the measured launch condition), ramps 2-5 use
+## 10.0 (measured drift catch, same rationale as XFER's ramp-2). One striped
+## catch field spans the whole lane -- stripes under the ramps/gaps double as
+## the catch floor, so a missed transfer anywhere lands measurable.
+func _build_chain_lane() -> void:
+	var cx := 370.0
+	var start_y := 30.0
+	var drops := [6.0, 7.3, 8.3, 9.1, 9.8]  # progressive schedule, see doc comment above
+	var gap := 8.0
+	var n_ramps := 5
+
+	# Runway: same convention as XFER, shifted to cx.
+	_add_box(Vector3(cx, start_y + PAD_CLEARANCE - 0.5, 6.0), Vector3(HALF_WIDTH * 2.0, 1.0, 12.0), Color(0.5, 0.4, 0.3))
+	STATIONS.append({"label": "CHAIN", "spawn": Vector3(cx, start_y + 1.0, 12.0), "face": FACE_FORWARD})
+
+	# Chain rule: entry_1 = (0, start_y); for i>=2, entry_i = (lip_(i-1).z -
+	# gap, lip_(i-1).y - 2.0). Each ramp's own horizontal run is now
+	# drop_i / tan(12deg) -- no longer constant across the chain, so path_len/
+	# horiz_span are computed per-iteration from drops[i].
+	var entry_z := 0.0
+	var entry_y := start_y
+	var lip_z := 0.0
+	var lip_y := 0.0
+	var lip1_z := 0.0  # ramp-1's lip, snapshotted before later iterations overwrite lip_z
+	for i in range(n_ramps):
+		var drop: float = drops[i]
+		var path_len := drop / sin(deg_to_rad(SPINE_PITCH_DEG))
+		var horiz_span := path_len * cos(deg_to_rad(SPINE_PITCH_DEG))
+		var half_width := HALF_WIDTH if i == 0 else 10.0
+		var peak_mid_z := entry_z - horiz_span / 2.0
+		var peak_mid_y := entry_y - drop / 2.0
+		_ramp_pair(cx, peak_mid_z, FACE_ANGLE_DEG, peak_mid_y, half_width, path_len, SPINE_PITCH_DEG)
+
+		lip_z = entry_z - horiz_span
+		lip_y = entry_y - drop
+		if i == 0:
+			lip1_z = lip_z
+
+		entry_z = lip_z - gap
+		entry_y = lip_y - 2.0
+
+	# Field: one striped catch field for the whole lane, top 4.0 m below
+	# lip-5 (y=-22.5). Stripe grid anchored on lip-5's z (-222.5375, a
+	# boundary lands exactly there, for a distance-past-lip-5 readout); the
+	# far edge (-342.5375) is an exact 10 m multiple past it, same
+	# boundary-list construction as XFER's field.
+	var field_top := lip_y - 4.0
+	var stripe_len := 10.0
+	var field_near_z := lip1_z  # ramp-1's lip -- catches misses under the whole chain
+	var lip5_z := lip_z
+	var field_far_z := lip5_z - 120.0
+
+	var boundaries: Array[float] = [field_near_z]
+	var k: int = floori((field_near_z - lip5_z) / stripe_len)
+	var b: float = lip5_z + stripe_len * k
 	while b > field_far_z + 0.001:
 		boundaries.append(b)
 		b -= stripe_len
