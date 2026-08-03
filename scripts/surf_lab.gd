@@ -57,6 +57,7 @@ var _probe_tick := 0
 var _probe_header_done := false
 var _probe_cluster_label := ""
 var _probe_seam_lips: Array = []  # [{"id": "A-5°#1", "pos": Vector3}, ...]
+var _probe_file: FileAccess  ## DEBUG PROBE — CSV sink so captures need no console redirect
 
 var STATIONS: Array = []  ## populated by _build_range_rig() + _build_seam_array(): [{"label","spawn","face"}, ...]
 
@@ -94,7 +95,13 @@ func _physics_process(_delta: float) -> void:
 	## DEBUG PROBE — remove before gates: per-tick campaign telemetry (T3).
 	if not _probe_header_done:
 		_probe_header_done = true
-		print("PROBE-CRITERIA: RETENTION := v_out / sqrt(v_in^2 + 2*35.2*drop_w), energy form, drop_w = measured window y-descent from position rows; RETENTION_MIN 0.98/seam; SEAM_WINDOW 24 ticks @ 120 Hz centred on the lip-crossing tick; STALL_FRAME = any window tick with h_speed < 0.5 * window-entry h_speed; RUNS_PER_CELL 5 (actual N reported per cell); entry speeds binned at 22 m/s by MEASURED entry speed")
+		var stamp := Time.get_datetime_string_from_system().replace(":", "-")
+		DirAccess.make_dir_recursive_absolute("user://probe")
+		_probe_file = FileAccess.open("user://probe/seam_%s.csv" % stamp, FileAccess.WRITE)
+		var criteria := "PROBE-CRITERIA: RETENTION := v_out / sqrt(v_in^2 + 2*35.2*drop_w), energy form, drop_w = measured window y-descent from position rows; RETENTION_MIN 0.98/seam; SEAM_WINDOW 24 ticks @ 120 Hz centred on the lip-crossing tick; STALL_FRAME = any window tick with h_speed < 0.5 * window-entry h_speed; RUNS_PER_CELL 5 (actual N reported per cell); entry speeds binned at 22 m/s by MEASURED entry speed"
+		print(criteria)
+		if _probe_file:
+			_probe_file.store_line(criteria)
 	var _probe_nearest := ""
 	var _probe_dist := INF
 	for lip in _probe_seam_lips:
@@ -102,7 +109,11 @@ func _physics_process(_delta: float) -> void:
 		if d < _probe_dist:
 			_probe_dist = d
 			_probe_nearest = lip["id"]
-	print("PROBE,%d,%.4f,%.4f,%.4f,%.4f,%.4f,%s,%.3f" % [_probe_tick, _player.global_position.x, _player.global_position.y, _player.global_position.z, _player.velocity.length(), speed, _probe_nearest, _probe_dist])
+	var row := "PROBE,%d,%.4f,%.4f,%.4f,%.4f,%.4f,%s,%.3f" % [_probe_tick, _player.global_position.x, _player.global_position.y, _player.global_position.z, _player.velocity.length(), speed, _probe_nearest, _probe_dist]
+	if _probe_file:
+		_probe_file.store_line(row)
+		if _probe_tick % 240 == 0:
+			_probe_file.flush()
 	_probe_tick += 1
 
 
@@ -111,6 +122,9 @@ func _reset_to_station() -> void:
 	_player.teleport(s["spawn"], s["face"])
 	_station_label.text = s["label"]
 	print("PROBE-RUN: station=%s ticks_captured=%d" % [s["label"], _probe_tick])  ## DEBUG PROBE — remove before gates
+	if _probe_file:  ## DEBUG PROBE — remove before gates
+		_probe_file.store_line("PROBE-RUN: station=%s ticks_captured=%d" % [s["label"], _probe_tick])
+		_probe_file.flush()
 	_probe_tick = 0  ## DEBUG PROBE — remove before gates
 
 
