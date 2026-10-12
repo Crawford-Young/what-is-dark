@@ -11,7 +11,7 @@
 
 ## Layout
 
-- Pure gameplay math lives in `RefCounted` scripts under `scripts/logic/` (`source_move.gd`, `yaw_drain.gd`, `wallrun_logic.gd`, `erosion_logic.gd`, `loop_logic.gd`, `void_logic.gd`, `posture.gd`, `course_logic.gd`) — full TDD, 100% coverage expectation. `source_move.gd` + `yaw_drain.gd` are the GAME's movement core (adopted from the momentum lab, phase 3a); `move_math.gd` is deleted.
+- Pure gameplay math lives in `RefCounted` scripts under `scripts/logic/` (`source_move.gd`, `yaw_drain.gd`, `wallrun_logic.gd`, `erosion_logic.gd`, `loop_logic.gd`, `void_logic.gd`, `posture.gd`, `course_logic.gd`, `gate_logic.gd`) — full TDD, 100% coverage expectation. `source_move.gd` + `yaw_drain.gd` are the GAME's movement core (adopted from the momentum lab, phase 3a); `move_math.gd` is deleted.
 - Node scripts (`scripts/player.gd`, `scripts/slice.gd`, `scripts/swallow_director.gd`, `scripts/void_wall.gd`, lab-only `scripts/momentum_player.gd`/`momentum_lab.gd`) wire input/scene-tree only and delegate all math to `scripts/logic/`.
 - Dev tooling lives in `scripts/dev/` (`course_audit.gd` survey collector, `audit_cli.gd` CLI entry) — scene-bound headless tooling, neither pure `scripts/logic/` math nor a gameplay node script. `CourseAudit` takes a live `Slice`, so it cannot be pure; it still gets GUT coverage like logic.
 - **Momentum lab** (`scenes/momentum_lab.tscn`, `just momentum-lab`): Source-movement evaluation env, verdict ADOPT 2026-07-24 — core adopted into `scripts/player.gd` in phase 3a; lab scene kept as a tuning sandbox. Movement constants live ONLY in `scripts/logic/source_move.gd` (top-of-file) and are game-wide; two deliberate CS2-parity breaks are user-locked there (`JUMP_SPEED` airtime parity, `AIR_CAP` 1.5 = 2× turn window).
@@ -24,7 +24,7 @@
 
 `just test` — run FOREGROUND, unpiped. Read the GUT summary block yourself (`Totals:` line — scripts/tests/asserts counts); never trust exit code alone.
 
-**CI enforces the same read** (`.github/workflows/ci.yml`, pinned to Godot 4.7.1): it greps for `could not find script`, asserts the `Scripts` count against an `EXPECTED_SCRIPTS` floor, and asserts `Passing Tests == Tests` — because an exit-code-only gate passes a suite that silently shrank. **Adding a test script means bumping `EXPECTED_SCRIPTS` in the workflow env block** (currently 17); CI fails loudly if you forget, which is the intended direction. The launch step fails on any `ERROR:`/`WARNING:`/`SCRIPT ERROR` in 600 headless frames.
+**CI enforces the same read** (`.github/workflows/ci.yml`, pinned to Godot 4.7.1): it greps for `could not find script`, asserts the `Scripts` count against an `EXPECTED_SCRIPTS` floor, and asserts `Passing Tests == Tests` — because an exit-code-only gate passes a suite that silently shrank. **Adding a test script means bumping `EXPECTED_SCRIPTS` in the workflow env block** (currently 19); CI fails loudly if you forget, which is the intended direction. The launch step fails on any `ERROR:`/`WARNING:`/`SCRIPT ERROR` in 600 headless frames.
 
 ## Course-law harness (phase 4.0)
 
