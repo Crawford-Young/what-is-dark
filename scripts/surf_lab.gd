@@ -23,6 +23,22 @@ const FACE_ANGLE_DEG := 51.34   # ramp face steepness (surfable: |normal.y| = co
 const SPINE_PITCH_DEG := 12.0   # along-path descent (T3: "~12 deg along-path descent")
 const RAMP_DROP := 3.0          # m vertical drop per ramp -> path = DROP / sin(12deg) = 14.43 m,
 								 # above the T3 12 m path-length design floor by construction
+const SEAM_RAMP_DROP := 6.0     # m vertical drop per SEAM-CLUSTER ramp. Raised from RAMP_DROP's
+								 # 3.0 on 2026-09-14: the 3 m ramp starves strafe time (same user ruling
+								 # that deepened the transfer rig on 2026-08-03, which was scoped to that
+								 # rig alone and never reached the T2-era seam array). 6.0 m is the
+								 # measured transfer-unit minimum (issue #12). Flat, not progressive: the
+								 # seam rig's design is that spine pitch is the ONLY swept parameter, so a
+								 # varying drop would make a seam result unattributable to the lip.
+								 # NOTE: at 12deg the path is 6/sin(12) = 28.9 m, but the steep half of a
+								 # cluster shortens -- Delta>=20 falls under the 12 m path floor (32deg =
+								 # 11.3 m, 42deg = 9.0 m). Those are the clusters the checklist already
+								 # calls known-bad by construction (4.1b negative controls), so the floor
+								 # breach is expected there -- but it is NOT a clean ride, and any
+								 # Delta>=20 seam result carries that caveat into the T3 table.
+								 # Band A's LEAD-IN deliberately keeps RAMP_DROP 3.0: it is a speed-setter
+								 # for the 17.31 m/s entry, and 6.0 there gives 22.1 m/s, across the
+								 # 22 m/s binning edge that separates the bands.
 const BAND_B_LEADIN_DROP := 9.9 # single-ramp Band B lead-in drop (law: 0.95*sqrt(11^2+70.4*9.9)
 								 # = 27.17, replaces the old 4-ramp kicker-terminated chain)
 const FACE_FORWARD := Vector3(0.0, 0.0, -1.0)
@@ -47,6 +63,16 @@ const BAND_A_ENTRY_X := 60.0    ## Band A (~17 m/s) clusters, spaced away from t
 const BAND_B_ENTRY_X := -60.0   ## Band B (~27 m/s) clusters, opposite side.
 const CLUSTER_X_SPACING := 50.0 ## lateral spread from FACE_ANGLE_DEG banking is ~20 m at most;
 ## 50 m keeps every cluster clear of its neighbours.
+## Rounded seam set (user pick 2026-09-22, issue #16: measure sharp AND rounded):
+## the same 12 clusters with every seam crease replaced by a tangent circular arc,
+## past the CHAIN lane (x=370) on one side and the sharp Band B set on the other.
+const ROUNDED_A_ENTRY_X := 430.0
+const ROUNDED_B_ENTRY_X := -370.0
+const SEAM_FILLET_LEN := 6.0    ## arc length of each rounded seam. Sized to the shortest ramp:
+## the D30 steep ramp's 9.0 m path takes a 3.07 m tangent at each end, leaving 2.9 m
+## straight. Radius = length / D (68.8 m at D5, 11.5 m at D30) -- a rider still leaves
+## the face above sqrt(g_n * R) (~15.5 m/s at D30), so rounded is gentler, not launch-proof.
+const FILLET_STEP := 0.25       ## arc sampling, metres along the path
 
 var _station := 0
 var _lowest_geometry_y := INF
@@ -71,6 +97,16 @@ func _ready() -> void:
 	_build_transfer_lane()
 	_build_chain_lane()
 	_build_seam_array()
+	# Default spawn: the first seam cluster, where the T3 campaign starts. The
+	# range lanes (RAMP/RAMP-L) stay built -- issue #11's curved ramps will need
+	# the exit law RE-MEASURED, not derived, so the rig has future use, and
+	# changing it would make issue #12's banked numbers non-reproducible. But
+	# they are closed-campaign geometry at RAMP_DROP 3.0 and should not be the
+	# first thing a rider meets.
+	for i in range(STATIONS.size()):
+		if str(STATIONS[i]["label"]).begins_with("A-"):
+			_station = i
+			break
 	_kill_y = _lowest_geometry_y - 10.0  # recomputed from the FINAL built geometry (T1's
 	## builder rule) -- Band B's lead-in alone descends ~12 m, R1 #14.
 	_reset_to_station()
@@ -331,9 +367,13 @@ func _build_chain_lane() -> void:
 ## "B-5°".."B-30°".
 func _build_seam_array() -> void:
 	for j in range(SEAM_DELTAS_DEG.size()):
-		_build_band_cluster("A", BAND_A_ENTRY_X + j * CLUSTER_X_SPACING, SEAM_DELTAS_DEG[j], RAMP_DROP)
+		_build_band_cluster("A", BAND_A_ENTRY_X + j * CLUSTER_X_SPACING, SEAM_DELTAS_DEG[j], RAMP_DROP, 0.0)
 	for j in range(SEAM_DELTAS_DEG.size()):
-		_build_band_cluster("B", BAND_B_ENTRY_X - j * CLUSTER_X_SPACING, SEAM_DELTAS_DEG[j], BAND_B_LEADIN_DROP)
+		_build_band_cluster("B", BAND_B_ENTRY_X - j * CLUSTER_X_SPACING, SEAM_DELTAS_DEG[j], BAND_B_LEADIN_DROP, 0.0)
+	for j in range(SEAM_DELTAS_DEG.size()):
+		_build_band_cluster("AR", ROUNDED_A_ENTRY_X + j * CLUSTER_X_SPACING, SEAM_DELTAS_DEG[j], RAMP_DROP, SEAM_FILLET_LEN)
+	for j in range(SEAM_DELTAS_DEG.size()):
+		_build_band_cluster("BR", ROUNDED_B_ENTRY_X - j * CLUSTER_X_SPACING, SEAM_DELTAS_DEG[j], BAND_B_LEADIN_DROP, SEAM_FILLET_LEN)
 
 
 ## One band+angle cluster: entry pad, then a single lead-in ramp of
@@ -341,7 +381,8 @@ func _build_seam_array() -> void:
 ## BAND_B_LEADIN_DROP=9.9 for Band B's exit-27.17 lead-in), same face angle and
 ## 12deg spine pitch as every other ramp. The lead-in's low end IS the
 ## cluster's first lip -- no gap, no pad, no kicker between them.
-func _build_band_cluster(label_prefix: String, x: float, delta_deg: float, lead_in_drop: float) -> void:
+## `fillet_len` > 0 rounds every seam crease into a tangent arc of that length.
+func _build_band_cluster(label_prefix: String, x: float, delta_deg: float, lead_in_drop: float, fillet_len: float) -> void:
 	var y := 30.0
 	var z := 0.0
 	var entry_speed := 11.0  # SourceMove.RUN_SPEED -- entry_1 (source_move.gd:9)
@@ -352,16 +393,18 @@ func _build_band_cluster(label_prefix: String, x: float, delta_deg: float, lead_
 
 	var path_len := lead_in_drop / sin(deg_to_rad(SPINE_PITCH_DEG))
 	var horiz_span := path_len * cos(deg_to_rad(SPINE_PITCH_DEG))
-	var peak_mid_z := z - horiz_span / 2.0
-	var peak_mid_y := y - lead_in_drop / 2.0
-	_ramp_pair(x, peak_mid_z, FACE_ANGLE_DEG, peak_mid_y, HALF_WIDTH, path_len, SPINE_PITCH_DEG)
+	var spine: Array[Vector3] = [Vector3(x, y, z)]
 
 	var low_z := z - horiz_span
 	var low_y := y - lead_in_drop
+	spine.append(Vector3(x, low_y, low_z))
 	var exit_speed: float = ETA * sqrt(entry_speed * entry_speed + 70.4 * lead_in_drop)
 
 	_probe_cluster_label = "%s-%d°" % [label_prefix, int(delta_deg)]  ## DEBUG PROBE — remove before gates
-	_build_seam_cluster(x, low_y, low_z, exit_speed, delta_deg)
+	_build_seam_cluster(x, low_y, low_z, exit_speed, delta_deg, spine)
+	if fillet_len > 0.0:
+		spine = _fillet_spine(spine, fillet_len)
+	_add_surf_strip(spine, FACE_ANGLE_DEG, HALF_WIDTH * 2.0, Color(0.45, 0.3, 0.5))
 
 
 ## The measurement rig itself (R1 #23 sanctioned exemption): 4 ramps sharing
@@ -369,25 +412,102 @@ func _build_band_cluster(label_prefix: String, x: float, delta_deg: float, lead_
 ## SPINE_PITCH_DEG -> +delta -> SPINE_PITCH_DEG -> +delta so every ramp still
 ## descends (R2 #11) and each of the 3 seams is a ±delta step. Face angle
 ## stays FACE_ANGLE_DEG throughout -- pitch is the only swept parameter.
-## Exit speed at drop RAMP_DROP is independent of pitch (T3's energy-
+## Exit speed at drop SEAM_RAMP_DROP is independent of pitch (T3's energy-
 ## normalized law), so entry speed climbs through the cluster exactly as it
 ## would through any other T1-style chain -- no control ramp needed (R3 M1/M2).
-func _build_seam_cluster(x: float, y: float, z: float, entry_speed: float, delta_deg: float) -> void:
+## Appends each ramp's low end to `spine`; the caller builds the surface.
+func _build_seam_cluster(x: float, y: float, z: float, entry_speed: float, delta_deg: float, spine: Array[Vector3]) -> void:
 	var pitches := [SPINE_PITCH_DEG, SPINE_PITCH_DEG + delta_deg, SPINE_PITCH_DEG, SPINE_PITCH_DEG + delta_deg]
 	var _probe_i := 0  ## DEBUG PROBE — remove before gates
 	for pitch in pitches:
 		if _probe_i > 0:  ## DEBUG PROBE — remove before gates: seam lip = entry of ramps 2/3/4
 			_probe_seam_lips.append({"id": "%s#%d" % [_probe_cluster_label, _probe_i], "pos": Vector3(x, y, z)})
 		_probe_i += 1  ## DEBUG PROBE — remove before gates
-		var path_len: float = RAMP_DROP / sin(deg_to_rad(pitch))
+		var path_len: float = SEAM_RAMP_DROP / sin(deg_to_rad(pitch))
 		var horiz_span: float = path_len * cos(deg_to_rad(pitch))
-		var peak_mid_z := z - horiz_span / 2.0
-		var peak_mid_y := y - RAMP_DROP / 2.0
-		_ramp_pair(x, peak_mid_z, FACE_ANGLE_DEG, peak_mid_y, HALF_WIDTH, path_len, pitch)
+		spine.append(Vector3(x, y - SEAM_RAMP_DROP, z - horiz_span))
 
-		entry_speed = ETA * sqrt(entry_speed * entry_speed + 70.4 * RAMP_DROP)
+		entry_speed = ETA * sqrt(entry_speed * entry_speed + 70.4 * SEAM_RAMP_DROP)
 		z -= horiz_span
-		y -= RAMP_DROP
+		y -= SEAM_RAMP_DROP
+
+
+## Rounded seams: replaces every interior pitch change of a straight-segment
+## spine with a circular arc of arc length `fillet_len`, tangent to both
+## neighbouring segments, so the slope stays continuous through the seam
+## instead of creasing. Arcs live in the vertical plane of the path (x fixed).
+func _fillet_spine(spine: Array[Vector3], fillet_len: float) -> Array[Vector3]:
+	var out: Array[Vector3] = [spine[0]]
+	for i in range(1, spine.size() - 1):
+		var p := spine[i]
+		var d1 := (p - spine[i - 1]).normalized()
+		var d2 := (spine[i + 1] - p).normalized()
+		var phi1 := atan2(-d1.y, -d1.z)  # pitch below horizontal, travelling -z
+		var phi2 := atan2(-d2.y, -d2.z)
+		var theta := absf(phi2 - phi1)
+		if theta < 0.001:
+			out.append(p)
+			continue
+		var r := fillet_len / theta
+		var tangent := r * tan(theta / 2.0)
+		assert(tangent <= minf(p.distance_to(spine[i - 1]), p.distance_to(spine[i + 1])) / 2.0)
+		var t1 := p - d1 * tangent
+		var sgn := signf(phi2 - phi1)
+		var n_steps := maxi(2, ceili(fillet_len / FILLET_STEP))
+		for k in range(n_steps + 1):
+			var phi := lerpf(phi1, phi2, float(k) / n_steps)
+			var du := sgn * r * (sin(phi) - sin(phi1))  # along-path (-z) offset from t1
+			var dy := sgn * r * (cos(phi) - cos(phi1))
+			out.append(Vector3(p.x, t1.y + dy, t1.z - du))
+	out.append(spine[spine.size() - 1])
+	return out
+
+
+## Seam-cluster surface: both faces of a surf peak extruded along a bent spine
+## polyline as ONE trimesh. Every face quad is (P_i, P_i+1) plus the SAME
+## lateral vector, so neighbouring ramps share their junction edge exactly --
+## _ramp_pair's rolled-then-pitched boxes swing their end edges apart whenever
+## pitch changes (issue #15: up to 1.2 m steps and holes at the seam lips). The
+## face angle holds in the vertical cross-section across the path (CS-style
+## extruded profile): |n.y| 0.619 at the 12deg base pitch vs _ramp_pair's 0.611.
+func _add_surf_strip(spine: Array[Vector3], angle_deg: float, face_width: float, color: Color) -> void:
+	var a := deg_to_rad(angle_deg)
+	var verts := PackedVector3Array()
+	var normals := PackedVector3Array()
+	for side in [-1.0, 1.0]:
+		var lateral := Vector3(side * cos(a), -sin(a), 0.0) * face_width
+		for i in range(spine.size() - 1):
+			var p0 := spine[i]
+			var p1 := spine[i + 1]
+			var n := (p1 - p0).cross(lateral).normalized()
+			if n.y < 0.0:
+				n = -n
+			for v in [p0, p1, p1 + lateral, p0, p1 + lateral, p0 + lateral]:
+				verts.append(v)
+				normals.append(n)
+			_track_lowest(p1.y + lateral.y)
+
+	var body := StaticBody3D.new()
+	var col := CollisionShape3D.new()
+	var shape := ConcavePolygonShape3D.new()
+	shape.set_faces(verts)
+	shape.backface_collision = true  # winding-agnostic: either side of a face collides
+	col.shape = shape
+	body.add_child(col)
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = verts
+	arrays[Mesh.ARRAY_NORMAL] = normals
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = color
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mesh.surface_set_material(0, mat)
+	var mesh_inst := MeshInstance3D.new()
+	mesh_inst.mesh = mesh
+	body.add_child(mesh_inst)
+	$Geometry.add_child(body)
 
 
 ## Compound X+Z rotation builder, same math as momentum_lab.gd's _ramp_pair
