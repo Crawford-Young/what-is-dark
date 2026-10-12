@@ -9,6 +9,8 @@ const GLANCE_TURN_SPEED := 18.0
 const FLOOR_LIMIT_DEG := 38.0  ## lab-parity classification boundary: steeper than
 ## this = wall (surfable in 3b). Every existing lap floor is flat (normal y = 1.0),
 ## so nothing reclassifies; 38° must hold so future pitched ramps read as walls.
+const ACTIVATE_RANGE := 200.0  ## gate-activate ray length (m). Generous on purpose: the
+## gate lab measures natural click distances, so range must never be the binding limit.
 
 var frozen := false
 var glancing := false
@@ -95,6 +97,9 @@ func _physics_process(delta: float) -> void:
 	_jump_was_down = jump_down
 	_rays_stale = false
 
+	if Input.is_action_just_pressed(&"activate"):
+		_activate_gate()
+
 
 func _wall_normal() -> Vector3:
 	var raw := Vector3.ZERO
@@ -103,6 +108,18 @@ func _wall_normal() -> Vector3:
 	elif $RayWallRight.is_colliding():
 		raw = $RayWallRight.get_collision_normal()
 	return WallrunLogic.wall_normal_after_shift(_rays_stale, raw)
+
+
+func _activate_gate() -> void:
+	var from := ($Head/Camera as Camera3D).global_position
+	var query := PhysicsRayQueryParameters3D.create(from, from + camera_forward() * ACTIVATE_RANGE)
+	query.exclude = [get_rid()]
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	if hit.is_empty():
+		return
+	var gate := GateNode.resolve_gate(hit.collider as Node)
+	if gate:
+		gate.try_activate_from(hit.collider)
 
 
 func camera_forward() -> Vector3:
