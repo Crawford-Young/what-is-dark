@@ -82,6 +82,7 @@ var _kill_y := -1000.0
 var _probe_tick := 0
 var _probe_header_done := false
 var _probe_cluster_label := ""
+var _probe_cluster_fillet := 0.0  ## DEBUG PROBE — remove before gates
 var _probe_seam_lips: Array = []  # [{"id": "A-5°#1", "pos": Vector3}, ...]
 var _probe_file: FileAccess  ## DEBUG PROBE — CSV sink so captures need no console redirect
 
@@ -135,10 +136,12 @@ func _physics_process(_delta: float) -> void:
 		var stamp := Time.get_datetime_string_from_system().replace(":", "-")
 		DirAccess.make_dir_recursive_absolute("user://probe")
 		_probe_file = FileAccess.open("user://probe/seam_%s.csv" % stamp, FileAccess.WRITE)
-		var criteria := "PROBE-CRITERIA: RETENTION := v_out / sqrt(v_in^2 + 2*35.2*drop_w), energy form, drop_w = measured window y-descent from position rows; RETENTION_MIN 0.98/seam; SEAM_WINDOW 24 ticks @ 120 Hz centred on the lip-crossing tick; STALL_FRAME = any window tick with h_speed < 0.5 * window-entry h_speed; RUNS_PER_CELL 5 (actual N reported per cell); entry speeds binned at 22 m/s by MEASURED entry speed"
+		var criteria := "PROBE-CRITERIA: RETENTION := v_out / sqrt(v_in^2 + 2*35.2*drop_w), energy form, drop_w = measured window y-descent from position rows; RETENTION_MIN 0.98/seam; SEAM_WINDOW (amended 2026-09-22, issue #16) = 12 ticks before the blend-start plane crossing -> 12 ticks after the later of landing (first contact after >=3 airborne ticks) and blend-end plane crossing; crossing = lip-plane z crossing within the cluster; STALL_FRAME = any window tick with h_speed < 0.5 * window-entry h_speed; RUNS_PER_CELL 5 (actual N reported per cell); entry speeds binned at 22 m/s by MEASURED entry speed; row col 10 = slide-collision count"
 		print(criteria)
 		if _probe_file:
 			_probe_file.store_line(criteria)
+			for lip in _probe_seam_lips:
+				_probe_file.store_line("PROBE-LIP,%s,%.4f,%.4f,%.4f,%.3f" % [lip["id"], lip["pos"].x, lip["pos"].y, lip["pos"].z, lip["fillet"]])
 	var _probe_nearest := ""
 	var _probe_dist := INF
 	for lip in _probe_seam_lips:
@@ -146,7 +149,7 @@ func _physics_process(_delta: float) -> void:
 		if d < _probe_dist:
 			_probe_dist = d
 			_probe_nearest = lip["id"]
-	var row := "PROBE,%d,%.4f,%.4f,%.4f,%.4f,%.4f,%s,%.3f" % [_probe_tick, _player.global_position.x, _player.global_position.y, _player.global_position.z, _player.velocity.length(), speed, _probe_nearest, _probe_dist]
+	var row := "PROBE,%d,%.4f,%.4f,%.4f,%.4f,%.4f,%s,%.3f,%d" % [_probe_tick, _player.global_position.x, _player.global_position.y, _player.global_position.z, _player.velocity.length(), speed, _probe_nearest, _probe_dist, _player.get_slide_collision_count()]
 	if _probe_file:
 		_probe_file.store_line(row)
 		if _probe_tick % 240 == 0:
@@ -401,6 +404,7 @@ func _build_band_cluster(label_prefix: String, x: float, delta_deg: float, lead_
 	var exit_speed: float = ETA * sqrt(entry_speed * entry_speed + 70.4 * lead_in_drop)
 
 	_probe_cluster_label = "%s-%d°" % [label_prefix, int(delta_deg)]  ## DEBUG PROBE — remove before gates
+	_probe_cluster_fillet = fillet_len  ## DEBUG PROBE — remove before gates
 	_build_seam_cluster(x, low_y, low_z, exit_speed, delta_deg, spine)
 	if fillet_len > 0.0:
 		spine = _fillet_spine(spine, fillet_len)
@@ -421,7 +425,7 @@ func _build_seam_cluster(x: float, y: float, z: float, entry_speed: float, delta
 	var _probe_i := 0  ## DEBUG PROBE — remove before gates
 	for pitch in pitches:
 		if _probe_i > 0:  ## DEBUG PROBE — remove before gates: seam lip = entry of ramps 2/3/4
-			_probe_seam_lips.append({"id": "%s#%d" % [_probe_cluster_label, _probe_i], "pos": Vector3(x, y, z)})
+			_probe_seam_lips.append({"id": "%s#%d" % [_probe_cluster_label, _probe_i], "pos": Vector3(x, y, z), "fillet": _probe_cluster_fillet})
 		_probe_i += 1  ## DEBUG PROBE — remove before gates
 		var path_len: float = SEAM_RAMP_DROP / sin(deg_to_rad(pitch))
 		var horiz_span: float = path_len * cos(deg_to_rad(pitch))
