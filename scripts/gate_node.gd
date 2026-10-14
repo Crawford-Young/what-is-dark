@@ -9,6 +9,8 @@ extends Node3D
 ##   Barrier — "retract": a wall across the corridor that sinks into the floor.
 ##   Bridge  — "deploy": a walkway over a void gap that extends from the near lip.
 ## Collision is binary (flips as openness crosses 0.5); the mesh is continuous.
+## Hidden (start_hidden, until reveal()): both blocks are invisible and the
+## Target is unclickable, but a shut Barrier stays solid (user ruling, T7).
 
 const OPEN_THRESHOLD := 0.5
 const SINK_MARGIN := 0.02  ## fully-open wall sinks this far below the floor top (no z-fight)
@@ -21,12 +23,16 @@ const SINK_MARGIN := 0.02  ## fully-open wall sinks this far below the floor top
 @export var thickness := 1.0  ## wall depth (retract) / walkway depth (deploy)
 @export var target_size := Vector3(2.0, 2.0, 0.5)
 @export var target_offset := Vector3(0.0, 8.0, 0.0)  ## target centre, gate-local
+@export var start_hidden := false  ## hidden until reveal(); reset() returns here
 
 var logic: GateLogic
 var _target: StaticBody3D
+var _target_col: CollisionShape3D
+var _gate_body: StaticBody3D  ## the Barrier or Bridge
 var _mesh: MeshInstance3D
 var _col: CollisionShape3D
 var _blocking := true
+var _revealed := true
 
 
 func _ready() -> void:
@@ -43,10 +49,29 @@ func _ready() -> void:
 			push_error("GateNode: unknown kind '%s'" % kind)
 			return
 	_apply_openness(0.0)
+	_set_revealed(not start_hidden)
 
 
+## Rejected while hidden: an unseen gate cannot be opened.
 func try_activate() -> bool:
+	if not _revealed:
+		return false
 	return logic.try_activate()
+
+
+func reveal() -> void:
+	_set_revealed(true)
+
+
+func is_revealed() -> bool:
+	return _revealed
+
+
+## Back to a fresh SHUT gate (openness 0 applied), hidden again if start_hidden.
+func reset() -> void:
+	logic = GateLogic.new(timed_window)
+	_apply_openness(0.0)
+	_set_revealed(not start_hidden)
 
 
 ## Activates only when the ray hit IS this gate's Target body (identity, not name).
@@ -97,6 +122,16 @@ func _set_blocking(solid: bool) -> void:
 	_col.set_deferred(&"disabled", not solid)
 
 
+## Visibility only on the blocks; the Target's collision follows it so a
+## hidden Target can't be hit, while the gate body's collision stays owned by
+## _set_blocking (a hidden shut Barrier still slams).
+func _set_revealed(revealed: bool) -> void:
+	_revealed = revealed
+	_target.visible = revealed
+	_gate_body.visible = revealed
+	_target_col.set_deferred(&"disabled", not revealed)
+
+
 func _add_block(block_name: StringName, pos: Vector3, size: Vector3, color: Color) -> void:
 	var body := StaticBody3D.new()
 	body.name = block_name
@@ -117,6 +152,8 @@ func _add_block(block_name: StringName, pos: Vector3, size: Vector3, color: Colo
 	add_child(body)
 	if block_name == &"Target":
 		_target = body
+		_target_col = col
 	else:
+		_gate_body = body
 		_mesh = mesh
 		_col = col

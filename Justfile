@@ -35,3 +35,7 @@ momentum-lab:
 # run the surf lab (T3 hop-chain array)
 surf-lab:
     "{{godot}}" --path . scenes/surf_lab.tscn
+
+# run the gate lab (T7 sightline lanes)
+gate-lab:
+    "{{godot}}" --path . scenes/gate_lab.tscn
