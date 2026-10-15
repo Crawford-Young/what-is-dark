@@ -39,3 +39,7 @@ surf-lab:
 # run the gate lab (T7 sightline lanes)
 gate-lab:
     "{{godot}}" --path . scenes/gate_lab.tscn
+
+# run the obstacle lab (T11 speed-cost + hard-stop rows)
+obstacle-lab:
+    "{{godot}}" --path . scenes/obstacle_lab.tscn

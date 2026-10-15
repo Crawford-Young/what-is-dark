@@ -56,5 +56,9 @@ The shipped course is audited against its own declared intent. `just audit` inst
 - `just launch` — 600-frame headless launch smoke, fails on any error or warning (the same gate CI runs)
 - `just import` — import assets headlessly (after adding new assets, or after any `.tscn` edit)
 - `just momentum-lab` — run the momentum lab scene directly
+- `just lab` — wall-jump measurement lab: sprint into the wall-jump chain and read distance/height/speed off the HUD
+- `just surf-lab` — surf lab: range lanes, ramp transfer and chain rigs, and the lip-to-lip seam sweep (N/P cycle stations)
+- `just gate-lab` — gate lab: one lane per look-to-open gate variant for the sightline campaign (N/P cycle, R restarts)
+- `just obstacle-lab` — obstacle lab: pillars, arches and hurdle bars on a solid straight (speed-cost) and mid-gap over void (hard-stop) (N/P cycle, R restarts)
 
 CI runs the same gates on every PR against `main` (GitHub Actions, pinned to Godot 4.7.1): asset import, the GUT suite, and a 600-frame headless launch that fails on any error or warning. The test step does not trust the exit code — GUT drops a test file that fails to parse and still exits 0, so CI checks the suite size and the pass count as well.
