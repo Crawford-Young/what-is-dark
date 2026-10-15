@@ -158,3 +158,33 @@ func test_reset_returns_to_shut_and_hidden() -> void:
 	assert_eq(gate.logic.openness(), 0.0)
 	assert_false(gate.is_revealed())
 	assert_false(gate.try_activate_from(gate.get_node("Target")))
+
+
+func _feel_key(lab: Node3D, keycode: int) -> void:  ## DEBUG PROBE
+	var ev := InputEventKey.new()  ## DEBUG PROBE
+	ev.physical_keycode = keycode  ## DEBUG PROBE
+	ev.pressed = true  ## DEBUG PROBE
+	lab._unhandled_input(ev)  ## DEBUG PROBE
+
+
+func test_feel_keys_cycle_and_apply_values() -> void:  ## DEBUG PROBE
+	var lab: Node3D = load("res://scenes/gate_lab.tscn").instantiate()  ## DEBUG PROBE
+	add_child_autofree(lab)  ## DEBUG PROBE
+	var timed: GateNode = lab.STATIONS[lab.STATIONS.size() - 1]["gate"]  ## DEBUG PROBE
+	_feel_key(lab, KEY_Z)  ## DEBUG PROBE
+	_feel_key(lab, KEY_X)  ## DEBUG PROBE
+	assert_eq([lab._feel_anim_i, lab._feel_window_i], [2, 2], "Z/X advance the requested indices")  ## DEBUG PROBE
+	lab._feel_tick()  ## DEBUG PROBE
+	var anim_one: float = GateLogic.ANIM_DURATION  ## DEBUG PROBE
+	var window_one: float = timed.logic.timed_window  ## DEBUG PROBE
+	var window_field_one: float = timed.timed_window  ## DEBUG PROBE
+	_feel_key(lab, KEY_Z)  ## DEBUG PROBE
+	_feel_key(lab, KEY_X)  ## DEBUG PROBE
+	assert_eq([lab._feel_anim_i, lab._feel_window_i], [0, 0], "both wrap")  ## DEBUG PROBE
+	lab._feel_tick()  ## DEBUG PROBE
+	var anim_two: float = GateLogic.ANIM_DURATION  ## DEBUG PROBE
+	GateLogic.ANIM_DURATION = 0.5  ## DEBUG PROBE - restore the static for other tests
+	assert_eq(anim_one, 0.8, "one Z press from the 0.5 default applies 0.8")  ## DEBUG PROBE
+	assert_eq(window_one, 2.5, "one X press from 1.5 applies 2.5 to the live logic")  ## DEBUG PROBE
+	assert_eq(window_field_one, 2.5, "and to the field reset() rebuilds from")  ## DEBUG PROBE
+	assert_eq(anim_two, 0.3, "a second Z press wraps to 0.3")  ## DEBUG PROBE

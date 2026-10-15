@@ -50,6 +50,12 @@ var _probe_file: FileAccess  ## DEBUG PROBE
 var _probe_path := ""  ## DEBUG PROBE
 var _probe_cur := {}  ## DEBUG PROBE — station dict of the latest run (rows keep logging after a run ends)
 var _probe_run := {}  ## DEBUG PROBE — active run record; empty = no run in flight
+const FEEL_ANIMS := [0.3, 0.5, 0.8]  ## DEBUG PROBE — Z cycles GateLogic.ANIM_DURATION, s
+const FEEL_WINDOWS := [1.0, 1.5, 2.5]  ## DEBUG PROBE — X cycles the TIMED-50 re-close window, s
+var _feel_anim_i := 1  ## DEBUG PROBE — requested index (launch default 0.5)
+var _feel_window_i := 1  ## DEBUG PROBE — requested index (launch default 1.5)
+var _feel_applied := [1, 1]  ## DEBUG PROBE — indices in force; changes land only while no gate is animating
+var _feel_label: Label  ## DEBUG PROBE
 
 
 @onready var _player: Player = $Player
@@ -61,6 +67,7 @@ var _probe_run := {}  ## DEBUG PROBE — active run record; empty = no run in fl
 func _ready() -> void:
 	_build_lanes()
 	_kill_y = _lowest_geometry_y - 10.0  # from the FINAL built geometry (T1's builder rule)
+	_feel_init()  ## DEBUG PROBE
 	_reset_to_station()
 
 
@@ -75,6 +82,10 @@ func _unhandled_input(event: InputEvent) -> void:
 				_reset_to_station()
 			KEY_R:
 				_reset_to_station()
+			KEY_Z:  ## DEBUG PROBE
+				_feel_anim_i = (_feel_anim_i + 1) % FEEL_ANIMS.size()  ## DEBUG PROBE
+			KEY_X:  ## DEBUG PROBE
+				_feel_window_i = (_feel_window_i + 1) % FEEL_WINDOWS.size()  ## DEBUG PROBE
 
 
 func _physics_process(_delta: float) -> void:
@@ -89,6 +100,7 @@ func _physics_process(_delta: float) -> void:
 		gate.reveal()
 	_gate_label.text = "%s / %s" % [GateLogic.State.keys()[gate.logic.state],
 		"revealed" if gate.is_revealed() else "hidden"]
+	_feel_tick()  ## DEBUG PROBE
 	_probe_tick(speed)  ## DEBUG PROBE
 
 
@@ -371,3 +383,36 @@ func _probe_row(event: String) -> void:
 		Vector2(_player.velocity.x, _player.velocity.z).length(),
 		GateLogic.State.keys()[gate.logic.state], gate.logic.openness(),
 		1 if gate.is_revealed() else 0, event])
+
+
+## DEBUG PROBE — readout label under the gate label.
+func _feel_init() -> void:
+	_feel_label = Label.new()
+	_feel_label.position = Vector2(20.0, 150.0)
+	_feel_label.add_theme_font_size_override("font_size", 24)
+	$HUD.add_child(_feel_label)
+	print("FEEL anim=%s window=%s" % [GateLogic.ANIM_DURATION, TIMED_WINDOW])
+
+
+## DEBUG PROBE — applies a requested change once no gate is mid-animation (it finishes at its old duration).
+func _feel_tick() -> void:
+	_feel_show()
+	if _feel_applied == [_feel_anim_i, _feel_window_i]:
+		return
+	for s in STATIONS:
+		var st: int = (s["gate"] as GateNode).logic.state
+		if st == GateLogic.State.OPENING or st == GateLogic.State.RECLOSING:
+			return
+	_feel_applied = [_feel_anim_i, _feel_window_i]
+	GateLogic.ANIM_DURATION = FEEL_ANIMS[_feel_anim_i]
+	var timed: GateNode = (STATIONS[STATIONS.size() - 1]["gate"] as GateNode)
+	timed.timed_window = FEEL_WINDOWS[_feel_window_i]  # survives reset(), which rebuilds the logic
+	timed.logic.timed_window = FEEL_WINDOWS[_feel_window_i]
+	print("FEEL anim=%s window=%s" % [GateLogic.ANIM_DURATION, timed.timed_window])
+
+
+## DEBUG PROBE
+func _feel_show() -> void:
+	var pending := " (pending)" if _feel_applied != [_feel_anim_i, _feel_window_i] else ""
+	_feel_label.text = "Z anim=%s  X timed window=%s%s" % [
+		FEEL_ANIMS[_feel_applied[0]], FEEL_WINDOWS[_feel_applied[1]], pending]
