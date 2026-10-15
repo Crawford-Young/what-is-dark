@@ -1,14 +1,14 @@
 extends GutTest
 
 const EXPECTED_STATIONS := {
+	"RETRACT-15": ["retract", GateLogic.NO_RECLOSE],
+	"RETRACT-20": ["retract", GateLogic.NO_RECLOSE],
 	"RETRACT-30": ["retract", GateLogic.NO_RECLOSE],
 	"RETRACT-40": ["retract", GateLogic.NO_RECLOSE],
-	"RETRACT-50": ["retract", GateLogic.NO_RECLOSE],
-	"RETRACT-60": ["retract", GateLogic.NO_RECLOSE],
+	"DEPLOY-15": ["deploy", GateLogic.NO_RECLOSE],
+	"DEPLOY-20": ["deploy", GateLogic.NO_RECLOSE],
 	"DEPLOY-30": ["deploy", GateLogic.NO_RECLOSE],
 	"DEPLOY-40": ["deploy", GateLogic.NO_RECLOSE],
-	"DEPLOY-50": ["deploy", GateLogic.NO_RECLOSE],
-	"DEPLOY-60": ["deploy", GateLogic.NO_RECLOSE],
 	"TIMED-50": ["retract", 1.5],
 }
 
