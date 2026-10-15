@@ -72,7 +72,8 @@ const SEAM_FILLET_LEN := 6.0    ## arc length of each rounded seam. Sized to the
 ## the D30 steep ramp's 9.0 m path takes a 3.07 m tangent at each end, leaving 2.9 m
 ## straight. Radius = length / D (68.8 m at D5, 11.5 m at D30) -- a rider still leaves
 ## the face above sqrt(g_n * R) (~15.5 m/s at D30), so rounded is gentler, not launch-proof.
-const FILLET_STEP := 0.25       ## arc sampling, metres along the path
+const FILLET_STEP := 1.5        ## arc sampling, metres along the path. Coarse on purpose: finer facets put
+## internal edges under the rider and GodotPhysics3D snags on them (#14). 1.5 m splits SEAM_FILLET_LEN into 4 even facets.
 
 var _station := 0
 var _lowest_geometry_y := INF

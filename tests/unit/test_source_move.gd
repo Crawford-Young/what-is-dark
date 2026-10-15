@@ -185,7 +185,7 @@ func test_surf_strip_normals_match_the_measured_face() -> void:
 
 
 func test_clip_multi_fillet_facets_dedupe_to_single_plane_clip() -> void:
-	# (a) adjacent 0.25 m fillet facets: d5 arc = 0.21 deg pitch/step, d15 arc = 0.625 deg/step.
+	# (a) adjacent fillet facets (0.25 m when authored; 1.5 m now, steps below are the old finer ones, still the tightest case): d5 arc = 0.21 deg pitch/step, d15 arc = 0.625 deg/step.
 	for step: float in [0.21, 0.625]:
 		var pitch_b := SURF_BASE_PITCH_DEG + step
 		assert_gt(_strip_normal(SURF_BASE_PITCH_DEG).dot(_strip_normal(pitch_b)), 0.999, "reads as one plane")
