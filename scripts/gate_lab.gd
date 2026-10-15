@@ -15,7 +15,7 @@ extends Node3D
 
 const GATE_DISTANCES := [15.0, 20.0, 30.0, 40.0]  ## approach line -> gate near edge, m
 const TIMED_DISTANCE := 50.0  ## the timed gate's fixed approach distance
-const TIMED_WINDOW := 1.5  ## initial timed re-close window, s (T8 sweeps it)
+const TIMED_WINDOW := 1.0  ## timed re-close window, s (feel-picked, user pick 2026-10-14)
 const RUN_UP_LENGTH := 60.0  ## spawn -> approach line
 const SPAWN_SPEED := 35.0  ## m/s along the lane at every spawn (ride-1 line speed 34-39)
 const SPAWN_HEIGHT := 1.5  ## spawn origin y: ~0.6 m above standing rest (capsule 1.8 m), so

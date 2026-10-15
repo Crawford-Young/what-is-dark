@@ -2,7 +2,7 @@ class_name GateLogic
 extends RefCounted
 ## Pure state machine for look-to-open gates (4.1 spec §4.2). A node wrapper
 ## (gate_node.gd) ticks it and drives geometry; no node code here.
-## ANIM_DURATION is a measured input to the sightline budget (T8).
+## ANIM_DURATION is authored and feel-picked (0.5 s, user pick at the T8 feel round); click -> collision-flip = ANIM_DURATION / 2 feeds the sightline budget.
 
 enum State { SHUT, OPENING, OPEN, RECLOSING }
 

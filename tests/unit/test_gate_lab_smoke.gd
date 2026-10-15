@@ -9,7 +9,7 @@ const EXPECTED_STATIONS := {
 	"DEPLOY-20": ["deploy", GateLogic.NO_RECLOSE],
 	"DEPLOY-30": ["deploy", GateLogic.NO_RECLOSE],
 	"DEPLOY-40": ["deploy", GateLogic.NO_RECLOSE],
-	"TIMED-50": ["retract", 1.5],
+	"TIMED-50": ["retract", 1.0],
 }
 
 
