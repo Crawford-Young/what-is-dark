@@ -27,6 +27,7 @@ const ROLES: Array[String] = [
 	"door",
 	"gate_path",
 	"ceiling",  ## declarative at 4.0 like `door` — 4.1's lowering-ceiling verbs attach here
+	"obstacle",  ## 4.1 spec §5: defined at 4.1a, applied via 4.1b's lab fixture manifests (lines law)
 ]
 
 ## `carried_speed` requires a `source` ("ground" or an upstream span id) because a bare

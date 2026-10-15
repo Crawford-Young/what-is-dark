@@ -16,8 +16,8 @@ func test_declaration_enum_is_the_six_verbs() -> void:
 		assert_true(CourseDecl.DECLARATIONS.has(decl_name), "missing declaration: %s" % decl_name)
 
 
-func test_role_enum_is_the_ten_roles() -> void:
-	assert_eq(CourseDecl.ROLES.size(), 10)
+func test_role_enum_is_the_eleven_roles() -> void:
+	assert_eq(CourseDecl.ROLES.size(), 11)
 	for role_name in [
 		"floor",
 		"kicker",
@@ -28,7 +28,8 @@ func test_role_enum_is_the_ten_roles() -> void:
 		"prop",
 		"door",
 		"gate_path",
-		"ceiling"
+		"ceiling",
+		"obstacle"
 	]:
 		assert_true(CourseDecl.ROLES.has(role_name), "missing role: %s" % role_name)
 
@@ -187,6 +188,15 @@ func test_a_plain_floor_surface_is_clean() -> void:
 ## a collector heuristic (issue #13 tail).
 func test_a_ceiling_surface_is_a_legal_role() -> void:
 	assert_eq(CourseDecl.validate_surface("D1CeilA", {"role": "ceiling"}).size(), 0)
+
+
+## Defined at 4.1a (wave spec §5), consumed by 4.1b's obstacle-lines law via the lab fixture
+## manifests. Adding a role must not loosen the legality check (w0 #12).
+func test_an_obstacle_surface_is_a_legal_role() -> void:
+	assert_eq(CourseDecl.validate_surface("ObsArchA", {"role": "obstacle"}).size(), 0)
+	var errors := CourseDecl.validate_surface("ObsArchA", {"role": "obstacles"})
+	assert_eq(errors.size(), 1, _joined(errors))
+	assert_true(_joined(errors).contains("obstacles"), _joined(errors))
 
 
 func test_erodable_is_legal_for_floor_only() -> void:
