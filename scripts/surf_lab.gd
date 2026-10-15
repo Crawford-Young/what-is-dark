@@ -80,6 +80,38 @@ var _kill_y := -1000.0
 
 var STATIONS: Array = []  ## populated by _build_range_rig() + _build_seam_array(): [{"label","spawn","face"}, ...]
 
+## DEBUG PROBE — remove before gates (issue #14): rounded-seam contact probe. Per
+## physics step while the rider touches a seam-cluster strip (or speed halves the step
+## after leaving one), it
+## logs speed before/after move_and_slide and after the surf clip, every slide
+## contact's normal + collider + shape index, and the trimesh facet under each
+## contact (a short ray along -normal reads face_index), with the contact's
+## along-arc distance in FILLET_STEP units. T rebuilds every rounded seam at
+## PROBE_COARSE_STEP so one ride compares 0.25 m and 1.5 m facets.
+## Sink: user://probe/seam_contact_<stamp>.csv, opened at the first TICK row.
+const PROBE_COARSE_STEP := 1.5  ## DEBUG PROBE — control facet length
+const PROBE_STOP_RATIO := 0.5  ## DEBUG PROBE — hard stop: speed below this fraction of last step's
+const PROBE_STOP_MIN_SPEED := 2.0  ## DEBUG PROBE — drops from below this are standing-still noise
+const PROBE_RAY_REACH := 0.05  ## DEBUG PROBE — facet ray starts/ends this far either side of a contact
+const PROBE_STRIP_COLOR := Color(0.45, 0.3, 0.5)  ## DEBUG PROBE — _build_band_cluster's strip colour
+const PROBE_TICK_COLS := "run,tick,station,step,x,y,z,vx,vy,vz,v_pre,v_slide,v_post,h_post,tick_ratio,step_ratio,slides,contacts,on_floor,clipped,hard_stop,seam,s_from_lip,s_in_arc,facet_k,boundary_dist"
+const PROBE_CONTACT_COLS := "run,tick,slide_i,coll_j,surface,shape_idx,nx,ny,nz,px,py,pz,face_index,face_seg,facet_nx,facet_ny,facet_nz,dev_deg,seam,s_from_lip,s_in_arc,facet_k,boundary_dist"
+var _probe_fillet_step := FILLET_STEP  ## DEBUG PROBE — what _fillet_spine samples at
+var _probe_rounded: Array = []  ## DEBUG PROBE — [{"label","fillet_len","raw","body","spine","cum","arcs"}]
+var _probe_rec_by_label := {}  ## DEBUG PROBE — rounded record per cluster label
+var _probe_strip_label := {}  ## DEBUG PROBE — strip body instance_id -> cluster label (sharp + rounded)
+var _probe_arcs_out: Array = []  ## DEBUG PROBE — arcs of the latest _fillet_spine call
+var _probe_sink_enabled := true  ## DEBUG PROBE — false keeps every line in _probe_buffer (tests)
+var _probe_buffer := PackedStringArray()  ## DEBUG PROBE — lines held until the file opens
+var _probe_file: FileAccess  ## DEBUG PROBE
+var _probe_header_done := false  ## DEBUG PROBE
+var _probe_run := 0  ## DEBUG PROBE
+var _probe_tick := 0  ## DEBUG PROBE
+var _probe_prev_speed := 0.0  ## DEBUG PROBE
+var _probe_prev_on_surf := false  ## DEBUG PROBE
+var _probe_stops := 0  ## DEBUG PROBE
+var _probe_step_label: Label  ## DEBUG PROBE
+
 @onready var _player: Player = $Player
 @onready var _speed_label: Label = $HUD/SpeedLabel
 @onready var _station_label: Label = $HUD/StationLabel
@@ -102,6 +134,7 @@ func _ready() -> void:
 			break
 	_kill_y = _lowest_geometry_y - 10.0  # recomputed from the FINAL built geometry (T1's
 	## builder rule) -- Band B's lead-in alone descends ~12 m, R1 #14.
+	_probe_ready()  ## DEBUG PROBE — remove before gates (issue #14)
 	_reset_to_station()
 
 
@@ -114,6 +147,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_P:
 				_station = (_station - 1 + STATIONS.size()) % STATIONS.size()
 				_reset_to_station()
+			KEY_T:  ## DEBUG PROBE — remove before gates (issue #14)
+				_probe_toggle_fillet_step()
 
 
 func _physics_process(_delta: float) -> void:
@@ -122,12 +157,14 @@ func _physics_process(_delta: float) -> void:
 	if _player.global_position.y < _kill_y:
 		var s: Dictionary = STATIONS[_station]
 		_player.teleport(s["spawn"], s["face"])
+		_probe_on_reset("kill_plane")  ## DEBUG PROBE — remove before gates (issue #14)
 
 
 func _reset_to_station() -> void:
 	var s: Dictionary = STATIONS[_station]
 	_player.teleport(s["spawn"], s["face"])
 	_station_label.text = s["label"]
+	_probe_on_reset("station")  ## DEBUG PROBE — remove before gates (issue #14)
 
 
 ## Range rig (replaces the 5-ramp authored chain, 2026-08-02 ruling round 4):
@@ -366,9 +403,11 @@ func _build_band_cluster(label_prefix: String, x: float, delta_deg: float, lead_
 	var exit_speed: float = ETA * sqrt(entry_speed * entry_speed + 70.4 * lead_in_drop)
 
 	_build_seam_cluster(x, low_y, low_z, exit_speed, delta_deg, spine)
+	var probe_raw_spine := spine.duplicate()  ## DEBUG PROBE — remove before gates (issue #14)
 	if fillet_len > 0.0:
 		spine = _fillet_spine(spine, fillet_len)
 	_add_surf_strip(spine, FACE_ANGLE_DEG, HALF_WIDTH * 2.0, Color(0.45, 0.3, 0.5))
+	_probe_register_strip("%s-%d°" % [label_prefix, int(delta_deg)], fillet_len, probe_raw_spine, spine)  ## DEBUG PROBE — remove before gates (issue #14)
 
 
 ## The measurement rig itself (R1 #23 sanctioned exemption): 4 ramps sharing
@@ -398,6 +437,7 @@ func _build_seam_cluster(x: float, y: float, z: float, entry_speed: float, delta
 ## instead of creasing. Arcs live in the vertical plane of the path (x fixed).
 func _fillet_spine(spine: Array[Vector3], fillet_len: float) -> Array[Vector3]:
 	var out: Array[Vector3] = [spine[0]]
+	_probe_arcs_out = []  ## DEBUG PROBE — remove before gates (issue #14)
 	for i in range(1, spine.size() - 1):
 		var p := spine[i]
 		var d1 := (p - spine[i - 1]).normalized()
@@ -413,7 +453,8 @@ func _fillet_spine(spine: Array[Vector3], fillet_len: float) -> Array[Vector3]:
 		assert(tangent <= minf(p.distance_to(spine[i - 1]), p.distance_to(spine[i + 1])) / 2.0)
 		var t1 := p - d1 * tangent
 		var sgn := signf(phi2 - phi1)
-		var n_steps := maxi(2, ceili(fillet_len / FILLET_STEP))
+		var n_steps := maxi(2, ceili(fillet_len / _probe_fillet_step))  ## DEBUG PROBE — was FILLET_STEP; restore before gates (issue #14)
+		_probe_arcs_out.append({"seam": i - 1, "i0": out.size(), "n": n_steps, "step": fillet_len / n_steps})  ## DEBUG PROBE — remove before gates (issue #14)
 		for k in range(n_steps + 1):
 			var phi := lerpf(phi1, phi2, float(k) / n_steps)
 			var du := sgn * r * (sin(phi) - sin(phi1))  # along-path (-z) offset from t1
@@ -530,3 +571,248 @@ func _add_box(pos: Vector3, size: Vector3, color: Color) -> void:
 ## not a fixed constant, so the plane always sits below every built surface.
 func _track_lowest(y: float) -> void:
 	_lowest_geometry_y = minf(_lowest_geometry_y, y)
+
+
+## DEBUG PROBE — remove before gates (issue #14): everything below is the
+## rounded-seam contact probe; see the PROBE_* block at the top of the file.
+func _probe_ready() -> void:
+	_probe_step_label = Label.new()
+	_probe_step_label.offset_left = 20.0
+	_probe_step_label.offset_top = 120.0
+	_probe_step_label.add_theme_font_size_override("font_size", 24)
+	$HUD.add_child(_probe_step_label)
+	_probe_update_label()
+	_player.probe_stepped.connect(_probe_on_step)
+
+
+func _probe_update_label() -> void:
+	_probe_step_label.text = "rounded FILLET_STEP %.2f m  [T toggle]   hard stops %d" % [_probe_fillet_step, _probe_stops]
+
+
+func _probe_engine_name() -> String:
+	if ClassDB.class_exists("JoltPhysicsServer3D"):
+		return "Jolt Physics"
+	if ClassDB.class_exists("GodotPhysicsServer3D"):
+		return "GodotPhysics3D"
+	return "unknown"
+
+
+func _probe_is_hard_stop(prev_speed: float, speed: float) -> bool:
+	return prev_speed > PROBE_STOP_MIN_SPEED and speed < PROBE_STOP_RATIO * prev_speed
+
+
+## Called after _add_surf_strip: the strip is $Geometry's newest child.
+func _probe_register_strip(label: String, fillet_len: float, raw: Array, spine: Array) -> void:
+	var body: Node = $Geometry.get_child(-1)
+	_probe_strip_label[body.get_instance_id()] = label
+	if fillet_len <= 0.0:
+		return
+	var rec := {"label": label, "fillet_len": fillet_len, "raw": raw}
+	_probe_set_geometry(rec, body, spine)
+	_probe_rounded.append(rec)
+	_probe_rec_by_label[label] = rec
+
+
+func _probe_set_geometry(rec: Dictionary, body: Node, spine: Array) -> void:
+	var cum := PackedFloat64Array([0.0])
+	for i in range(1, spine.size()):
+		cum.append(cum[i - 1] + spine[i].distance_to(spine[i - 1]))
+	rec["body"] = body
+	rec["spine"] = spine
+	rec["cum"] = cum
+	rec["arcs"] = _probe_arcs_out
+
+
+func _probe_toggle_fillet_step() -> void:
+	_probe_fillet_step = PROBE_COARSE_STEP if is_equal_approx(_probe_fillet_step, FILLET_STEP) else FILLET_STEP
+	for rec in _probe_rounded:
+		var old: Node = rec["body"]
+		_probe_strip_label.erase(old.get_instance_id())
+		$Geometry.remove_child(old)
+		old.free()
+		var spine := _fillet_spine(rec["raw"], rec["fillet_len"])
+		_add_surf_strip(spine, FACE_ANGLE_DEG, HALF_WIDTH * 2.0, PROBE_STRIP_COLOR)
+		var body: Node = $Geometry.get_child(-1)
+		_probe_strip_label[body.get_instance_id()] = rec["label"]
+		_probe_set_geometry(rec, body, spine)
+	_probe_update_label()
+	_probe_write("PROBE-STEP,%d,%d,%.3f" % [_probe_run, _probe_tick, _probe_fillet_step])
+	for line in _probe_arc_lines():
+		_probe_write(line)
+	_reset_to_station()
+
+
+func _probe_arc_lines() -> PackedStringArray:
+	var lines := PackedStringArray()
+	for rec in _probe_rounded:
+		for arc in rec["arcs"]:
+			var i0: int = arc["i0"]
+			var n: int = arc["n"]
+			lines.append("PROBE-ARC,%s,%d,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%d" % [rec["label"], arc["seam"], rec["spine"][i0].x, rec["spine"][i0].z, rec["spine"][i0 + n].z, rec["cum"][i0], rec["cum"][i0 + n] - rec["cum"][i0], arc["step"], n])
+	return lines
+
+
+## Along-path position of world z on a rounded strip. Every strip quad is a spine
+## segment plus a purely lateral (x, y) offset, so a surface point's z is its spine
+## generator's z and z alone fixes the path distance. Returns the nearest arc.
+func _probe_arc_coord(rec: Dictionary, z: float) -> Dictionary:
+	var spine: Array = rec["spine"]
+	var cum: PackedFloat64Array = rec["cum"]
+	var j := 0
+	while j < spine.size() - 2 and z < spine[j + 1].z:
+		j += 1
+	var frac: float = (spine[j].z - z) / (spine[j].z - spine[j + 1].z)
+	var s: float = cum[j] + frac * (cum[j + 1] - cum[j])
+	var best: Dictionary = {}
+	var best_out := INF
+	for arc in rec["arcs"]:
+		var s0: float = cum[arc["i0"]]
+		var s1: float = cum[arc["i0"] + arc["n"]]
+		var outside := maxf(maxf(s0 - s, s - s1), 0.0)
+		if outside < best_out:
+			best_out = outside
+			var step: float = arc["step"]
+			var s_in := s - s0
+			var nearest := clampf(roundf(s_in / step), 0.0, float(arc["n"]))
+			best = {
+				"seam": arc["seam"],
+				"s_in_arc": s_in,
+				"s_from_lip": s_in - (s1 - s0) / 2.0,
+				"facet_k": floori(s_in / step) if outside == 0.0 else -1,
+				"boundary_dist": absf(s_in - nearest * step),
+			}
+	return best
+
+
+func _probe_face_hit(from: Vector3, to: Vector3) -> Dictionary:
+	var query := PhysicsRayQueryParameters3D.create(from, to)
+	query.exclude = [_player.get_rid()]
+	query.hit_back_faces = true
+	return get_world_3d().direct_space_state.intersect_ray(query)
+
+
+## _add_surf_strip emits two triangles per spine segment, side -1 then side +1.
+func _probe_face_segment(rec: Dictionary, face_index: int) -> int:
+	var n_seg: int = rec["spine"].size() - 1
+	return (face_index % (2 * n_seg)) / 2
+
+
+func _probe_on_reset(reason: String) -> void:
+	_probe_run += 1
+	_probe_tick = 0
+	_probe_prev_speed = 0.0
+	_probe_prev_on_surf = false
+	_probe_write("PROBE-RUN,%d,%s,%s,%.3f" % [_probe_run, STATIONS[_station]["label"], reason, _probe_fillet_step])
+	if _probe_file:
+		_probe_file.flush()
+
+
+func _probe_on_step(pre_slide: Vector3, post_slide: Vector3, clipped: bool) -> void:
+	_probe_tick += 1
+	var v_pre := pre_slide.length()
+	var v_slide := post_slide.length()
+	var vel := _player.velocity
+	var v_post := vel.length()
+	var prev := _probe_prev_speed
+	_probe_prev_speed = v_post
+	var contacts := PackedStringArray()
+	var surf_rec: Dictionary = {}
+	var on_surf := false
+	for i in _player.get_slide_collision_count():
+		var kc := _player.get_slide_collision(i)
+		for j in kc.get_collision_count():
+			var collider := kc.get_collider(j)
+			var label: String = _probe_strip_label.get(collider.get_instance_id(), "") if collider else ""
+			on_surf = on_surf or label != ""
+			var rec: Dictionary = _probe_rec_by_label.get(label, {})
+			if not rec.is_empty() and surf_rec.is_empty():
+				surf_rec = rec
+			contacts.append(_probe_contact_row(i, j, kc, collider, label, rec))
+	# Stops count only inside the surf-contact window (this step or the last), so a
+	# flat landing that zeroes vertical speed never reads as a seam snag.
+	var stop := (on_surf or _probe_prev_on_surf) and _probe_is_hard_stop(prev, v_post)
+	_probe_prev_on_surf = on_surf
+	if not on_surf and not stop:
+		return
+	if stop:
+		_probe_stops += 1
+		_probe_update_label()
+	if surf_rec.is_empty():
+		surf_rec = _probe_rec_by_label.get(STATIONS[_station]["label"], {})
+	var pos := _player.global_position
+	var row := "TICK,%d,%d,%s,%.3f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%d,%d,%d,%d,%d" % [
+		_probe_run, _probe_tick, STATIONS[_station]["label"], _probe_fillet_step,
+		pos.x, pos.y, pos.z, vel.x, vel.y, vel.z, v_pre, v_slide, v_post,
+		Vector2(vel.x, vel.z).length(), v_post / prev if prev > 0.0 else 1.0,
+		v_post / v_pre if v_pre > 0.0 else 1.0,
+		_player.get_slide_collision_count(), contacts.size(),
+		int(_player.is_on_floor()), int(clipped), int(stop)]
+	_probe_write(row + _probe_coord_cols(surf_rec, pos.z))
+	for line in contacts:
+		_probe_write(line)
+	if _probe_file and (stop or _probe_tick % 120 == 0):
+		_probe_file.flush()
+
+
+func _probe_contact_row(i: int, j: int, kc: KinematicCollision3D, collider: Object, label: String, rec: Dictionary) -> String:
+	var n := kc.get_normal(j)
+	var p := kc.get_position(j)
+	var surface := label if label != "" else "other:%s" % ((collider as Node).name if collider is Node else "?")
+	var face_index := -1
+	var face_seg := -1
+	var facet_n := Vector3.ZERO
+	var dev := -1.0
+	if label != "":
+		var hit := _probe_face_hit(p + n * PROBE_RAY_REACH, p - n * PROBE_RAY_REACH)
+		if not hit.is_empty() and hit["collider"] == collider:
+			face_index = hit["face_index"]
+			facet_n = hit["normal"]
+			var angle := rad_to_deg(n.angle_to(facet_n))
+			dev = minf(angle, 180.0 - angle)
+			if not rec.is_empty():
+				face_seg = _probe_face_segment(rec, face_index)
+	var row := "CONTACT,%d,%d,%d,%d,%s,%d,%.5f,%.5f,%.5f,%.4f,%.4f,%.4f,%d,%d,%.5f,%.5f,%.5f,%.3f" % [
+		_probe_run, _probe_tick, i, j, surface, kc.get_collider_shape_index(j),
+		n.x, n.y, n.z, p.x, p.y, p.z, face_index, face_seg, facet_n.x, facet_n.y, facet_n.z, dev]
+	return row + _probe_coord_cols(rec, p.z)
+
+
+func _probe_coord_cols(rec: Dictionary, z: float) -> String:
+	if rec.is_empty():
+		return ",,,,,"
+	var c := _probe_arc_coord(rec, z)
+	return ",%d,%.4f,%.4f,%d,%.4f" % [c["seam"], c["s_from_lip"], c["s_in_arc"], c["facet_k"], c["boundary_dist"]]
+
+
+func _probe_header() -> PackedStringArray:
+	var lines := PackedStringArray()
+	lines.append("PROBE-META,engine=%s,godot=%s,physics_ticks=%d,jolt_edge_removal=%s,fillet_step=%.3f,coarse_step=%.3f,stop_ratio=%.2f,stop_min_speed=%.1f,ray_reach=%.3f" % [
+		_probe_engine_name(), Engine.get_version_info()["string"], Engine.physics_ticks_per_second,
+		str(ProjectSettings.get_setting("physics/jolt_physics_3d/simulation/use_enhanced_internal_edge_removal", "absent")),
+		_probe_fillet_step, PROBE_COARSE_STEP, PROBE_STOP_RATIO, PROBE_STOP_MIN_SPEED, PROBE_RAY_REACH])
+	lines.append("PROBE-COLS,TICK," + PROBE_TICK_COLS)
+	lines.append("PROBE-COLS,CONTACT," + PROBE_CONTACT_COLS)
+	lines.append("PROBE-COLS,PROBE-ARC,label,seam,x,z_start,z_end,s_start,arc_len,step,n")
+	lines.append_array(_probe_arc_lines())
+	return lines
+
+
+## Lines buffer in memory until the first TICK row, so instancing the lab (tests,
+## a launch that never touches a surf face) writes no file.
+func _probe_write(line: String) -> void:
+	if not _probe_header_done:
+		_probe_header_done = true
+		_probe_buffer.append_array(_probe_header())
+	if _probe_file:
+		_probe_file.store_line(line)
+		return
+	_probe_buffer.append(line)
+	if _probe_sink_enabled and line.begins_with("TICK,"):
+		var stamp := Time.get_datetime_string_from_system().replace(":", "-")
+		DirAccess.make_dir_recursive_absolute("user://probe")
+		_probe_file = FileAccess.open("user://probe/seam_contact_%s.csv" % stamp, FileAccess.WRITE)
+		if _probe_file:
+			for buffered in _probe_buffer:
+				_probe_file.store_line(buffered)
+			_probe_buffer.clear()
+			print("PROBE: writing %s" % ProjectSettings.globalize_path(_probe_file.get_path()))

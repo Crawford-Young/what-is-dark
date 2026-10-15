@@ -36,6 +36,11 @@ momentum-lab:
 surf-lab:
     "{{godot}}" --path . scenes/surf_lab.tscn
 
+# DEBUG PROBE — remove before gates (issue #14): list rounded-seam hard stops from the
+# newest user://probe/seam_contact_*.csv (or a given path); --tol=0.02 sets the boundary band
+probe-stops *args:
+    node scripts/dev/seam_contact_stops.mjs {{args}}
+
 # run the gate lab (T7 sightline lanes)
 gate-lab:
     "{{godot}}" --path . scenes/gate_lab.tscn
