@@ -1,9 +1,13 @@
 extends Node3D
 ## Gate lab (4.1 T7): one straight lane per gate variant, side by side on x,
 ## for T8's sightline campaign. Lane (travel along -Z, floor top y = 0):
-##   spawn -> RUN_UP_LENGTH of bhop run-up -> approach-start line (a visible
-##   floor strip) -> D m -> gate near edge -> runout (retract) or a void gap of
-##   the bridge's gap_length then a landing floor (deploy).
+##   spawn (already moving at SPAWN_SPEED) -> RUN_UP_LENGTH of run-up ->
+##   approach-start line (a visible floor strip) -> D m -> gate near edge ->
+##   runout (retract) or a DEPLOY_GAP void then a landing floor (deploy).
+## Tall side walls (WALL_HEIGHT) flank every floor so a lane cannot be skirted.
+## Retract lanes are walled unbroken; deploy lanes are walled up to the gate
+## plane and again along the landing floor, but NOT over the void: a wall there
+## would be wall-rideable and let a rider skip the bridge.
 ## Every gate starts hidden and is revealed the tick the rider crosses its
 ## lane's approach line (user ruling, T7) -- so D is the true sightline budget.
 ## Station cycling follows the surf_lab pattern.
@@ -12,13 +16,18 @@ extends Node3D
 const GATE_DISTANCES := [30.0, 40.0, 50.0, 60.0]  ## approach line -> gate near edge, m
 const TIMED_DISTANCE := 50.0  ## the timed gate's fixed approach distance
 const TIMED_WINDOW := 1.5  ## initial timed re-close window, s (T8 sweeps it)
-const RUN_UP_LENGTH := 300.0  ## spawn -> approach line. Generous on purpose: room to
-## strafe-hop from RUN_SPEED 11 up to ~25 m/s with distance to spare; the rider
-## verifies the reached speed on the HUD SpeedLabel.
+const RUN_UP_LENGTH := 60.0  ## spawn -> approach line (the rider is already at speed)
+const SPAWN_SPEED := 35.0  ## m/s along the lane at every spawn (measured line speed 34-39)
+const SPAWN_HEIGHT := 1.5  ## spawn origin y: ~0.6 m above standing rest (capsule 1.8 m), so
+## the rider starts airborne and ground friction (FRICTION 4 -> ~7%/tick) cannot bleed
+## SPAWN_SPEED before the first hop lands.
 const SPAWN_BACK := 4.0  ## floor extends this far behind the spawn (+z)
 const RUNOUT_LENGTH := 60.0  ## floor past a retract gate
 const LANDING_LENGTH := 40.0  ## landing floor past a deploy gate's void gap
 const LANE_WIDTH := 16.0  ## floor width = gate corridor width: no way around a barrier
+const DEPLOY_GAP := 35.0  ## void length of a deploy lane (GateNode.gap_length)
+const WALL_HEIGHT := 12.0  ## side walls: well over the 6 m barrier, out of wall-kick reach
+const WALL_THICKNESS := 1.0
 const LANE_SPACING := 40.0  ## lane centre-to-centre on x
 const FLOOR_THICKNESS := 1.0
 const LINE_DEPTH := 0.5  ## approach-line strip z-length
@@ -73,6 +82,7 @@ func _physics_process(_delta: float) -> void:
 func _reset_to_station() -> void:
 	var s: Dictionary = STATIONS[_station]
 	_player.teleport(s["spawn"], s["face"])
+	_player.velocity = (s["face"] as Vector3) * SPAWN_SPEED  # teleport() zeroes velocity
 	(s["gate"] as GateNode).reset()
 	_station_label.text = s["label"]
 
@@ -95,6 +105,8 @@ func _build_lane(x: float, label: String, kind: String, distance: float, window:
 	gate.timed_window = window
 	gate.corridor_width = LANE_WIDTH
 	gate.start_hidden = true
+	if kind == "deploy":
+		gate.gap_length = DEPLOY_GAP
 	gate.position = Vector3(x, 0.0, gate_z)
 	$Geometry.add_child(gate)
 
@@ -103,10 +115,12 @@ func _build_lane(x: float, label: String, kind: String, distance: float, window:
 		far_z = gate_z  # the approach floor ends at the near lip; the bridge spans the void
 		var landing_near := gate_z - gate.gap_length
 		_add_floor(x, landing_near, landing_near - LANDING_LENGTH)
+		_add_walls(x, landing_near, landing_near - LANDING_LENGTH)
 	_add_floor(x, SPAWN_BACK, far_z)
+	_add_walls(x, SPAWN_BACK, far_z)
 	_add_line_strip(x, line_z)
 
-	STATIONS.append({"label": label, "spawn": Vector3(x, 1.0, 0.0), "face": FACE_FORWARD,
+	STATIONS.append({"label": label, "spawn": Vector3(x, SPAWN_HEIGHT, 0.0), "face": FACE_FORWARD,
 		"gate": gate, "line_z": line_z})
 
 
@@ -124,6 +138,24 @@ func _add_floor(x: float, near_z: float, far_z: float) -> void:
 	body.add_child(_box_mesh(size, Color(0.4, 0.4, 0.42), false))
 	$Geometry.add_child(body)
 	_track_lowest(body.position.y - FLOOR_THICKNESS / 2.0)
+
+
+## Both side walls over [far_z, near_z]: inner faces flush with the floor edge,
+## top at WALL_HEIGHT. Grouped "lab_wall" so tests can inspect their extents.
+func _add_walls(x: float, near_z: float, far_z: float) -> void:
+	var size := Vector3(WALL_THICKNESS, WALL_HEIGHT, near_z - far_z)
+	for side in [-1.0, 1.0]:
+		var body := StaticBody3D.new()
+		body.position = Vector3(x + side * (LANE_WIDTH + WALL_THICKNESS) / 2.0,
+			WALL_HEIGHT / 2.0, (near_z + far_z) / 2.0)
+		var col := CollisionShape3D.new()
+		var shape := BoxShape3D.new()
+		shape.size = size
+		col.shape = shape
+		body.add_child(col)
+		body.add_child(_box_mesh(size, Color(0.3, 0.3, 0.34), false))
+		body.add_to_group(&"lab_wall")
+		$Geometry.add_child(body)
 
 
 ## The approach-start line: visual only (no collider), so it never bumps a hop.

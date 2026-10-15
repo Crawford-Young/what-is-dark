@@ -53,6 +53,61 @@ func test_crossing_the_approach_line_reveals_the_gate_and_restart_hides_it() -> 
 	assert_false(gate.is_revealed())
 
 
+func _wall_spans(lab: Node3D, x: float) -> Array:
+	var spans := []  ## [near_z, far_z] of each wall on the lane at x
+	for wall in lab.get_tree().get_nodes_in_group(&"lab_wall"):
+		if absf(wall.position.x - x) < lab.LANE_WIDTH:
+			var half: float = (wall.get_child(0).shape as BoxShape3D).size.z / 2.0
+			spans.append([wall.position.z + half, wall.position.z - half])
+	return spans
+
+
+func test_deploy_gate_uses_the_deploy_gap() -> void:
+	var lab: Node3D = load("res://scenes/gate_lab.tscn").instantiate()
+	add_child_autofree(lab)
+	for s in lab.STATIONS:
+		if (s["gate"] as GateNode).kind == "deploy":
+			assert_eq((s["gate"] as GateNode).gap_length, lab.DEPLOY_GAP, s["label"])
+
+
+func test_retract_lane_has_unbroken_walls_on_both_sides() -> void:
+	var lab: Node3D = load("res://scenes/gate_lab.tscn").instantiate()
+	add_child_autofree(lab)
+	var s: Dictionary = lab.STATIONS[0]
+	var gate: GateNode = s["gate"]
+	var spans := _wall_spans(lab, gate.position.x)
+	assert_eq(spans.size(), 2, "one wall per side")
+	for span in spans:
+		assert_true(span[0] >= s["spawn"].z and span[1] <= gate.position.z - lab.RUNOUT_LENGTH + 0.01,
+			"covers spawn to past the gate")
+
+
+func test_deploy_lane_walls_leave_the_void_open() -> void:
+	var lab: Node3D = load("res://scenes/gate_lab.tscn").instantiate()
+	add_child_autofree(lab)
+	var gate: GateNode
+	for s in lab.STATIONS:
+		if (s["gate"] as GateNode).kind == "deploy":
+			gate = s["gate"]
+			break
+	var spans := _wall_spans(lab, gate.position.x)
+	assert_eq(spans.size(), 4, "approach + landing wall per side")
+	var void_near := gate.position.z
+	var void_far: float = gate.position.z - lab.DEPLOY_GAP
+	for span in spans:
+		assert_true(span[1] >= void_near - 0.01 or span[0] <= void_far + 0.01, "wall overlaps the void")
+
+
+func test_reset_spawns_the_rider_at_speed() -> void:
+	var lab: Node3D = load("res://scenes/gate_lab.tscn").instantiate()
+	add_child_autofree(lab)
+	var player: Player = lab.get_node("Player")
+	player.velocity = Vector3.ZERO
+	lab._reset_to_station()
+	var horiz := Vector2(player.velocity.x, player.velocity.z).length()
+	assert_almost_eq(horiz, lab.SPAWN_SPEED, 0.01)
+
+
 func test_resolve_gate_from_direct_child() -> void:
 	var gate: GateNode = autofree(GateNode.new())
 	var child := Node3D.new()
