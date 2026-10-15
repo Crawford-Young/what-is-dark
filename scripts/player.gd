@@ -12,11 +12,6 @@ const FLOOR_LIMIT_DEG := 38.0  ## lab-parity classification boundary: steeper th
 const ACTIVATE_RANGE := 200.0  ## gate-activate ray length (m). Generous on purpose: the
 ## gate lab measures natural click distances, so range must never be the binding limit.
 
-## DEBUG PROBE — remove before gates (issue #14): fires once per physics step after the
-## surf clip, carrying the velocity before move_and_slide and right after it; the
-## post-clip velocity is `velocity` itself when a listener reads it.
-signal probe_stepped(pre_slide_velocity: Vector3, post_slide_velocity: Vector3, clipped: bool)
-
 var frozen := false
 var glancing := false
 var _jump_was_down := false
@@ -89,7 +84,6 @@ func _physics_process(delta: float) -> void:
 
 	var pre_slide_velocity := velocity
 	move_and_slide()
-	var probe_post_slide_velocity := velocity  ## DEBUG PROBE — remove before gates (issue #14)
 	var steep: Array[Vector3] = []
 	for i in get_slide_collision_count():
 		var normal := get_slide_collision(i).get_normal()
@@ -100,7 +94,6 @@ func _physics_process(delta: float) -> void:
 		# steep walls (anti-climb). Recompute from the pre-slide velocity with
 		# Source clip semantics (lab lesson, 9822c47).
 		velocity = SourceMove.clip_multi(pre_slide_velocity, steep)
-	probe_stepped.emit(pre_slide_velocity, probe_post_slide_velocity, steep.size() > 0 and not is_on_floor())  ## DEBUG PROBE — remove before gates (issue #14)
 	_jump_was_down = jump_down
 	_rays_stale = false
 
