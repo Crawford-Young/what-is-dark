@@ -39,25 +39,6 @@ var _kill_y := -1000.0
 
 var STATIONS: Array = []  ## populated by _build_lanes(): [{"label","spawn","face","gate","line_z"}, ...]
 
-# DEBUG PROBE — remove before gates: per-run rider telemetry (T8 sightline probe + "obstacles are not hard" diagnosis).
-const PROBE_CAPTURE_DIR := "res://tools/probe/captures"  ## DEBUG PROBE — git-excluded via tools/probe/
-const PROBE_PASS_MARGIN := 5.0  ## DEBUG PROBE — a run ends this far (m) past the gate plane
-const PROBE_SLAM_ZONE := 3.0  ## DEBUG PROBE — SLAM window: this many m before the gate plane
-const PROBE_SLAM_DROP := 0.5  ## DEBUG PROBE — SLAM = zone min speed < this fraction of zone entry speed
-const PROBE_FLUSH_TICKS := 30  ## DEBUG PROBE — CSV flush cadence (events flush immediately)
-const PROBE_COLUMNS := "tick,station,x,y,z,hspeed,gate_state,openness,revealed,event"  ## DEBUG PROBE
-var _probe_file: FileAccess  ## DEBUG PROBE
-var _probe_path := ""  ## DEBUG PROBE
-var _probe_cur := {}  ## DEBUG PROBE — station dict of the latest run (rows keep logging after a run ends)
-var _probe_run := {}  ## DEBUG PROBE — active run record; empty = no run in flight
-const FEEL_ANIMS := [0.3, 0.5, 0.8]  ## DEBUG PROBE — Z cycles GateLogic.ANIM_DURATION, s
-const FEEL_WINDOWS := [1.0, 1.5, 2.5]  ## DEBUG PROBE — X cycles the TIMED-50 re-close window, s
-var _feel_anim_i := 1  ## DEBUG PROBE — requested index (launch default 0.5)
-var _feel_window_i := 1  ## DEBUG PROBE — requested index (launch default 1.5)
-var _feel_applied := [1, 1]  ## DEBUG PROBE — indices in force; changes land only while no gate is animating
-var _feel_label: Label  ## DEBUG PROBE
-
-
 @onready var _player: Player = $Player
 @onready var _speed_label: Label = $HUD/SpeedLabel
 @onready var _station_label: Label = $HUD/StationLabel
@@ -67,7 +48,6 @@ var _feel_label: Label  ## DEBUG PROBE
 func _ready() -> void:
 	_build_lanes()
 	_kill_y = _lowest_geometry_y - 10.0  # from the FINAL built geometry (T1's builder rule)
-	_feel_init()  ## DEBUG PROBE
 	_reset_to_station()
 
 
@@ -82,10 +62,6 @@ func _unhandled_input(event: InputEvent) -> void:
 				_reset_to_station()
 			KEY_R:
 				_reset_to_station()
-			KEY_Z:  ## DEBUG PROBE
-				_feel_anim_i = (_feel_anim_i + 1) % FEEL_ANIMS.size()  ## DEBUG PROBE
-			KEY_X:  ## DEBUG PROBE
-				_feel_window_i = (_feel_window_i + 1) % FEEL_WINDOWS.size()  ## DEBUG PROBE
 
 
 func _physics_process(_delta: float) -> void:
@@ -100,19 +76,15 @@ func _physics_process(_delta: float) -> void:
 		gate.reveal()
 	_gate_label.text = "%s / %s" % [GateLogic.State.keys()[gate.logic.state],
 		"revealed" if gate.is_revealed() else "hidden"]
-	_feel_tick()  ## DEBUG PROBE
-	_probe_tick(speed)  ## DEBUG PROBE
 
 
 ## Teleport to the station spawn and put its gate back to SHUT + hidden.
 func _reset_to_station() -> void:
-	_probe_on_reset()  ## DEBUG PROBE
 	var s: Dictionary = STATIONS[_station]
 	_player.teleport(s["spawn"], s["face"])
 	_player.velocity = (s["face"] as Vector3) * SPAWN_SPEED  # teleport() zeroes velocity
 	(s["gate"] as GateNode).reset()
 	_station_label.text = s["label"]
-	_probe_begin_run()  ## DEBUG PROBE
 
 
 func _build_lanes() -> void:
@@ -209,210 +181,3 @@ func _box_mesh(size: Vector3, color: Color, unshaded: bool) -> MeshInstance3D:
 ## Kill-plane tracking (surf_lab R1 #14): the plane sits below every built surface.
 func _track_lowest(y: float) -> void:
 	_lowest_geometry_y = minf(_lowest_geometry_y, y)
-
-
-## DEBUG PROBE — opens the CSV sink once and prints the GATE_PROBE header.
-func _probe_open() -> void:
-	if _probe_path != "":
-		return
-	var dir := ProjectSettings.globalize_path(PROBE_CAPTURE_DIR)
-	DirAccess.make_dir_recursive_absolute(dir)
-	var stamp := Time.get_datetime_string_from_system().replace(":", "-")
-	_probe_path = "%s/gate_%s.csv" % [dir, stamp]
-	_probe_file = FileAccess.open(_probe_path, FileAccess.WRITE)
-	print("GATE_PROBE: capture=%s PASS_MARGIN=%.1f SLAM_ZONE=%.1f SLAM_DROP=%.2f FLUSH_TICKS=%d ACTIVATE_RANGE=%.0f OPEN_THRESHOLD=%.2f tick_hz=%d | outcome := OPEN_PASS (open at gate plane) / SHUT_PASS_AROUND (|x off| > corridor half-width) / SHUT_PASS_OVER (y > barrier_height) / SLAM (min speed in last SLAM_ZONE m before plane < SLAM_DROP * zone entry speed, plane never reached) / FALL (respawn) / NO_ARRIVAL (reset before plane); SHUT_PASS_OTHER = shut at plane, neither around nor over" % [
-		_probe_path, PROBE_PASS_MARGIN, PROBE_SLAM_ZONE, PROBE_SLAM_DROP, PROBE_FLUSH_TICKS,
-		Player.ACTIVATE_RANGE, GateNode.OPEN_THRESHOLD, Engine.physics_ticks_per_second])
-	if _probe_file:
-		_probe_file.store_line(PROBE_COLUMNS)
-		_probe_file.flush()
-
-
-## DEBUG PROBE — run record for the station the rider was just placed on.
-func _probe_begin_run() -> void:
-	_probe_cur = STATIONS[_station]
-	var gate: GateNode = _probe_cur["gate"]
-	_probe_run = {"gate_z": gate.global_position.z, "lane_x": gate.global_position.x,
-		"line_tick": -1, "line_speed": 0.0, "click_tick": -1, "click_dist": 0.0,
-		"click_hit": "NONE", "click_revealed": false, "clicks": 0, "plane_tick": -1,
-		"plane_state": "", "plane_open": 0.0, "plane_xoff": 0.0, "plane_y": 0.0,
-		"max_xoff": 0.0, "zone_speed": -1.0, "zone_min": 0.0}
-
-
-## DEBUG PROBE — a reset/respawn ends the run in flight (called before the teleport).
-func _probe_on_reset() -> void:
-	_probe_open()
-	if _probe_cur.is_empty():
-		return
-	var respawn := _player.global_position.y < _kill_y
-	_probe_row("RESPAWN" if respawn else "RESET")
-	if not _probe_run.is_empty():
-		_probe_finish("FALL" if respawn else "")
-	if _probe_file:
-		_probe_file.flush()
-
-
-## DEBUG PROBE — one CSV row per physics tick, plus run bookkeeping and click polling.
-func _probe_tick(speed: float) -> void:
-	if _probe_cur.is_empty():
-		return
-	var p := _player.global_position
-	var tick := Engine.get_physics_frames()
-	var events: Array = []
-	if not _probe_run.is_empty():
-		_probe_track(p, speed, tick, events)
-	if Input.is_action_just_pressed(&"activate"):
-		events.append("CLICK")
-		_probe_click(p, tick)
-	_probe_row("|".join(events))
-	if not events.is_empty() or tick % PROBE_FLUSH_TICKS == 0:
-		if _probe_file:
-			_probe_file.flush()
-
-
-## DEBUG PROBE — line crossing, gate-plane arrival, slam zone and run end.
-func _probe_track(p: Vector3, speed: float, tick: int, events: Array) -> void:
-	var r := _probe_run
-	var gate: GateNode = _probe_cur["gate"]
-	var gate_z: float = r["gate_z"]
-	if r["line_tick"] < 0 and p.z <= float(_probe_cur["line_z"]):
-		r["line_tick"] = tick
-		r["line_speed"] = speed
-		events.append("LINE_CROSS")
-	if r["line_tick"] >= 0 and r["plane_tick"] < 0:
-		r["max_xoff"] = maxf(r["max_xoff"], absf(p.x - r["lane_x"]))
-	if r["plane_tick"] < 0 and p.z <= gate_z + PROBE_SLAM_ZONE and p.z > gate_z:
-		if r["zone_speed"] < 0.0:
-			r["zone_speed"] = speed
-			r["zone_min"] = speed
-		r["zone_min"] = minf(r["zone_min"], speed)
-	if r["plane_tick"] < 0 and p.z <= gate_z:
-		r["plane_tick"] = tick
-		r["plane_state"] = GateLogic.State.keys()[gate.logic.state]
-		r["plane_open"] = gate.logic.openness()
-		r["plane_xoff"] = p.x - r["lane_x"]
-		r["plane_y"] = p.y
-		events.append("GATE_PLANE")
-	if r["plane_tick"] >= 0 and p.z <= gate_z - PROBE_PASS_MARGIN:
-		_probe_finish("")
-
-
-## DEBUG PROBE — classifies the click; click_* fields record the OPENING click, `clicks` counts all.
-func _probe_click(p: Vector3, tick: int) -> void:
-	var gate: GateNode = _probe_cur["gate"]
-	var hit_class := _probe_classify(gate)
-	if _probe_run.is_empty():
-		return
-	var r := _probe_run
-	r["clicks"] += 1
-	# Opening click = first click after the line that is a TARGET hit while revealed
-	# (only the Target body opens a gate); a miss or a barrier/bridge click is not it.
-	if r["line_tick"] >= 0 and r["click_tick"] < 0 and hit_class == "TARGET" and gate.is_revealed():
-		r["click_tick"] = tick
-		r["click_dist"] = p.z - float(r["gate_z"])
-		r["click_hit"] = hit_class
-		r["click_revealed"] = gate.is_revealed()
-
-
-## DEBUG PROBE — the same ray the player casts: TARGET / BARRIER / BRIDGE / OTHER / NONE.
-func _probe_classify(gate: GateNode) -> String:
-	var from := (_player.get_node("Head/Camera") as Camera3D).global_position
-	var query := PhysicsRayQueryParameters3D.create(from, from + _player.camera_forward() * Player.ACTIVATE_RANGE)
-	query.exclude = [_player.get_rid()]
-	var hit := _player.get_world_3d().direct_space_state.intersect_ray(query)
-	if hit.is_empty():
-		return "NONE"
-	var collider := hit.collider as Node
-	if GateNode.resolve_gate(collider) != gate:
-		return "OTHER"
-	match String(collider.name):
-		"Target":
-			return "TARGET"
-		"Barrier":
-			return "BARRIER"
-		"Bridge":
-			return "BRIDGE"
-	return "OTHER"
-
-
-## DEBUG PROBE — outcome from the recorded run; forced is "FALL" on a respawn.
-func _probe_outcome(forced: String) -> String:
-	if forced != "":
-		return forced
-	var r := _probe_run
-	var gate: GateNode = _probe_cur["gate"]
-	if r["plane_tick"] < 0:
-		var slam: bool = r["zone_speed"] >= 0.0 and r["zone_min"] < PROBE_SLAM_DROP * r["zone_speed"]
-		return "SLAM" if slam else "NO_ARRIVAL"
-	if r["plane_open"] >= GateNode.OPEN_THRESHOLD:
-		return "OPEN_PASS"
-	if absf(r["plane_xoff"]) > gate.corridor_width / 2.0:
-		return "SHUT_PASS_AROUND"
-	if r["plane_y"] > gate.barrier_height:
-		return "SHUT_PASS_OVER"
-	return "SHUT_PASS_OTHER"
-
-
-## DEBUG PROBE — prints the one GATE_RUN summary line and closes the run.
-func _probe_finish(forced: String) -> void:
-	var r := _probe_run
-	var hz := float(Engine.physics_ticks_per_second)
-	var has_click: bool = r["click_tick"] >= 0
-	var dt: int = r["click_tick"] - r["line_tick"]
-	print("GATE_RUN station=%s outcome=%s line_speed=%s click_ticks=%s click_s=%s click_dist=%s click_hit=%s click_revealed=%s clicks=%d plane_state=%s plane_open=%s plane_xoff=%s plane_y=%s max_xoff=%.2f" % [
-		_probe_cur["label"], _probe_outcome(forced),
-		("%.2f" % r["line_speed"]) if r["line_tick"] >= 0 else "NA",
-		str(dt) if has_click else "NA", ("%.3f" % (dt / hz)) if has_click else "NA",
-		("%.2f" % r["click_dist"]) if has_click else "NA", r["click_hit"] if has_click else "NA",
-		str(r["click_revealed"]) if has_click else "NA", r["clicks"],
-		r["plane_state"] if r["plane_tick"] >= 0 else "NA",
-		("%.2f" % r["plane_open"]) if r["plane_tick"] >= 0 else "NA",
-		("%.2f" % r["plane_xoff"]) if r["plane_tick"] >= 0 else "NA",
-		("%.2f" % r["plane_y"]) if r["plane_tick"] >= 0 else "NA", r["max_xoff"]])
-	_probe_run = {}
-
-
-## DEBUG PROBE — appends one CSV row; the event column joins same-tick events with "|".
-func _probe_row(event: String) -> void:
-	if _probe_file == null or _probe_cur.is_empty():
-		return
-	var gate: GateNode = _probe_cur["gate"]
-	var p := _player.global_position
-	_probe_file.store_line("%d,%s,%.4f,%.4f,%.4f,%.4f,%s,%.3f,%d,%s" % [
-		Engine.get_physics_frames(), _probe_cur["label"], p.x, p.y, p.z,
-		Vector2(_player.velocity.x, _player.velocity.z).length(),
-		GateLogic.State.keys()[gate.logic.state], gate.logic.openness(),
-		1 if gate.is_revealed() else 0, event])
-
-
-## DEBUG PROBE — readout label under the gate label.
-func _feel_init() -> void:
-	_feel_label = Label.new()
-	_feel_label.position = Vector2(20.0, 150.0)
-	_feel_label.add_theme_font_size_override("font_size", 24)
-	$HUD.add_child(_feel_label)
-	print("FEEL anim=%s window=%s" % [GateLogic.ANIM_DURATION, TIMED_WINDOW])
-
-
-## DEBUG PROBE — applies a requested change once no gate is mid-animation (it finishes at its old duration).
-func _feel_tick() -> void:
-	_feel_show()
-	if _feel_applied == [_feel_anim_i, _feel_window_i]:
-		return
-	for s in STATIONS:
-		var st: int = (s["gate"] as GateNode).logic.state
-		if st == GateLogic.State.OPENING or st == GateLogic.State.RECLOSING:
-			return
-	_feel_applied = [_feel_anim_i, _feel_window_i]
-	GateLogic.ANIM_DURATION = FEEL_ANIMS[_feel_anim_i]
-	var timed: GateNode = (STATIONS[STATIONS.size() - 1]["gate"] as GateNode)
-	timed.timed_window = FEEL_WINDOWS[_feel_window_i]  # survives reset(), which rebuilds the logic
-	timed.logic.timed_window = FEEL_WINDOWS[_feel_window_i]
-	print("FEEL anim=%s window=%s" % [GateLogic.ANIM_DURATION, timed.timed_window])
-
-
-## DEBUG PROBE
-func _feel_show() -> void:
-	var pending := " (pending)" if _feel_applied != [_feel_anim_i, _feel_window_i] else ""
-	_feel_label.text = "Z anim=%s  X timed window=%s%s" % [
-		FEEL_ANIMS[_feel_applied[0]], FEEL_WINDOWS[_feel_applied[1]], pending]

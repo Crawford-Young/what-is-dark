@@ -6,7 +6,7 @@ extends RefCounted
 
 enum State { SHUT, OPENING, OPEN, RECLOSING }
 
-static var ANIM_DURATION := 0.5  ## DEBUG PROBE — was const; gate_lab feel-round keys mutate it live
+const ANIM_DURATION := 0.5
 const NO_RECLOSE := -1.0  ## timed_window value for gates that stay open
 
 var state: int = State.SHUT
