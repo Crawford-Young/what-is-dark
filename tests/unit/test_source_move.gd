@@ -143,6 +143,132 @@ func test_clip_multi_bitidentical_duplicates() -> void:
 	assert_true(v.is_equal_approx(Vector3(-5, -5, 0)))
 
 
+# --- clip_multi on rounded-seam surf geometry (issue #14, candidate 2: crease collapse) ---
+# Characterization only. Face normals are built exactly as surf_lab.gd._add_surf_strip does:
+# (p1 - p0) x lateral, lateral = (side*cos(face), -sin(face), 0), flipped to +y. Pitch is the
+# spine descent angle; the rider travels along the face in the spine direction.
+
+const SURF_FACE_DEG := 51.34
+const SURF_BASE_PITCH_DEG := 12.0
+const SURF_SPEEDS := [15.0, 50.0]
+const SURF_TICK := 1.0 / 120.0  # project.godot physics_ticks_per_second
+
+
+func _spine_dir(pitch_deg: float) -> Vector3:
+	var p := deg_to_rad(pitch_deg)
+	return Vector3(0.0, -sin(p), -cos(p))
+
+
+func _strip_normal(pitch_deg: float) -> Vector3:
+	var a := deg_to_rad(SURF_FACE_DEG)
+	var lateral := Vector3(-cos(a), -sin(a), 0.0)
+	var n := _spine_dir(pitch_deg).cross(lateral).normalized()
+	return n if n.y >= 0.0 else -n
+
+
+func _pre_slide_velocity(pitch_deg: float, speed: float) -> Vector3:
+	# along-ramp travel plus one tick of gravity, as player.gd hands to clip_multi
+	return _spine_dir(pitch_deg) * speed + Vector3(0.0, -SourceMove.GRAVITY * SURF_TICK, 0.0)
+
+
+func _seam_clip(pitch_a: float, pitch_b: float, speed: float) -> Vector3:
+	var normals: Array[Vector3] = [_strip_normal(pitch_a), _strip_normal(pitch_b)]
+	return SourceMove.clip_multi(_pre_slide_velocity(pitch_a, speed), normals)
+
+
+func test_surf_strip_normals_match_the_measured_face() -> void:
+	assert_almost_eq(_strip_normal(SURF_BASE_PITCH_DEG).y, 0.619, 0.001, "|n.y| at 12 deg pitch")
+	# the dot margins any dedupe threshold has to separate (reported in #14)
+	assert_almost_eq(_strip_normal(12.0).dot(_strip_normal(17.0)), 0.99839, 0.0001, "sharp seam d5")
+	assert_almost_eq(_strip_normal(12.0).dot(_strip_normal(27.0)), 0.98453, 0.0001, "sharp seam d15")
+	assert_almost_eq(_strip_normal(12.0).dot(_strip_normal(12.21)), 0.999997, 0.000001, "fillet facet, d5")
+
+
+func test_clip_multi_fillet_facets_dedupe_to_single_plane_clip() -> void:
+	# (a) adjacent 0.25 m fillet facets: d5 arc = 0.21 deg pitch/step, d15 arc = 0.625 deg/step.
+	for step: float in [0.21, 0.625]:
+		var pitch_b := SURF_BASE_PITCH_DEG + step
+		assert_gt(_strip_normal(SURF_BASE_PITCH_DEG).dot(_strip_normal(pitch_b)), 0.999, "reads as one plane")
+		for speed: float in SURF_SPEEDS:
+			var before := _pre_slide_velocity(SURF_BASE_PITCH_DEG, speed)
+			var after := _seam_clip(SURF_BASE_PITCH_DEG, pitch_b, speed)
+			var single := SourceMove.clip_velocity(before, _strip_normal(SURF_BASE_PITCH_DEG))
+			assert_true(after.is_equal_approx(single), "single-plane clip, step %s speed %s" % [step, speed])
+			var forward := after.dot(_spine_dir(SURF_BASE_PITCH_DEG))
+			assert_gt(forward, speed * 0.999, "forward component kept (%.2f of %.2f)" % [forward, speed])
+
+
+func test_clip_multi_three_degree_normal_pair_keeps_forward_speed() -> void:
+	# (b) two kept normals 3 deg apart (past the 0.999 dedupe, ~2.56 deg), velocity into both.
+	# Candidate 2 predicted a near-arbitrary crease collapse here; it does NOT happen. FLIP this
+	# test's expectation only if clip_multi is changed on purpose.
+	var n1 := _strip_normal(SURF_BASE_PITCH_DEG)
+	var lateral := Vector3(-cos(deg_to_rad(SURF_FACE_DEG)), -sin(deg_to_rad(SURF_FACE_DEG)), 0.0)
+	var rotations := {
+		"lateral edge (strip seam)": lateral.normalized(),
+		"travel axis (side tilt)": _spine_dir(SURF_BASE_PITCH_DEG),
+		"vertex (diagonal)": (_spine_dir(SURF_BASE_PITCH_DEG) + Vector3.RIGHT).slide(n1).normalized(),
+	}
+	for label: String in rotations:
+		var n2 := n1.rotated(rotations[label], deg_to_rad(3.0))
+		assert_almost_eq(rad_to_deg(n1.angle_to(n2)), 3.0, 0.001, label)
+		var normals: Array[Vector3] = [n1, n2]
+		for speed: float in SURF_SPEEDS:
+			# velocity tilted into the face so it points into BOTH planes
+			var v := (_spine_dir(SURF_BASE_PITCH_DEG) * cos(deg_to_rad(4.0)) - n1 * sin(deg_to_rad(4.0))) * speed
+			assert_lt(v.dot(n1), 0.0, label)
+			assert_lt(v.dot(n2), 0.0, label)
+			var after := SourceMove.clip_multi(v, normals)
+			var forward := after.dot(_spine_dir(SURF_BASE_PITCH_DEG))
+			assert_gt(after.length(), speed * 0.99, "%s: speed %.2f -> %.2f" % [label, speed, after.length()])
+			assert_gt(forward, speed * 0.99, "%s: forward %.2f -> %.2f" % [label, speed, forward])
+
+
+func test_clip_multi_sharp_seam_pairs_keep_forward_speed() -> void:
+	# (c) the real pitch seams, both orders (convex = leaving the second face, concave = into it).
+	# The concave d15 turn clips ~2.4% of 50 m/s (the plain single-plane loss of a 10 deg normal
+	# change), not a collapse.
+	for delta: float in [5.0, 15.0]:
+		var hi := SURF_BASE_PITCH_DEG + delta
+		for order: Array in [[SURF_BASE_PITCH_DEG, hi], [hi, SURF_BASE_PITCH_DEG]]:
+			for speed: float in SURF_SPEEDS:
+				var after := _seam_clip(order[0], order[1], speed)
+				var forward := after.dot(_spine_dir(order[0]))
+				assert_gt(after.length(), speed * 0.95, "d%s %s speed %s -> %.2f" % [delta, order, speed, after.length()])
+				assert_gt(forward, speed * 0.95, "d%s %s forward %s -> %.2f" % [delta, order, speed, forward])
+
+
+func test_clip_multi_acute_normals_never_reach_the_crease_branch() -> void:
+	# Why (b) and (c) cannot collapse: while every pair has n_i.n_j > 0, a sequential clip only
+	# RAISES v.n of already-clipped planes, so the "still moving into a plane" crease test never
+	# fires. Fuzz 3 normals within 8 deg of the surf face and velocities pointing into the face.
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 14
+	var base := _strip_normal(SURF_BASE_PITCH_DEG)
+	for trial in 300:
+		var normals: Array[Vector3] = []
+		for k in 3:
+			var axis := Vector3(rng.randf_range(-1, 1), rng.randf_range(-1, 1), rng.randf_range(-1, 1)).normalized()
+			normals.append(base.rotated(axis, deg_to_rad(rng.randf_range(0.0, 8.0))))
+		var tilt := deg_to_rad(rng.randf_range(0.0, 6.0))
+		var speed := rng.randf_range(15.0, 50.0)
+		var v := (_spine_dir(SURF_BASE_PITCH_DEG) * cos(tilt) - base * sin(tilt)) * speed
+		var after := SourceMove.clip_multi(v, normals)
+		assert_gt(after.length(), speed * 0.9, "trial %d: %.2f -> %.2f" % [trial, speed, after.length()])
+		assert_gt(after.dot(_spine_dir(SURF_BASE_PITCH_DEG)), speed * 0.9, "trial %d forward" % trial)
+
+
+func test_clip_multi_crease_branch_needs_opposing_planes() -> void:
+	# The branch's only live trigger: a valley whose planes face each other (n1.n2 < 0).
+	# Velocity collapses onto the valley line, which here is the travel axis, so speed is kept.
+	var n1 := Vector3(0.8, 0.6, 0.0)
+	var n2 := Vector3(-0.8, 0.6, 0.0)
+	assert_lt(n1.dot(n2), 0.0)
+	var normals: Array[Vector3] = [n1, n2]
+	var v := SourceMove.clip_multi(Vector3(0.0, -10.0, -20.0), normals)
+	assert_true(v.is_equal_approx(Vector3(0.0, 0.0, -20.0)), "got %s" % v)
+
+
 # --- jump / gravity ---
 
 func test_jump_replaces_y_keeps_horizontal() -> void:
