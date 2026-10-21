@@ -12,7 +12,10 @@ The fade is visual only (places.md, "The fade, every loop"):
     a place's dominant lights roll 1.0 and never die, so plateau keeps one line of light;
   - from loop 2, walls and dressing open ragged holes onto the void (wid_holes);
   - objects with `solid` = 1 (the surfaces you ride: floors, ride walls, ramps) never
-    dissolve or open holes. A surface you can stand on is never invisible.
+    dissolve, open holes or darken with the desat. A surface you can stand on is never
+    invisible;
+  - dominant lamps (and their panels) brighten per loop by DOMINANT_GAIN while the scene's
+    exposure lifts by EXPOSURE_LIFT: the void stays black, the ridden line stays lit.
 """
 import math
 import random
@@ -30,6 +33,10 @@ ABSORB = [0.018, 0.020, 0.022, 0.025, 0.028, 0.032]
 # late loops punch ragged holes in walls and dressing (noise threshold; 0 = none)
 HOLES = [0.0, 0.0, 0.30, 0.37, 0.42, 0.46]
 SCATTER = [0.004, 0.0045, 0.005, 0.006, 0.007, 0.008]
+# as the practical lights die, the dominant ones flare and the eye adapts to the dark,
+# so the surfaces you ride stay readable at plateau (stops of exposure lift per loop)
+DOMINANT_GAIN = [1.0, 1.1, 1.3, 1.7, 2.2, 2.8]
+EXPOSURE_LIFT = [0.0, 0.05, 0.15, 0.3, 0.45, 0.6]
 
 COLLECTIONS = ("PLAY", "DRESS", "MEMORY", "LIGHT", "CAM")
 
@@ -92,6 +99,7 @@ def reset_scene(name):
     nt.links.new(bg.outputs[0], out.inputs["Surface"])
     nt.links.new(add.outputs[0], out.inputs["Volume"])
     sc.view_settings.exposure = -0.6
+    sc["wid_exposure0"] = -0.6
     _bloom(sc)
     for c in COLLECTIONS:
         col = bpy.data.collections.new(c)
@@ -185,7 +193,9 @@ def _fade_group():
     hs = N.new("ShaderNodeHueSaturation")
     L.new(gi.outputs["Color"], hs.inputs["Color"])
     L.new(math("SUBTRACT", 1.0, d), hs.inputs["Saturation"])
-    L.new(math("SUBTRACT", 1.0, math("MULTIPLY", d, 0.35)), hs.inputs["Value"])
+    solid = attr("solid", "OBJECT")
+    dim = math("MULTIPLY", math("MULTIPLY", d, 0.35), math("SUBTRACT", 1.0, solid))
+    L.new(math("SUBTRACT", 1.0, dim), hs.inputs["Value"])
 
     # void bite: distance past the shrunken core along y, roughened by noise
     geo = N.new("ShaderNodeNewGeometry")
@@ -212,8 +222,8 @@ def _fade_group():
     above = math("SUBTRACT", hn.outputs["Fac"], attr("wid_holes"))
     hole_alpha = math("MAXIMUM", math("MULTIPLY", above, 25.0, clamp=True), gi.outputs["Memory"])
     rim = math("ADD", 0.25, math("MULTIPLY", math("MULTIPLY", above, 6.0, clamp=True), 0.75))
-    rim = math("MAXIMUM", rim, gi.outputs["Memory"])
-    alpha = math("MAXIMUM", math("MULTIPLY", edge_alpha, hole_alpha), attr("solid", "OBJECT"))
+    rim = math("MAXIMUM", math("MAXIMUM", rim, gi.outputs["Memory"]), solid)  # no scorch on what you ride
+    alpha = math("MAXIMUM", math("MULTIPLY", edge_alpha, hole_alpha), solid)
     darken = math("SUBTRACT", 1.0, math("MULTIPLY", math("DIVIDE", past, 4.0, clamp=True), 0.85))
     darken = math("MULTIPLY", darken, rim)
     col = N.new("ShaderNodeMix")
@@ -230,18 +240,22 @@ def _fade_group():
     L.new(rgba_out, go.inputs["Color"])
     L.new(alpha, go.inputs["Alpha"])
 
-    # emission: a dead lamp's panel goes dark; the rest dim with the desat
+    # emission: a dead lamp's panel goes dark; the rest dim with the desat, and a dominant
+    # panel's gain (object prop, 0 when absent) brightens it as the others die
     alive = math("SUBTRACT", 1.0, attr("dead", "OBJECT"))
     em = math("MULTIPLY", math("MULTIPLY", gi.outputs["Emission"], alive),
               math("SUBTRACT", 1.0, math("MULTIPLY", d, 0.4)))
+    em = math("MULTIPLY", em, math("ADD", 1.0, attr("gain", "OBJECT")))
     L.new(math("MULTIPLY", em, darken), go.inputs["Emission"])
     return ng
 
 
 def material(name, color, rough=0.5, metal=0.0, emission=0.0, emit_color=None,
-             memory=False, transmission=0.0, coat=0.0, base_tex=None, rough_tex=None, bump=None):
+             memory=False, transmission=0.0, coat=0.0, base_tex=None, rough_tex=None, bump=None,
+             practical=False):
     """Principled material routed through WID_Fade. base_tex/rough_tex/bump are callbacks
-    (nodes, links) -> output socket, for procedural detail."""
+    (nodes, links) -> output socket, for procedural detail. A practical glow (a lit window,
+    a screen) is a light with no lamp: its emission fails with the loop's dead fraction."""
     m = bpy.data.materials.new(name)
     m.use_nodes = True
     nt = m.node_tree
@@ -273,6 +287,8 @@ def material(name, color, rough=0.5, metal=0.0, emission=0.0, emit_color=None,
         L.new(bump(N, L), b.inputs["Height"])
         L.new(b.outputs["Normal"], p.inputs["Normal"])
     m["wid_memory"] = memory
+    if practical:
+        m["wid_emission0"] = emission
     return m
 
 
@@ -350,8 +366,10 @@ def area_lamp(name, loc, size, energy, color=(1, 1, 1), panel=None, rng=None, ke
     roll = 1.0 if keep else (rng.random() if rng else 1.0)
     ob["light_r"] = roll
     ob["energy0"] = energy
+    ob["dominant"] = keep  # kept area lamps are the place's dominant light
     if panel is not None:
         panel["light_r"] = roll
+        panel["dominant"] = keep
     return ob
 
 
@@ -396,16 +414,23 @@ def apply_loop(n):
     sc["wid_holes"] = HOLES[n]
     sc.world.node_tree.nodes["Fog"].inputs["Density"].default_value = SCATTER[n]
     sc.world.node_tree.nodes["Absorb"].inputs["Density"].default_value = ABSORB[n]
+    sc.view_settings.exposure = sc.get("wid_exposure0", -0.6) + EXPOSURE_LIFT[n]
     for ob in bpy.data.objects:
         if "gone_at" in ob:
             ob.hide_render = n >= ob["gone_at"]
         if "light_r" in ob:
             dead = ob["light_r"] < DEAD[n]
+            gain = DOMINANT_GAIN[n] if ob.get("dominant") else 1.0
             if ob.type == "LIGHT":
                 ob.hide_render = dead
-                ob.data.energy = ob["energy0"] * (1 - 0.3 * DESAT[n])
+                ob.data.energy = ob["energy0"] * (1 - 0.3 * DESAT[n]) * gain
             else:
                 ob["dead"] = 1.0 if dead else 0.0
+                ob["gain"] = gain - 1.0
+    for m in bpy.data.materials:
+        if "wid_emission0" in m:
+            g = next(nd for nd in m.node_tree.nodes if nd.type == "GROUP")
+            g.inputs["Emission"].default_value = m["wid_emission0"] * (1 - DEAD[n])
     # custom props feed shaders through Attribute nodes; tag for a fresh depsgraph
     for ob in bpy.data.objects:
         ob.update_tag()

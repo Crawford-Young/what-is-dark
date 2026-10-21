@@ -18,7 +18,7 @@ W = 7.0               # corridor width: exaggerated from a real 2.5 m for bhop s
 H = 4.2               # ceiling height
 XL, XR = -W / 2, W / 2
 SEG = 12.0            # one classroom per 12 m on the right
-ALCOVE = (-31.0, -37.0)   # memory pocket: coat pegs, off the racing line
+ALCOVE = (-32.0, -35.6)   # memory pocket: the cloakroom, off the racing line
 HALL = (-62.0, -68.0)     # double doors to the dark hall
 TINT = (0.74, 0.95, 0.82)  # cold fluorescent green-grey (phase-2 tint)
 
@@ -179,12 +179,17 @@ M = {
     "desk": material("DeskTop", (0.66, 0.58, 0.44), rough=0.5),
     "chair": material("ChairShell", (0.16, 0.30, 0.48), rough=0.45),
     "whiteboard": material("Whiteboard", (0.9, 0.91, 0.9), rough=0.15),
-    "outside": material("OutsideGlow", (0.02, 0.025, 0.03), emission=1.6, emit_color=(0.30, 0.42, 0.62)),
+    "outside": material("OutsideGlow", (0.02, 0.025, 0.03), emission=6.0, emit_color=(0.20, 0.32, 0.62),
+                        practical=True),
     "exit": material("ExitRed", (1, 0.08, 0.04), emission=14.0, emit_color=(1, 0.08, 0.04)),
     "exit_box": material("ExitBox", (0.06, 0.06, 0.06), rough=0.4),
     "clock_face": material("ClockFace", (0.92, 0.92, 0.88), rough=0.4),
     "wood": material("BenchWood", (0.5, 0.36, 0.22), rough=0.5),
     "coat": material("Raincoat", (0.95, 0.70, 0.05), rough=0.35, memory=True, coat=0.6),
+    "coat_lining": material("CoatLining", (0.30, 0.20, 0.03), rough=0.6, memory=True),
+    "toggle": material("Toggle", (0.10, 0.06, 0.03), rough=0.4, memory=True),
+    "sign": material("SignBlue", (0.05, 0.12, 0.30), rough=0.4),
+    "cubby": material("CubbyShadow", (0.06, 0.05, 0.04), rough=0.8),
     "coat_tag": material("NameTag", (0.95, 0.94, 0.9), rough=0.6, memory=True),
     "dark_glass": material("DarkGlass", (0.01, 0.012, 0.012), rough=0.05),
     "alcove_lamp": material("AlcoveLamp", (1.0, 0.85, 0.6), emission=6.0, emit_color=(1.0, 0.82, 0.55), memory=True),
@@ -259,7 +264,13 @@ proto_box("CR_floor", (D / 2, -SEG / 2, 0.01), (D, SEG, 0.02), M["carpet"])
 proto_box("CR_back", (D + 0.1, -SEG / 2, H / 2), (0.2, SEG, H), M["wall"])
 proto_box("CR_side", (D / 2, -SEG + 0.1, H / 2), (D, 0.2, H), M["wall"])
 proto_box("CR_ceil", (D / 2, -SEG / 2, H + 0.05), (D, SEG, 0.1), M["ceil"])
-proto_box("CR_outside", (D - 0.02, -SEG / 2, 2.2), (0.02, 8.0, 1.6), M["outside"])
+# night through the back windows, low enough that the chairs up on the desks cut across it
+proto_box("CR_outside", (D - 0.02, -SEG / 2, 1.85), (0.02, 9.6, 2.0), M["outside"])
+mull = [((D - 0.06, -SEG / 2 + 4.8 - k * 1.2, 1.85), (0.06, 0.08, 2.0), 0) for k in range(9)]
+mull.append(((D - 0.08, -SEG / 2, 0.82), (0.16, 9.8, 0.06), 0))  # sill
+mull.append(((D - 0.06, -SEG / 2, 2.88), (0.06, 9.8, 0.08), 0))  # head
+o = boxes_object("CR_mullions", mull, [M["frame"]], "DRESS")
+coll("DRESS").objects.unlink(o); proto.objects.link(o)
 proto_box("CR_board", (D / 2, -SEG + 0.22, 1.7), (3.6, 0.04, 1.2), M["whiteboard"], 0.01)
 desks, chairs = [], []
 for r in range(5):
@@ -431,81 +442,220 @@ boxes_object("HallDoors", hall, [M["frame"]], "DRESS")
 for k, cy in enumerate(((hy0 + hy1) / 2 + 1.4, (hy0 + hy1) / 2 - 1.4)):
     box(f"HallPort{k}", (XL - 0.05, cy, 1.5), (0.02, 0.5, 0.5), M["dark_glass"], "DRESS")
 
-# ---------------------------------------------------------------- memory pocket: the coat
+# ---------------------------------------------------------------- memory pocket: the cloakroom
 
 ay0, ay1 = ALCOVE
-AD = 2.6  # alcove depth
-box("Alcove_back", (XL - AD - 0.1, (ay0 + ay1) / 2, H / 2), (0.2, abs(ay0 - ay1), H), M["wall"], "PLAY")
-box("Alcove_dado", (XL - AD + 0.011, (ay0 + ay1) / 2, 0.6), (0.02, abs(ay0 - ay1), 1.2), M["dado"], "DRESS")
-for k, sy in enumerate((ay0, ay1)):
-    box(f"Alcove_side{k}", (XL - AD / 2, sy, H / 2), (AD, 0.2, H), M["wall"], "PLAY")
-box("Alcove_ceil", (XL - AD / 2, (ay0 + ay1) / 2, H + 0.05), (AD, abs(ay0 - ay1), 0.1), M["ceil"], "DRESS")
-box("PegRail", (XL - AD + 0.03, (ay0 + ay1) / 2, 1.3), (0.04, abs(ay0 - ay1) - 0.6, 0.12), M["wood"], "DRESS", 0.005)
-box("Bench", (XL - AD + 0.3, (ay0 + ay1) / 2, 0.35), (0.4, abs(ay0 - ay1) - 0.8, 0.05), M["wood"], "DRESS", 0.01)
-pegs = []
-peg_ys = [ay0 - 0.6 - k * 0.48 for k in range(11)]
-COAT_PEG = 4
-for k, py in enumerate(peg_ys):
-    pegs.append(((XL - AD + 0.09, py, 1.3), (0.1, 0.025, 0.025), 0))
-    tag_m = M["coat_tag"] if k == COAT_PEG else M["label"]
-    tg = box(f"PegTag{k}", (XL - AD + 0.004, py, 1.48), (0.005, 0.2, 0.07), tag_m, "DRESS" if k != COAT_PEG else "MEMORY")
-    if k != COAT_PEG:
-        tg["gone_at"] = 3
-boxes_object("Pegs", pegs, [M["steel"]], "DRESS")
+AW = abs(ay0 - ay1)
+AY = (ay0 + ay1) / 2
+AD = 2.0          # alcove depth
+BX = XL - AD      # back wall face
+box("Alcove_back", (BX - 0.1, AY, H / 2), (0.2, AW, H), M["wall"], "PLAY")
+box("Alcove_dado", (BX + 0.011, AY, 0.6), (0.02, AW, 1.2), M["dado"], "DRESS")
+for k, (sy, face) in enumerate(((ay0, -1), (ay1, 1))):
+    box(f"Alcove_side{k}", (XL - AD / 2, sy - 0.1 * face, H / 2), (AD, 0.2, H), M["wall"], "PLAY")
+    box(f"Alcove_sdado{k}", (XL - AD / 2, sy + 0.011 * face, 0.6), (AD, 0.02, 1.2), M["dado"], "DRESS")
+box("Alcove_ceil", (XL - AD / 2, AY, H + 0.05), (AD, AW, 0.1), M["ceil"], "DRESS")
 
-# the coat: a child's yellow raincoat hung by its hood loop
-import bmesh as _bm
-bm = _bm.new()
-ring_n = 16
-rings = []
-for i, (z, rx, ry) in enumerate([(1.30, 0.06, 0.04), (1.24, 0.17, 0.08), (1.16, 0.20, 0.09),
-                                  (0.98, 0.21, 0.10), (0.80, 0.23, 0.11), (0.66, 0.25, 0.12)]):
-    ring = []
-    for j in range(ring_n):
-        a = 2 * math.pi * j / ring_n
-        sag = 0.015 * math.sin(3 * a + i)  # cloth unevenness
-        ring.append(bm.verts.new((ry * math.cos(a) + sag, rx * math.sin(a), z)))
-    rings.append(ring)
-for r0, r1 in zip(rings, rings[1:]):
-    for j in range(ring_n):
-        bm.faces.new([r0[j], r0[(j + 1) % ring_n], r1[(j + 1) % ring_n], r1[j]])
-bm.faces.new(rings[0])
-# sleeves hang along the sides
-for side in (-1, 1):
-    sl = []
-    for i, (z, off) in enumerate([(1.18, 0.20), (0.95, 0.235), (0.74, 0.245)]):
-        ring = []
-        for j in range(8):
-            a = 2 * math.pi * j / 8
-            ring.append(bm.verts.new((0.045 * math.cos(a), side * off + 0.045 * math.sin(a), z)))
-        sl.append(ring)
-    for r0, r1 in zip(sl, sl[1:]):
-        for j in range(8):
-            bm.faces.new([r0[j], r0[(j + 1) % 8], r1[(j + 1) % 8], r1[j]])
-# hood folded down the back
-hood = _bm.ops.create_uvsphere(bm, u_segments=12, v_segments=8, radius=0.11)
-for v in hood["verts"]:
-    v.co = (v.co.x * 0.5 - 0.06, v.co.y * 1.0, v.co.z * 0.8 + 1.20)
-cm = bpy.data.meshes.new("Coat")
-bm.to_mesh(cm); bm.free()
-cm.materials.append(M["coat"])
-coat = bpy.data.objects.new("Coat", cm)
-coat.location = (XL - AD + 0.22, peg_ys[COAT_PEG], 0.0)
-coll("MEMORY").objects.link(coat)
-sub = coat.modifiers.new("Sub", "SUBSURF"); sub.levels = 2; sub.render_levels = 2
-sol = coat.modifiers.new("Thick", "SOLIDIFY"); sol.thickness = 0.008
-for p in cm.polygons:
-    p.use_smooth = True
+# the sign over the opening: the plate stays, its word goes with the other labels
+box("CloakSign", (XL + 0.012, AY, 2.85), (0.02, 1.5, 0.3), M["sign"], "DRESS", 0.005)
+t = text("CloakWord", "CLOAKROOM", (XL + 0.024, AY, 2.85), (math.radians(90), 0, math.radians(90)), 0.15,
+         M["plate_ink"], "DRESS")
+t["gone_at"] = 2
+
+# shoe cubbies under a bench: two rows of pigeonholes, empty
+CD, CH = 0.36, 0.42   # cubby depth, height (the bench top)
+span = AW - 0.3
+cols = int(span // 0.3)
+cw = span / cols
+cub = [((BX + CD / 2, AY, CH + 0.02), (CD + 0.04, span + 0.04, 0.04), 0),       # bench top
+       ((BX + CD / 2, AY, 0.03), (CD, span, 0.06), 0),                           # plinth
+       ((BX + CD / 2, AY, CH / 2 + 0.03), (CD, span, 0.025), 0),                 # middle shelf
+       ((BX + 0.01, AY, CH / 2), (0.02, span, CH), 1)]                           # back panel
+for c in range(cols + 1):
+    cub.append(((BX + CD / 2, AY - span / 2 + c * cw, CH / 2), (CD, 0.02, CH), 0))
+boxes_object("Cubbies", cub, [M["wood"], M["cubby"]], "DRESS", bevel=0.004)
+
+# two staggered rows of double coat hooks on wooden rails, a name tag over each
+RAILS = (1.52, 1.12)
+hooks, rails = [], []
+pegs = []   # (rail, index, y, z) of every hook
+for r, rz in enumerate(RAILS):
+    rails.append(((BX + 0.012, AY, rz), (0.024, span, 0.16), 0))
+    n = 9 - r
+    for k in range(n):
+        py = AY - (n - 1) * 0.17 + k * 0.34
+        hz = rz - 0.02
+        pegs.append((r, k, py, hz))
+        hooks += [((BX + 0.03, py, hz), (0.012, 0.024, 0.07), 0),             # plate
+                  ((BX + 0.075, py, hz - 0.02), (0.09, 0.013, 0.013), 0),     # long prong
+                  ((BX + 0.115, py, hz - 0.002), (0.013, 0.013, 0.045), 0),   # its tip
+                  ((BX + 0.055, py, hz + 0.022), (0.05, 0.011, 0.011), 0),    # short prong
+                  ((BX + 0.075, py, hz + 0.036), (0.011, 0.011, 0.03), 0)]
+boxes_object("PegRails", rails, [M["wood"]], "DRESS", bevel=0.004)
+boxes_object("Hooks", hooks, [M["steel"]], "DRESS", bevel=0.002)
+COAT_PEG = (0, 2)   # upper rail, toward the far end: the stretch of back wall the line can see
+for r, k, py, hz in pegs:
+    mine = (r, k) == COAT_PEG
+    tg = box(f"PegTag{r}_{k}", (BX + 0.026, py, hz + 0.065), (0.004, 0.11, 0.035),
+             M["coat_tag"] if mine else M["label"], "MEMORY" if mine else "DRESS")
+    if not mine:
+        tg["gone_at"] = 3
+coat_hook = next((py, hz) for r, k, py, hz in pegs if (r, k) == COAT_PEG)
+
+
+def raincoat(name, tip):
+    """A child's yellow raincoat hung by the loop at the back of its collar. Local frame at the
+    hook's tip: +x out of the wall (the wall is at x = -0.115), y along it, z up. The shoulders
+    slump from the collar, the hood hangs down behind them, the empty sleeves drop down the
+    sides. Body, sleeves and hood are lofted rings; toggles, cords and pocket flaps are parented
+    parts. Every part takes a memory material."""
+    import bmesh as _bm
+    bm = _bm.new()
+
+    def prof(table, t):
+        for (t0, v0), (t1, v1) in zip(table, table[1:]):
+            if t <= t1:
+                u = (t - t0) / (t1 - t0)
+                u = u * u * (3 - 2 * u)
+                return v0 + (v1 - v0) * u
+        return table[-1][1]
+
+    def loft(rings, cap_top=None, cap_bot=None):
+        """Faces between rings; a cap is the material index of a face closing that end."""
+        n = len(rings[0])
+        vs = [[bm.verts.new(p) for p in ring] for ring in rings]
+        for r0, r1 in zip(vs, vs[1:]):
+            for j in range(n):
+                bm.faces.new([r0[j], r0[(j + 1) % n], r1[(j + 1) % n], r1[j]])
+        if cap_top is not None:
+            bm.faces.new(list(reversed(vs[0]))).material_index = cap_top
+        if cap_bot is not None:
+            bm.faces.new(vs[-1]).material_index = cap_bot
+
+    RN = 36
+    COLLAR = -0.015    # the collar's top edge, just under the prong it hangs from
+    LEN = 0.66
+
+    def xc(t):         # the coat swings back toward the wall below the hook
+        return 0.035 - 0.07 * t
+
+    half_w = [(0.0, 0.055), (0.07, 0.10), (0.16, 0.158), (0.3, 0.165), (0.65, 0.185), (1.0, 0.225)]
+    front = [(0.0, 0.04), (0.12, 0.065), (0.35, 0.085), (1.0, 0.10)]
+    back = [(0.0, 0.035), (0.2, 0.045), (1.0, 0.05)]
+
+    def body_point(t, a):
+        wy, fx, bx = prof(half_w, t), prof(front, t), prof(back, t)
+        c, s_ = math.cos(a), math.sin(a)
+        dx = fx if c > 0 else bx
+        fold = (0.003 + 0.026 * t * t) * math.sin(5 * a + 1.3 + 2.0 * t) * (0.4 + 0.6 * max(c, 0))
+        # the front closure: a crease down to the last toggle, then the fronts part toward the hem
+        ang = math.atan2(s_, c)
+        split = max(t - 0.66, 0.0) / 0.34
+        seam = -(0.007 + 0.05 * split) * math.exp(-(ang / (0.12 + 0.2 * split)) ** 2) * min(t * 6, 1)
+        z = COLLAR - t * LEN
+        if t > 0.9:   # an uneven hem, lifted into a V where the fronts part
+            k = (t - 0.9) / 0.1
+            z += k * (0.014 * math.sin(3 * a + 0.7) + 0.075 * math.exp(-(ang / 0.22) ** 2))
+        return (xc(t) + (dx + fold + seam) * c, (wy + fold * 0.5) * s_, z)
+
+    # the neck opening is capped in shadowed lining
+    loft([[body_point(i / 23, 2 * math.pi * j / RN) for j in range(RN)] for i in range(24)], cap_top=1)
+
+    # sleeves: empty, flattened, hanging down the sides from the slumped shoulder
+    SL = 0.42
+    for side in (-1, 1):
+        rings = []
+        for i in range(14):
+            u = i / 13
+            grow = min(u / 0.18, 1.0)                    # rises out of the shoulder seam
+            cx = xc(0.15 + 0.4 * u) + 0.03 * grow        # a little in front of the body side
+            cy = side * (0.10 + 0.055 * grow + 0.02 * u)
+            cz = COLLAR - 0.11 - u * SL
+            rx = (0.6 + 0.4 * grow) * (0.052 + 0.008 * math.sin(u * math.pi))  # elbow fullness
+            ry = (0.6 + 0.4 * grow) * (0.034 - 0.006 * u)
+            if u > 0.88:                                 # cuff band
+                rx, ry = rx + 0.006, ry + 0.004
+            rings.append([(cx + rx * math.cos(2 * math.pi * j / 12), cy + ry * math.sin(2 * math.pi * j / 12), cz)
+                          for j in range(12)])
+        loft(rings, cap_top=0, cap_bot=1)
+
+    # hood: hanging down the back between the coat and the wall, its rim just over the collar
+    hood = _bm.ops.create_uvsphere(bm, u_segments=24, v_segments=14, radius=1.0)
+    for v in hood["verts"]:
+        x, y, z = v.co
+        sag = 0.012 * (1 - z) * math.cos(3 * y)          # the cloth bags toward the bottom
+        v.co = (-0.058 + 0.042 * x + sag, 0.15 * y * (1.0 - 0.2 * z), COLLAR - 0.11 + 0.10 * z)
+
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    me.materials.append(M["coat"])
+    me.materials.append(M["coat_lining"])
+    for p in me.polygons:
+        p.use_smooth = True
+    ob = bpy.data.objects.new(name, me)
+    ob.location = tip
+    ob.rotation_euler = (math.radians(2.5), 0, 0)   # hangs a little off true
+    coll("MEMORY").objects.link(ob)
+    sub = ob.modifiers.new("Sub", "SUBSURF")
+    sub.levels = sub.render_levels = 2
+    tex = bpy.data.textures.new(name + "_crumple", "CLOUDS")
+    tex.noise_scale = 0.08
+    dsp = ob.modifiers.new("Crumple", "DISPLACE")
+    dsp.texture = tex
+    dsp.strength = 0.01
+    sol = ob.modifiers.new("Thick", "SOLIDIFY")
+    sol.thickness = 0.006
+
+    def part(pname, c, size, mat, rot=(0, 0, 0), bevel=0.0):
+        p = box(f"{name}_{pname}", c, size, mat, "MEMORY", bevel)
+        p.rotation_euler = rot
+        p.parent = ob
+        return p
+
+    for i, tz in enumerate((0.10, 0.25, 0.40)):   # toggles down the front, each through a cord loop
+        t = tz / LEN
+        x = xc(t) + prof(front, t)
+        z = COLLAR - tz
+        part(f"toggle{i}", (x + 0.004, 0.0, z), (0.018, 0.05, 0.016), M["toggle"], bevel=0.007)
+        part(f"loop{i}", (x + 0.002, -0.03, z), (0.006, 0.04, 0.006), M["toggle"])
+    for side in (-1, 1):
+        # the collar, folded down into two points either side of the throat
+        x = xc(0.05) + prof(front, 0.05)
+        part(f"collar{side}", (x + 0.008, side * 0.045, COLLAR - 0.035), (0.012, 0.075, 0.085), M["coat"],
+             (math.radians(side * -28), math.radians(-12), 0), bevel=0.005)
+        # the hood's drawcords, dangling from the collar front with a stopper on each end
+        x = xc(0.02) + prof(front, 0.02) + 0.004
+        part(f"cord{side}", (x, side * 0.035, COLLAR - 0.06), (0.004, 0.004, 0.11), M["toggle"],
+             (math.radians(side * 4), 0, 0))
+        part(f"stopper{side}", (x, side * 0.039, COLLAR - 0.12), (0.014, 0.014, 0.022), M["toggle"], bevel=0.006)
+        # pocket flaps, turned to follow the body
+        t = 0.62
+        y = side * 0.115
+        wy = prof(half_w, t)
+        a = math.asin(max(-1.0, min(1.0, y / wy)))
+        part(f"flap{side}", (xc(t) + prof(front, t) * math.cos(a) + 0.006, y, COLLAR - t * LEN),
+             (0.012, 0.11, 0.045), M["coat"], (0, 0, -a * 0.8), bevel=0.005)
+    return ob
+
+
+coat = raincoat("Coat", (BX + 0.115, coat_hook[0], coat_hook[1]))
 # the alcove's own lamp: the memory object keeps its light longest
-abox = box("AlcoveLamp", (XL - AD / 2, (ay0 + ay1) / 2, H - 0.02), (0.5, 0.5, 0.02), M["alcove_lamp"], "MEMORY")
-point_lamp("AlcoveLight", (XL - AD + 0.9, peg_ys[COAT_PEG], 2.6), 60.0, (1.0, 0.85, 0.62), radius=0.25, keep=True)
+# a laminated notice over the rails, its words gone with the other labels
+box("HangNotice", (BX + 0.004, AY + 0.6, 1.98), (0.006, 0.42, 0.3), POSTER_M[6], "DRESS")
+for i, line in enumerate(("PLEASE HANG UP", "YOUR COAT")):
+    t = text(f"HangWord{i}", line, (BX + 0.009, AY + 0.6, 2.02 - i * 0.075), (math.radians(90), 0, math.radians(90)),
+             0.05, M["ink"], "DRESS")
+    t["gone_at"] = 2
+abox = box("AlcoveLamp", (XL - AD / 2, AY, H - 0.02), (0.5, 0.5, 0.02), M["alcove_lamp"], "MEMORY")
+point_lamp("AlcoveLight", (BX + 1.0, coat_hook[0] + 0.3, 2.7), 55.0, (1.0, 0.85, 0.62), radius=0.25, keep=True)
 
 # ---------------------------------------------------------------- cameras
 
 camera("CamStraight", (0.9, 4.0, 1.6), 0.0, -2.0)
-camera("CamAlcove", (1.0, -27.5, 1.6), -50.0, -8.0)
+camera("CamAlcove", (1.4, -27.0, 1.6), -42.0, -8.0)
 camera("CamDoor", (2.2, -50.0, 1.6), -18.0, -3.0)
-camera("CamCoat", (-1.6, -32.6, 1.45), -78.0, -10.0)  # lingering: stopped at the alcove mouth
+camera("CamCoat", (-3.7, -34.35, 1.6), -88.0, -16.0)  # lingering: stepped into the alcove mouth
 
 apply_loop(0)
 bpy.ops.wm.save_mainfile()

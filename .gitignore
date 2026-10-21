@@ -2,3 +2,5 @@
 export_presets.cfg
 node_modules/
 *.tmp
+*.blend1
+art/course/renders/
