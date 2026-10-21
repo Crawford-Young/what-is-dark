@@ -9,7 +9,7 @@ ns = {"BUILD": os.path.dirname(os.path.abspath(__file__))}
 exec(open(os.path.join(ns["BUILD"], args[0] + ".py")).read(), ns)
 print("BUILD_RESULT", ns.get("result"))
 if len(args) > 2 and args[1] == "render":
-    outdir = args[2]
+    outdir = os.path.abspath(args[2])  # Blender drops relative render paths somewhere unhelpful
     if os.environ.get("WID_PREVIEW"):  # fast composition pass: half size, few samples
         bpy.context.scene.render.resolution_percentage = 50
         bpy.context.scene.cycles.samples = 48
