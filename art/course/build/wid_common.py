@@ -135,6 +135,12 @@ def set_fog_color(rgb):
     bpy.context.scene.world.node_tree.nodes["Fog"].inputs["Color"].default_value = (*rgb, 1)
 
 
+def set_haze(scale):
+    """Scale this place's haze. ABSORB and SCATTER are per metre, tuned in the school's 4 m
+    corridor; a place built at ten times scale thins them, or the far end drowns in fog."""
+    bpy.context.scene["wid_haze"] = float(scale)
+
+
 def set_core(y_min, y_max):
     """The place's core along y; the void eats inward from both ends by wid_edge."""
     sc = bpy.context.scene
@@ -412,8 +418,9 @@ def apply_loop(n):
     sc["wid_mem_desat"] = MEM_DESAT[n]
     sc["wid_edge"] = EDGE[n]
     sc["wid_holes"] = HOLES[n]
-    sc.world.node_tree.nodes["Fog"].inputs["Density"].default_value = SCATTER[n]
-    sc.world.node_tree.nodes["Absorb"].inputs["Density"].default_value = ABSORB[n]
+    haze = sc.get("wid_haze", 1.0)  # places that never call set_haze keep the tables as tuned
+    sc.world.node_tree.nodes["Fog"].inputs["Density"].default_value = SCATTER[n] * haze
+    sc.world.node_tree.nodes["Absorb"].inputs["Density"].default_value = ABSORB[n] * haze
     sc.view_settings.exposure = sc.get("wid_exposure0", -0.6) + EXPOSURE_LIFT[n]
     for ob in bpy.data.objects:
         if "gone_at" in ob:
