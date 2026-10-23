@@ -1,0 +1,19 @@
+{
+  "spans": {
+    "WorktopL0_0>WorktopL1_0": {"decl": "bare_run"},
+    "WorktopL0_1>WorktopL1_4": {"decl": "bare_run"},
+    "BreadBin_0>Microwave_0": {"decl": "bare_run"},
+    "Microwave_0>WorktopR2_0": {
+      "decl": "wall_ride",
+      "wall": ["UpperR2_2", "UpperR2_3", "UpperR2_4", "UpperR2_5"],
+      "entry_height": 2.508865,
+      "along_speed": 11
+    },
+    "WorktopL1_1>WorktopL2_0": {"decl": "barrier"},
+    "WorktopL1_4>WorktopL2_1": {"decl": "barrier"},
+    "WorktopR0_0>WorktopR1_0": {"decl": "barrier"},
+    "WorktopR0_1>WorktopR1_1": {"decl": "barrier"},
+    "WorktopR1_0>WorktopR2_0": {"decl": "barrier"},
+    "WorktopR1_1>WorktopR2_1": {"decl": "barrier"}
+  }
+}

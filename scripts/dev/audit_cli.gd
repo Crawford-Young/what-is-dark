@@ -8,28 +8,39 @@ const DEFAULT_COURSE := "slice"
 
 
 ## Course name -> its spec, resolved lazily so one course's missing data never blocks another's
-## audit. Wave 2 of #23 registers the kitchen zone here.
+## audit.
 static func courses() -> Dictionary:
 	return {
 		"slice": func() -> CourseSpec: return Slice.spec(),
+		"kitchen": func() -> CourseSpec: return Kitchen.spec(),
 	}
 
 
-func _initialize() -> void:
-	var args := OS.get_cmdline_user_args()
-	var registry := courses()
+## `{course, error}` from the user args: the registered course to audit (`error` empty), or why
+## the arguments name none (`course` empty).
+static func resolve_course(args: PackedStringArray, registry: Dictionary) -> Dictionary:
 	var known := ", ".join(PackedStringArray(registry.keys()))
 	if args.size() > 1:
-		printerr("usage: just audit [course] — one course name, got %d args (known: %s)" % [
-			args.size(), known
-		])
-		quit(2)
-		return
+		return {
+			"course": "",
+			"error": "usage: just audit [course] — one course name, got %d args (known: %s)" % [
+				args.size(), known
+			],
+		}
 	var course_name: String = args[0] if args.size() == 1 else DEFAULT_COURSE
 	if not registry.has(course_name):
-		printerr("unknown course \"%s\" — known: %s" % [course_name, known])
+		return {"course": "", "error": "unknown course \"%s\" — known: %s" % [course_name, known]}
+	return {"course": course_name, "error": ""}
+
+
+func _initialize() -> void:
+	var registry := courses()
+	var resolved := resolve_course(OS.get_cmdline_user_args(), registry)
+	if not str(resolved["error"]).is_empty():
+		printerr(resolved["error"])
 		quit(2)
 		return
+	var course_name: String = resolved["course"]
 	var spec: CourseSpec = (registry[course_name] as Callable).call()
 	var spec_errors := spec.validate()
 	if not spec_errors.is_empty():

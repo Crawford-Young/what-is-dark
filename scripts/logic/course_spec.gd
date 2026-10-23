@@ -18,11 +18,14 @@ var fall_y := 0.0
 var void_start := 0.0
 ## The audit's pinned `law:subject` finding set. Changing it is a ruling, never an append.
 var baseline: Array[String] = []
+## What went wrong building this spec from a file (a zone's sidecar parse). `validate()` reports
+## these first, so a broken source fails every gate that validates the spec.
+var load_errors: Array[String] = []
 
 
 ## Empty when the spec is usable. Every rule names the field it judges.
 func validate() -> Array[String]:
-	var errors: Array[String] = []
+	var errors: Array[String] = load_errors.duplicate()
 	for field in ["scene_path", "declarations_path"]:
 		if not str(get(field)).begins_with("res://"):
 			errors.append("%s must be a res:// path, got \"%s\"" % [field, get(field)])

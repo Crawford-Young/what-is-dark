@@ -68,10 +68,13 @@ static func load_manifest(path: String) -> Dictionary:
 	return manifest
 
 
-## `manifest` defaults to the course's own declarations file, named by its `CourseSpec`; the GUT
-## cases pass a fixture instead.
+## `manifest` defaults to the course's own (`Course.audit_manifest()` — a zone merges its sidecar
+## roles in there), else its declarations file, named by its `CourseSpec`; the GUT cases pass a
+## fixture instead.
 func _init(course: Course, manifest: Variant = null) -> void:
 	_course = course
+	if manifest == null and course != null:
+		manifest = course.audit_manifest()
 	if manifest == null and course != null:
 		manifest = load_manifest(course.course_spec().declarations_path)
 	if manifest is Dictionary:

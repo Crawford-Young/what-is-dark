@@ -1,0 +1,38 @@
+[gd_scene load_steps=6 format=3]
+
+[sub_resource type="StandardMaterial3D" id="slab_mat"]
+resource_name = "SlabMat"
+albedo_color = Color(0.5, 0.45, 0.4, 1)
+
+[sub_resource type="BoxMesh" id="slab_mesh"]
+material = SubResource("slab_mat")
+size = Vector3(4, 0.4, 20)
+
+[sub_resource type="StandardMaterial3D" id="wall_mat"]
+resource_name = "WallMat"
+
+[sub_resource type="BoxMesh" id="wall_mesh"]
+material = SubResource("wall_mat")
+size = Vector3(0.4, 6, 24)
+
+[sub_resource type="BoxMesh" id="rug_mesh"]
+size = Vector3(2, 0.05, 3)
+
+[node name="09_Fixture" type="Node3D"]
+
+[node name="Scene Collection" type="Node3D" parent="."]
+
+[node name="PLAY" type="Node3D" parent="Scene Collection"]
+
+[node name="Slab" type="MeshInstance3D" parent="Scene Collection/PLAY"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, -8)
+mesh = SubResource("slab_mesh")
+
+[node name="Wall" type="MeshInstance3D" parent="Scene Collection/PLAY"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 2, -10)
+mesh = SubResource("wall_mesh")
+
+[node name="DRESS" type="Node3D" parent="Scene Collection"]
+
+[node name="Rug" type="MeshInstance3D" parent="Scene Collection/DRESS"]
+mesh = SubResource("rug_mesh")

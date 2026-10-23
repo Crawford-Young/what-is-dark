@@ -51,6 +51,12 @@ func course_spec() -> CourseSpec:
 	return _spec
 
 
+## The course-law audit's manifest, or null to have the audit load `course_spec()`'s
+## declarations file itself. A `Zone` overrides this: its roles live in its sidecar.
+func audit_manifest() -> Variant:
+	return null
+
+
 func _ready() -> void:
 	for error in _spec.validate():
 		push_error("%s: %s" % [name, error])

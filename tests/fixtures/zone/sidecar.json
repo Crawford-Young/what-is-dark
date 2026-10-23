@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "place": "09-fixture",
+  "frame": "godot",
+  "boxes": [
+    {"name": "Slab_0", "object": "Slab", "role": "marker_floor",
+     "center": [0, -0.2, -4], "size": [4, 0.4, 12], "solid": true},
+    {"name": "Slab_1", "object": "Slab", "role": "floor",
+     "center": [0, -0.2, -16], "size": [4, 0.4, 8], "solid": true,
+     "erode": {"axis": 2, "min": 4, "anchor": -1}},
+    {"name": "Wall_0", "object": "Wall", "role": "ride_wall",
+     "center": [3, 2, -10], "size": [0.4, 6, 24], "solid": false}
+  ],
+  "path": [[0, 0, 0], [0, 0, -20]],
+  "spawn": [0, 1, 0],
+  "markers": [0, 5],
+  "door_progress": 18,
+  "fall_y": -6
+}

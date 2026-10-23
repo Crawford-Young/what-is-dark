@@ -47,6 +47,13 @@ HOOD = (-10.5, -21.5)
 SINK_UPPERS = [(8.0, -14.0), (-45.0, -57.5), (-58.0, -70.5)]
 HOB_UPPERS = [(8.0, -10.5), (-21.5, -35.0), (-35.5, -59.0), (-59.5, -70.5)]  # third bank = the ride wall
 FR_Y, FR_W = -64.0, 6.0     # fridge front and width; it stands 18.6 m, to the top of its box
+# The back wall is OPEN behind each gap a run breaks for (#23 ruling): nothing to wall-ride low
+# across a barrier, and a rider who flies in falls to the void. Each opening runs past the gap ends
+# by the wall-ride ray reach (0.7 m, player.tscn RayWall*) plus the capsule radius (0.35 m), so no
+# ray reaches the wall from over the gap; floor to the uppers' underside, full wall depth.
+OPEN_MARGIN = 0.7 + 0.35
+HOB_OPENINGS = [(a[1] + OPEN_MARGIN, b[0] - OPEN_MARGIN) for a, b in zip(HOB_RUNS, HOB_RUNS[1:])]
+SINK_OPENINGS = [(SINK_RUNS[1][1] + OPEN_MARGIN, SINK_RUNS[2][0] - OPEN_MARGIN)]   # the broken sink run
 DOOR_OPEN = 45.0           # degrees the fridge door stands ajar, hinged on its -x edge: the slit
                            # and its light face the hob run, the line and the rack; the card on
                            # the door face looks back up the galley
@@ -453,23 +460,43 @@ box("Floor", (0, (Y0 + Y1) / 2, -0.1), (2 * XB + 0.8, Y0 - Y1, 0.2), M["floor"],
 box("Ceiling", (0, (Y0 + Y1) / 2, CEIL + 0.15), (2 * XB + 0.8, Y0 - Y1, 0.3), M["ceil"], "DRESS")
 box("WallNear", (0, Y0 + 0.2, CEIL / 2), (2 * XB + 0.8, 0.4, CEIL), M["paint"], "PLAY", role="ride_wall")
 box("WallEnd", (0, Y1 - 0.2, CEIL / 2), (2 * XB + 0.8, 0.4, CEIL), M["paint"], "PLAY", role="ride_wall")
-box("WallR", (XB + 0.2, (Y0 + Y1) / 2, CEIL / 2), (0.4, Y0 - Y1, CEIL), M["paint"], "PLAY", role="ride_wall")
+
+
+def open_spans(spans, openings):
+    """Wall spans (ya, yb, za, zb) with each opening (y range) cut from the floor up to UP_Z0."""
+    out = []
+    for ya, yb, za, zb in spans:
+        cuts = sorted(((min(o0, ya), max(o1, yb)) for o0, o1 in openings if o0 > yb and o1 < ya), reverse=True)
+        y = ya
+        for o0, o1 in cuts:
+            if y > o0:
+                out.append((y, o0, za, zb))
+            if zb > UP_Z0:
+                out.append((o0, o1, max(za, UP_Z0), zb))
+            y = o1
+        if y > yb:
+            out.append((y, yb, za, zb))
+    return out
+
+
+def wall(name, sx, spans):
+    bx = [((sx * (XB + 0.2), (ya + yb) / 2, (za + zb) / 2), (0.4, ya - yb, zb - za), 0) for ya, yb, za, zb in spans]
+    return boxes_object(name, bx, [M["paint"]], "PLAY", role="ride_wall")
+
+
+wall("WallR", 1, open_spans([(Y0, Y1, 0.0, CEIL)], HOB_OPENINGS))
 # sink-side wall: cut for the hall doorway and the window over the sink
-lw = []
 spans = [(Y0, DOORWAY[0], 0.0, CEIL), (DOORWAY[0], DOORWAY[1], 20.5, CEIL), (DOORWAY[1], WINDOW[0], 0.0, CEIL),
          (WINDOW[0], WINDOW[1], 0.0, 11.0), (WINDOW[0], WINDOW[1], 20.5, CEIL), (WINDOW[1], Y1, 0.0, CEIL)]
-for ya, yb, za, zb in spans:
-    lw.append(((-XB - 0.2, (ya + yb) / 2, (za + zb) / 2), (0.4, ya - yb, zb - za), 0))
-boxes_object("WallL", lw, [M["paint"]], "PLAY", role="ride_wall")
+wall("WallL", -1, open_spans(spans, SINK_OPENINGS))
 
-# splashback tiles between the worktops and the wall cupboards
+# splashback tiles between the worktops and the wall cupboards, none over an opening
 tl = []
-for ya, yb, za, zb in ((Y0, DOORWAY[0], WT, UP_Z0), (DOORWAY[1], WINDOW[0], WT, UP_Z0), (WINDOW[0], WINDOW[1], WT, 11.0),
-                       (WINDOW[1], Y1, WT, UP_Z0)):
+for ya, yb, za, zb in open_spans([(Y0, DOORWAY[0], WT, UP_Z0), (DOORWAY[1], WINDOW[0], WT, UP_Z0),
+                                  (WINDOW[0], WINDOW[1], WT, 11.0), (WINDOW[1], Y1, WT, UP_Z0)], SINK_OPENINGS):
     tl.append(((-XB + 0.03, (ya + yb) / 2, (za + zb) / 2), (0.06, ya - yb, zb - za), 0))
-for ya, yb, za, zb in ([(Y0, HOOD[0], WT, UP_Z0), (HOOD[0], HOOD[1], WT, 15.5), (HOOD[1], HOB_RUNS[0][1], WT, UP_Z0)]
-                       + [(a, b, WT, UP_Z0) for a, b in HOB_RUNS[1:]]
-                       + [(HOB_RUNS[1][1], HOB_RUNS[2][0], WT, UP_Z0)]):   # still there over the wall-ride gap
+for ya, yb, za, zb in open_spans([(Y0, HOOD[0], WT, UP_Z0), (HOOD[0], HOOD[1], WT, 15.5), (HOOD[1], Y1, WT, UP_Z0)],
+                                 HOB_OPENINGS):
     tl.append(((XB - 0.03, (ya + yb) / 2, (za + zb) / 2), (0.06, ya - yb, zb - za), 0))
 boxes_object("Splashback", tl, [M["tile"]], "DRESS")
 te = []
@@ -477,9 +504,7 @@ for sx in (-1, 1):
     # from the fridge's side, where the worktop meets the end wall at every loop
     te.append(((sx * (FR_W / 2 + XB) / 2, Y1 + 0.03, (WT + UP_Z0) / 2), (XB - FR_W / 2, 0.06, UP_Z0 - WT), 0))
 boxes_object("SplashbackEnd", te, [M["tile_end"]], "DRESS")
-sk = [((sx * (XB - 0.1), (a[1] + b[0]) / 2, 0.6), (0.2, a[1] - b[0], 1.2), 0)   # bare wall in a run's gap
-      for sx, runs in ((1, HOB_RUNS), (-1, SINK_RUNS[1:])) for a, b in zip(runs, runs[1:])]
-boxes_object("Skirting", sk, [M["skirting"]], "DRESS")
+#: no skirting: every run gap but the hall doorway now has the wall open behind it (OPEN_MARGIN)
 
 # ---------------------------------------------------------------- worktops and base units
 
@@ -749,20 +774,30 @@ leaf.append(((0.15, -6.3, 10.0), (0.3, 0.9, 0.18), 1))
 child(boxes_object("HallDoor", leaf, [M["door_paint"], M["brushed"]], "DRESS", bevel=0.04), hd)
 box("LightSwitch", (-XB + 0.06, dy0 + 1.6, 12.0), (0.1, 0.86, 0.86), M["white"], "DRESS", 0.03)
 box("LightRocker", (-XB + 0.14, dy0 + 1.6, 12.0), (0.06, 0.24, 0.36), M["white"], "DRESS", 0.02)
-box("GapSocket", (XB - 0.06, -51.0, 3.0), (0.1, 1.46, 0.86), M["white"], "DRESS", 0.03)
-# the calendar on the bare wall by the first crossing: October, her birthday ringed in red
-cy_ = (HOB_RUNS[0][1] + HOB_RUNS[1][0]) / 2
-box("CalendarGrid", (XB - 0.04, cy_, 8.9), (0.05, 3.0, 3.0), M["list"], "DRESS")
-box("CalendarPhoto", (XB - 0.04, cy_, 11.9), (0.05, 3.0, 3.0), M["cal_photo"], "DRESS")
-box("CalendarNail", (XB - 0.1, cy_, 13.5), (0.15, 0.12, 0.12), M["brushed"], "DRESS")
-grid = [((XB - 0.07, cy_, 7.6 + r * 0.42), (0.01, 2.6, 0.03), 0) for r in range(6)]
-grid += [((XB - 0.07, cy_ - 1.3 + c * 2.6 / 7, 8.65), (0.01, 0.03, 2.1), 0) for c in range(8)]
+# the calendar on the bare sink-side wall facing the first crossing (the hob wall behind that gap is
+# open now): October, her birthday ringed in red, hung above the splashback at eye height
+cy_ = (DOORWAY[1] + WINDOW[0]) / 2
+cz = 6.2   # lift over the splashback (it hung in the hob run's gap, below the worktop line, before)
+
+
+def cal_x(inset):   # on the -x wall, read from the chasm
+    return -(XB - inset)
+
+
+box("CalendarGrid", (cal_x(0.04), cy_, 8.9 + cz), (0.05, 3.0, 3.0), M["list"], "DRESS")
+box("CalendarPhoto", (cal_x(0.04), cy_, 11.9 + cz), (0.05, 3.0, 3.0), M["cal_photo"], "DRESS")
+box("CalendarNail", (cal_x(0.1), cy_, 13.5 + cz), (0.15, 0.12, 0.12), M["brushed"], "DRESS")
+grid = [((cal_x(0.07), cy_, 7.6 + r * 0.42 + cz), (0.01, 2.6, 0.03), 0) for r in range(6)]
+grid += [((cal_x(0.07), cy_ - 1.3 + c * 2.6 / 7, 8.65 + cz), (0.01, 0.03, 2.1), 0) for c in range(8)]
 g = boxes_object("CalendarLines", grid, [M["pencil"]], "DRESS")
 g["gone_at"] = 2
-t = text("CalendarMonth", "OCTOBER", (XB - 0.07, cy_, 10.0), FACE_X, 0.3, M["pencil"], "DRESS")
+FACE_NX = (math.radians(90), 0, math.radians(90))   # text read from the chasm, on a -x wall
+t = text("CalendarMonth", "OCTOBER", (cal_x(0.07), cy_, 10.0 + cz), FACE_NX, 0.3, M["pencil"], "DRESS")
 t["gone_at"] = 2
 for k, (r, m, dx) in enumerate(((0.21, M["red_pen"], 0.075), (0.15, M["list"], 0.08))):  # a red pen ring
-    ring = cyl(f"CalendarRing{k}", (XB - dx, cy_ - 0.3, 8.42), r, 0.01, m, "DRESS", rot=(0, math.radians(90), 0))
+    # +0.3 on this wall is the same date column the -0.3 was on the facing wall
+    ring = cyl(f"CalendarRing{k}", (cal_x(dx), cy_ + 0.3, 8.42 + cz), r, 0.01, m, "DRESS",
+               rot=(0, math.radians(90), 0))
     ring["gone_at"] = 2
 
 # ---------------------------------------------------------------- the fridge (landmark, dominant light)
@@ -972,7 +1007,9 @@ def course_point(name, loc):
 LINE = [(5.0, 4.0, WT),            # spawn, MARKER_0
         (4.25, -2.0, WT), (4.25, -24.0, WT),         # past the hob, under the hood, to the overlap
         (-4.5, -24.0, WT), (-4.5, -27.5, WT),        # first crossing, straight across; MARKER_1
-        (-4.5, -33.5, WT), (4.5, -33.5, WT),         # second crossing, before the sink; MARKER_2
+        # second crossing, straight across over the sink rim; MARKER_2 lands 1.5 m inside R1's
+        # near end (-33.0), so every respawn offset (+-1 m along y) stands on the slab
+        (-4.5, -34.5, WT), (4.5, -34.5, WT),
         (6.8, -36.5, WT + 1.8), (5.4, -41.0, WT + 3.0),   # bread bin, microwave
         (5.3, -45.0, 15.5), (5.3, -57.5, 15.5),      # the cupboard faces over the wall-ride gap
         (4.25, -60.0, WT), (4.25, -63.0, WT)]        # land by the rack: the DOOR, then the fridge
@@ -995,6 +1032,7 @@ camera("CamLine", (4.0, -20.0, EYE), -9.0, -1.0)    # past the hob, under the ho
 camera("CamFridge", (4.0, -44.9, EYE), -14.0, 22.0)  # end of the hob run, looking up into the light
 camera("CamPan", (-4.2, -52.5, EYE), 20.0, 18.0)    # lingering: stepped off to the sink run's end, the pan under the card
 camera("CamOven", (-5.0, -12.0, EYE), 75.0, -14.0)  # look-dev check of the clock across the chasm
+camera("CamOpening", (-6.0, -28.5, EYE), 80.0, -8.0)  # across the chasm at the hob run's first opening
 
 apply_loop(0)
 bpy.ops.wm.save_mainfile()

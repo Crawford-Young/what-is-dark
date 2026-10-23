@@ -86,6 +86,18 @@ func test_baseline_keys_are_unique_law_subject_pairs() -> void:
 	assert_string_contains(_joined(errors), "duplicate")
 
 
+## A spec built from a file (a Blender zone's sidecar) carries what went wrong reading it, and
+## `validate()` reports those first — so the CLI and `Course._ready` gate on them with no second
+## error channel.
+func test_load_errors_are_reported_first() -> void:
+	var spec := _valid()
+	spec.load_errors = ["sidecar: version must be 1"] as Array[String]
+	spec.markers = [] as Array[float]
+	var errors := spec.validate()
+	assert_eq(errors.size(), 2, _joined(errors))
+	assert_eq(errors[0], "sidecar: version must be 1")
+
+
 # --- the slice's own spec ----------------------------------------------------------------------
 
 

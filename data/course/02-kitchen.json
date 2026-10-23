@@ -42,12 +42,76 @@
    "center": [
     -9.8,
     3.0,
-    -31.25
+    -7.725
    ],
    "size": [
     0.4,
     24.0,
-    78.5
+    31.45
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_1",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -9.8,
+    9.75,
+    -28.75
+   ],
+   "size": [
+    0.4,
+    10.5,
+    10.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_2",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -9.8,
+    3.0,
+    -39.0
+   ],
+   "size": [
+    0.4,
+    24.0,
+    9.9
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_3",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -9.8,
+    9.75,
+    -51.25
+   ],
+   "size": [
+    0.4,
+    10.5,
+    14.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_4",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -9.8,
+    3.0,
+    -64.525
+   ],
+   "size": [
+    0.4,
+    24.0,
+    11.95
    ],
    "solid": false
   },
@@ -138,12 +202,44 @@
    "center": [
     9.8,
     3.0,
-    -56.75
+    -44.475
    ],
    "size": [
     0.4,
     24.0,
-    27.5
+    2.95
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallL_6",
+   "object": "WallL",
+   "role": "ride_wall",
+   "center": [
+    9.8,
+    9.75,
+    -51.25
+   ],
+   "size": [
+    0.4,
+    10.5,
+    10.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallL_7",
+   "object": "WallL",
+   "role": "ride_wall",
+   "center": [
+    9.8,
+    3.0,
+    -63.525
+   ],
+   "size": [
+    0.4,
+    24.0,
+    13.95
    ],
    "solid": false
   },
@@ -1247,12 +1343,12 @@
   [
    4.5,
    0.0,
-   -33.5
+   -34.5
   ],
   [
    -4.5,
    0.0,
-   -33.5
+   -34.5
   ],
   [
    -6.8,
@@ -1293,8 +1389,8 @@
  "markers": [
   0.0,
   40.296693,
-  55.296693
+  56.296693
  ],
- "door_progress": 89.205622,
+ "door_progress": 89.558512,
  "fall_y": -6.0
 }

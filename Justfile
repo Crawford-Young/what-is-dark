@@ -8,6 +8,10 @@ run:
 edit:
     "{{godot}}" --path . -e
 
+# run the kitchen zone (Blender-exported place 2, issue #23)
+kitchen:
+    "{{godot}}" --path . scenes/kitchen.tscn
+
 # run the wall-jump measurement lab
 lab:
     "{{godot}}" --path . scenes/wall_lab.tscn
