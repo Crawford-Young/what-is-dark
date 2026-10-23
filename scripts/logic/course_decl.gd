@@ -14,6 +14,7 @@ const DECLARATIONS: Array[String] = [
 	"chasm",  ## grows per loop; audited against the plateau ceiling
 	"surf_transfer",  ## ramp exit carries into the next gap
 	"gate_deploy",  ## reserved for 4.1 — gate laws are not built in this wave
+	"barrier",  ## built NOT to be crossed on foot; audited as wider than the flat reach
 ]
 
 const ROLES: Array[String] = [
@@ -39,6 +40,7 @@ const REQUIRED_KEYS := {
 	"chasm": ["per_loop"],
 	"surf_transfer": ["entry_speed", "drop", "kicker", "factor"],
 	"gate_deploy": ["sightline_m"],
+	"barrier": [],
 }
 
 ## The one required key that cannot be authored at a desk, because it is a MEASUREMENT

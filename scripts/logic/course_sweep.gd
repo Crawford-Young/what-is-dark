@@ -14,6 +14,8 @@ const SEV_WARN := "WARN"
 
 ## The declared source that means "the player arrives on foot".
 const GROUND_SOURCE := "ground"
+## The verb of a gap built NOT to be crossed: its own reach law, no landing, no chain link.
+const BARRIER_VERB := "barrier"
 
 ## Order is the reading order of the report: what the pass saw, then what the surfaces claim,
 ## then the spans in course order, then the standalone families. T4b inserts floors before
@@ -161,7 +163,9 @@ static func _sweep_spans(survey: Dictionary, declarations: Dictionary) -> Array[
 		if errors.is_empty():
 			findings.append_array(_sweep_verb(survey, id, span_row, decl, walls, declarations))
 
-		findings.append_array(_sweep_width(survey, id, span_row, capsule))
+		# A barrier is not a landing — nobody arrives across it — so the width laws do not apply.
+		if str(decl.get("decl", "")) != BARRIER_VERB:
+			findings.append_array(_sweep_width(survey, id, span_row, capsule))
 
 		# Span ids are `<near>><far>`, so the launch surface's role is readable without a new
 		# declaration key: off a kicker, issue #16's measured level reach is the budget —
@@ -200,12 +204,16 @@ static func _sweep_chains(survey: Dictionary, declarations: Dictionary) -> Array
 	for row in _rows(survey, "spans"):
 		var span_row: Dictionary = row
 		var id := str(span_row.get("id", "<unnamed>"))
+		var verb := str((declarations.get(id, {}) as Dictionary).get("decl", ""))
+		# A barrier is never jumped, so it is no edge of the chain graph: the run ends before it.
+		if verb == BARRIER_VERB:
+			continue
 		edges.append({
 			"id": id,
 			"key": float(span_row.get("z_from", 0.0)),
 			"void": bool(span_row.get("void_punished", false)),
 			"break": bool(span_row.get("marker_break_before", false)),
-			"verb": str((declarations.get(id, {}) as Dictionary).get("decl", "")),
+			"verb": verb,
 		})
 	var seams := _chasm_ranges(survey)
 	for row in _rows(survey, "floors"):
@@ -327,6 +335,20 @@ static func _sweep_verb(
 
 		"surf_transfer":
 			findings.append_array(_sweep_transfer(survey, id, length, decl))
+
+		BARRIER_VERB:
+			if not CourseLaw.barrier_holds(length):
+				findings.append(
+					_finding(
+						survey,
+						"barrier_reach",
+						id,
+						(
+							"%.2f m barrier is within the %.5f m flat reach — it can be crossed"
+							% [length, CourseLaw.FLAT_REACH]
+						)
+					)
+				)
 
 		"chasm", "gate_deploy":
 			# A chasm's laws run over the `chasms` rows, where the per-loop growth is measured

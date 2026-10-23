@@ -31,6 +31,14 @@ func test_bare_run_span_at_reach_passes_and_just_past_fails() -> void:
 	assert_false(CourseLaw.span_ok_bare_run(CourseLaw.FLAT_REACH + 0.01))
 
 
+## A barrier (#23 kitchen ruling) is a gap built NOT to be crossed on foot, so it must stay wider
+## than the flat reach: a barrier at or inside reach is a route someone will find.
+func test_a_barrier_holds_only_past_flat_reach() -> void:
+	assert_false(CourseLaw.barrier_holds(7.0))
+	assert_false(CourseLaw.barrier_holds(CourseLaw.FLAT_REACH))
+	assert_true(CourseLaw.barrier_holds(CourseLaw.FLAT_REACH + 0.01))
+
+
 func test_required_entry_speed_is_span_over_airtime() -> void:
 	assert_almost_eq(CourseLaw.required_entry_speed(9.5), 12.5810, 0.001)
 

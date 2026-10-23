@@ -25,6 +25,12 @@ static func span_ok_bare_run(span: float) -> bool:
 	return span <= FLAT_REACH + EPS
 
 
+## A barrier is a gap built NOT to be crossed on foot (#23 kitchen ruling), so it holds only
+## while it stays wider than the flat reach; at or inside it, it is a route.
+static func barrier_holds(span: float) -> bool:
+	return span > FLAT_REACH + EPS
+
+
 static func required_entry_speed(span: float) -> float:
 	return span / AIRTIME
 

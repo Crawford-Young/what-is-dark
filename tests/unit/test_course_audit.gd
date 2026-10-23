@@ -20,7 +20,7 @@ func before_each() -> void:
 	add_child_autofree(_slice)
 	# `_ready` must have run — `_cache_erodable()` fills the erosion cache there, and until it
 	# has, every geometry read below is a confident-looking false negative.
-	await wait_frames(2)
+	await wait_physics_frames(2)
 
 
 ## Real shipped nodes, verified in `scenes/slice.tscn` on 2026-07-29. `Sh6Exit` is the one

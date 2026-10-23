@@ -8,10 +8,11 @@ func _joined(errors: Array) -> String:
 	return "\n".join(errors)
 
 
-func test_declaration_enum_is_the_six_verbs() -> void:
-	assert_eq(CourseDecl.DECLARATIONS.size(), 6)
+func test_declaration_enum_is_the_seven_verbs() -> void:
+	assert_eq(CourseDecl.DECLARATIONS.size(), 7)
 	for decl_name in [
-		"bare_run", "carried_speed", "wall_ride", "chasm", "surf_transfer", "gate_deploy"
+		"bare_run", "carried_speed", "wall_ride", "chasm", "surf_transfer", "gate_deploy",
+		"barrier",
 	]:
 		assert_true(CourseDecl.DECLARATIONS.has(decl_name), "missing declaration: %s" % decl_name)
 

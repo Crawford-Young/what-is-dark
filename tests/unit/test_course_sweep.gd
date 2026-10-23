@@ -110,6 +110,20 @@ func test_a_bare_run_span_past_flat_reach_fails() -> void:
 	assert_eq(_laws(CourseSweep.sweep(survey, decls)), ["bare_run_reach"] as Array[String])
 
 
+func test_a_barrier_inside_flat_reach_fails() -> void:
+	var survey := _survey({"spans": [{"id": "A>B", "span": 8.0, "landing_width": 12.0}]})
+	var decls := {"A>B": {"decl": "barrier"}}
+	assert_eq(_laws(CourseSweep.sweep(survey, decls)), ["barrier_reach"] as Array[String])
+
+
+## A barrier is not a landing: nobody arrives on its far side by that gap, so the landing-width
+## and compound laws have nothing to judge — a narrow far strip is not a trap there.
+func test_a_barrier_past_reach_is_silent_even_onto_a_narrow_strip() -> void:
+	var survey := _survey({"spans": [{"id": "A>B", "span": 8.5, "landing_width": 0.5}]})
+	var decls := {"A>B": {"decl": "barrier"}}
+	assert_eq(CourseSweep.sweep(survey, decls).size(), 0)
+
+
 func test_a_carried_span_beyond_its_declared_entry_speed_fails() -> void:
 	var survey := _survey({"spans": [{"id": "A>B", "span": 9.5, "landing_width": 12.0}]})
 	var decls := {"A>B": {"decl": "carried_speed", "entry_speed": 11.0, "source": "ground"}}
@@ -614,6 +628,17 @@ func test_a_stretch_at_the_cap_warns_once() -> void:
 	var findings := CourseSweep.sweep(_survey({"spans": spans}), _chain_decls(spans))
 	assert_eq(_laws(findings), ["precision_chain_at_cap"] as Array[String])
 	assert_eq(String(findings[0]["severity"]), "WARN")
+
+
+## A barrier is never jumped, so it is not a link in a precision chain: it ends the run.
+func test_a_barrier_is_not_a_link_in_the_precision_chain() -> void:
+	var spans := _chain_spans(4, -1)
+	var decls := _chain_decls(spans)
+	spans[2]["span"] = 8.5
+	decls[spans[2]["id"]] = {"decl": "barrier"}
+	var laws := _laws(CourseSweep.sweep(_survey({"spans": spans}), decls))
+	assert_false(laws.has("precision_chain"), "two, a barrier, then one — no run of four")
+	assert_false(laws.has("precision_chain_at_cap"), "no run reaches three")
 
 
 func test_a_soft_landing_also_breaks_the_chain() -> void:
