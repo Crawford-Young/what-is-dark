@@ -1,7 +1,7 @@
 class_name CourseAudit
 extends RefCounted
 ## Method A of the course-law harness: read the shipped geometry off the box metadata of a LIVE
-## `Slice` and hand `CourseSweep` numbers to apply the laws to. Takes a scene, so it is not pure
+## `Course` and hand `CourseSweep` numbers to apply the laws to. Takes a scene, so it is not pure
 ## and does not belong in `scripts/logic/`; it is dev tooling, hence `scripts/dev/`.
 ##
 ## Two rules govern every extraction here.
@@ -15,66 +15,6 @@ extends RefCounted
 ## the erosion state off `apply_erosion()`, the shipped span off loop 0. `assert_setup()` is the
 ## guard for the one failure mode none of that survives — a scene whose `_ready` never ran reports
 ## the shipped size at every loop, confidently and wrongly.
-
-const DECL_PATH := "res://data/course_declarations.json"
-
-## The pinned finding set — deduped `law:subject` keys the audit is ALLOWED to report. `just audit`
-## and the GUT gate case both exit green only when the live set EQUALS this list, so a new defect
-## fails loudly and a silently fixed one fails loudly too (stale baseline). Authored at T9 from
-## run8 against commit e0592e0's manifest. Every key is a documented read of the RETIRING course;
-## issue numbers cite `docs/games/what-is-dark/issues/2026-07-29-phase4-w0-issues.md`, where every
-## FAIL's ACCEPT verdict lives in the "T9 ruling round" entry (2026-07-31) plus the cited issue.
-## Number namespaces: bare #18-#21 are that wave log's own entries; #23/#27/#28/#33/#34 (and any
-## number tagged "course") are phase-3b course issues from `issues/done/2026-07-25-phase3b-issues.md`
-## — the wave log tags its own 23rd entry "#23 (wave)" to keep the two apart.
-const BASELINE_FINDINGS: Array[String] = [
-	"bare_run_reach:G2PadRight>G2Ramp1",  # #20 companion — ray reads the bank face 12 m down its diagonal
-	"compound_landing:D1TileM2>D2StripA",  # #23 — near-ceiling gap onto a strip eroding 2.5 -> 1.6 m
-	"compound_landing:D2StripA>D2StripB",  # #23
-	"compound_landing:D2StripB>D2StripC",  # #23
-	"compound_landing:D6TileL3>D7PadA",  # loop-5 narrow landing (D7PadA 4.00 -> 2.80 m) — T8-close, ruling round
-	"compound_landing:D6TileL3>D7PadB",  # #21(b) companion — probe misses the shrunken pad at loop 5
-	"compound_landing:D6TileM3>D7PadA",  # loop-5 narrow landing — T8-close, ruling round
-	"compound_landing:D6TileR3>D7PadA",  # loop-5 narrow landing — T8-close, ruling round
-	"compound_landing:D6TileR3>D7PadB",  # #21(b) companion
-	"compound_landing:D7PadA>D7PadB",  # measured-law read, no issue number — T8-close, ruling round
-	"compound_landing:G7Exit>G8PadARight",  # #34 — 8.20 m gap, G8PadA reaches 5 m at plateau
-	"compound_landing:G8PadALeft>G8PadBLeft",  # #34
-	"compound_landing:G8PadAMid>G8PadBMid",  # #34
-	"compound_landing:G8PadARight>G8PadBRight",  # #34
-	"compound_landing:Sh4Mid>Sh5FloorA",  # #33 — 7.50/7.85 m gaps onto a pad eroding 12 -> 4 m
-	"compound_landing:Sh6Ledge>Sh6ExitTileL2",  # #18 pair — phantom 40 m key on the walk-off drop
-	"declaration:D1TileL3>D2Exit",  # #21(a) — straight-z model cannot merge lanes; RULED baseline
-	"declaration:D1TileR2>D2Exit",  # #21(a)
-	"declaration:D6TileL3>D7PadB",  # #21(b)
-	"declaration:D6TileR3>D7PadB",  # #21(b)
-	"declaration:G2PadLeft>G2Kick1",  # #20 — lateral bank entry unrepresentable; RULED baseline
-	"declaration:G2PadRight>G2Kick1",  # #20
-	"declaration:Sh6Ledge>Sh6ExitTileL2",  # #18 — no drop verb; RULED option (c)
-	"method_disagreement:G2PadRight>G2Ramp1",  # #20 companion — ray falls through a slit onto the face
-	"method_disagreement:Sh8Ramp>Sh8FloorTileL3",  # #19 — 0.673 m on the compound-rotated bank; RULED ACCEPT
-	"precision_chain_at_cap:D1TileM2>D2StripA",  # course #27's adjudicated 3-chain — wave #23 entry
-	"precision_chain_at_cap:D4LandA>D5FloorA",  # #28-class standing constraint — wave #23 entry
-	"precision_chain_at_cap:D6TileL3>D7PadA",  # #28-class, per lane — wave #23 entry
-	"precision_chain_at_cap:D6TileM3>D7PadA",  # #28-class, per lane — wave #23 entry
-	"precision_chain_at_cap:D6TileR3>D7PadA",  # #28-class, per lane — wave #23 entry
-	"precision_chain_at_cap:G7Exit>G8PadARight",  # course #34's triple at ruling #7's cap — wave #23 entry
-	"precision_chain_at_cap:Sh3FloorB>Sh4Step1",  # #28-class standing constraint — wave #23 entry
-	"precision_chain_at_cap:Sh8FloorTileL2>Sh8FloorTileL3",  # course #28's adjudicated 3-chain incl. chasm
-	"shrink_target_carries:D1TileL1",  # props on shrinking tiles — RULED ACCEPT, T9 ruling round
-	"shrink_target_carries:D1TileR2",  # ruling round
-	"shrink_target_carries:D6TileL1",  # ruling round
-	"shrink_target_carries:D6TileL2",  # ruling round
-	"shrink_target_carries:D6TileL3",  # ruling round
-	"shrink_target_carries:D6TileR2",  # ruling round
-	"shrink_target_carries:G5TileA1",  # ruling round
-	"shrink_target_carries:G5TileA2",  # ruling round
-	"shrink_target_carries:G5TileD1",  # ruling round
-	"shrink_target_carries:G5TileD2",  # ruling round
-	"shrink_target_carries:G5TileD3",  # ruling round
-	"surf_exit_unmeasured:Sh8Ramp>Sh8FloorTileL3",  # #19 companion — non-kicker exit, unmeasured exit_h_speed
-	"wall_chain_gap:Sh9Lip>Sh9Exit",  # Sh9 ride handoff — measured-law read, T8-close mapping, ruling round
-]
 
 ## Role lookup resolves against the body for the 155 single-`Col` bodies and against the collision
 ## node for the 15 multi-shape aggregates (shells, prop clusters, the door frame) — issue #9. The
@@ -107,12 +47,12 @@ const RAY_STEP := 0.05
 const RAY_MARGIN := 0.5
 const RAY_FILL_DEPTH := 0.4
 
-var _slice: Slice
+var _course: Course
 var _manifest: Dictionary
 var _rays_cast := 0
 
 
-static func load_manifest(path := DECL_PATH) -> Dictionary:
+static func load_manifest(path: String) -> Dictionary:
 	var manifest := {"spans": {}, "surfaces": {}, "floors": {}, "landing_bands": []}
 	if not FileAccess.file_exists(path):
 		# A fresh checkout reports every span undeclared instead of crashing — that report is the
@@ -128,9 +68,20 @@ static func load_manifest(path := DECL_PATH) -> Dictionary:
 	return manifest
 
 
-func _init(slice: Slice, manifest: Dictionary = load_manifest()) -> void:
-	_slice = slice
-	_manifest = manifest
+## `manifest` defaults to the course's own declarations file, named by its `CourseSpec`; the GUT
+## cases pass a fixture instead.
+func _init(course: Course, manifest: Variant = null) -> void:
+	_course = course
+	if manifest == null and course != null:
+		manifest = load_manifest(course.course_spec().declarations_path)
+	if manifest is Dictionary:
+		_manifest = manifest
+	else:
+		if manifest != null:
+			push_error(
+				"CourseAudit: manifest must be a Dictionary, got %s" % type_string(typeof(manifest))
+			)
+		_manifest = {}
 
 
 func declarations() -> Dictionary:
@@ -141,21 +92,21 @@ func declarations() -> Dictionary:
 ## call it FIRST and abort on non-empty.
 func assert_setup() -> Array[String]:
 	var errors: Array[String] = []
-	if _slice == null:
-		errors.append("no slice")
+	if _course == null:
+		errors.append("no course")
 		return errors
 
-	if (_slice._erodable as Array).is_empty():
+	if _course.erodable_count() == 0:
 		errors.append(
 			"the erodable cache is empty — `_ready` has not run, so every box reads its shipped "
 			+ "size at every loop"
 		)
 
-	var world_env := _slice.get_node_or_null("WorldEnvironment") as WorldEnvironment
+	var world_env := _course.get_node_or_null("WorldEnvironment") as WorldEnvironment
 	if world_env == null or world_env.environment == null:
 		errors.append("no WorldEnvironment — `apply_erosion()` cannot complete")
 
-	var path := _slice.get_node_or_null("CoursePath") as Path3D
+	var path := _course.get_node_or_null("CoursePath") as Path3D
 	if path == null or path.curve == null or path.curve.get_baked_length() <= 0.0:
 		errors.append("the course curve has no baked length — no marker z can be resolved")
 
@@ -168,8 +119,8 @@ func assert_setup() -> Array[String]:
 ## Sets the loop count and re-applies erosion. Idempotent by `apply_erosion()`'s own contract:
 ## every dimension is recomputed from the cached shipped geometry, never from the current size.
 func set_loop(loop: int) -> void:
-	_slice.loop_logic.loop_count = loop
-	_slice.apply_erosion()
+	_course.loop_logic.loop_count = loop
+	_course.apply_erosion()
 
 
 func survey_boxes(loop: int) -> Dictionary:
@@ -214,11 +165,11 @@ func survey_rays(loop: int) -> Dictionary:
 	set_loop(loop)
 	# Two physics frames: the first carries the eroded sizes into the physics server, the second
 	# guarantees the space sits between steps when the queries run.
-	await _slice.get_tree().physics_frame
-	await _slice.get_tree().physics_frame
+	await _course.get_tree().physics_frame
+	await _course.get_tree().physics_frame
 
 	_rays_cast = 0
-	var space := _slice.get_world_3d().direct_space_state
+	var space := _course.get_world_3d().direct_space_state
 	var boxes := _collect_boxes()
 	var surfaces := _surfaces(boxes)
 	var floor_boxes := _floor_boxes(boxes, surfaces)
@@ -322,7 +273,7 @@ func _ray_chasms(
 	space: PhysicsDirectSpaceState3D, box_chasms: Array[Dictionary], floors: Array[Dictionary]
 ) -> Array[Dictionary]:
 	var chasms: Array[Dictionary] = []
-	var loop := _slice.loop_logic.loop_count
+	var loop := _course.loop_logic.loop_count
 
 	for row in box_chasms:
 		var box_chasm: Dictionary = row
@@ -388,14 +339,14 @@ func _floor_covering(floors: Array[Dictionary], from: float, to: float) -> Dicti
 ## space, so a collider the metadata never mentioned still counts as ground.
 func _ray_markers(space: PhysicsDirectSpaceState3D) -> Array[Dictionary]:
 	var markers: Array[Dictionary] = []
-	for i in Slice.MARKER_PROGRESSES.size():
-		var at := _slice.respawn_position(i)
+	for i in _course.marker_progresses.size():
+		var at := _course.respawn_position(i)
 		var hit := 0
 		for dz in MARKER_OFFSETS:
 			# Ground counts down to the game's own fall plane: the respawn point rides 1 m above
 			# the path curve, and the curve's height above its floor varies per zone — a fixed
 			# shallow window under-reached every Grief and Depression marker on the first run.
-			if _ray_hits(space, at.x, at.z + dz, at.y + 0.5, Slice.FALL_Y, null):
+			if _ray_hits(space, at.x, at.z + dz, at.y + 0.5, _course.fall_y, null):
 				hit += 1
 		markers.append({
 			"index": i,
@@ -473,7 +424,7 @@ func _bisect_x(
 ## extents already reduced to the numbers every family below needs. Read AFTER `apply_erosion()`.
 func _collect_boxes() -> Array[Dictionary]:
 	var boxes: Array[Dictionary] = []
-	for body in _bodies(_slice):
+	for body in _bodies(_course):
 		var cols: Array[CollisionShape3D] = []
 		for child in body.get_children():
 			var col := child as CollisionShape3D
@@ -521,7 +472,7 @@ func _box_row(
 		"node": body,
 		"role": str((_manifest.get("surfaces", {}) as Dictionary).get(box_name, {}).get("role", "")),
 		"aggregate": aggregate,
-		"erodable": body.is_in_group(Slice.EROSION_GROUP),
+		"erodable": body.is_in_group(Course.EROSION_GROUP),
 		"size": size,
 		"level": up.dot(Vector3.UP) > 1.0 - CourseLaw.EPS,
 		"normal_y": up.y,
@@ -536,7 +487,7 @@ func _box_row(
 
 
 func _capsule_diameter() -> float:
-	var player := _slice.get_node_or_null("Player") as CharacterBody3D
+	var player := _course.get_node_or_null("Player") as CharacterBody3D
 	if player == null:
 		return 0.0
 	for child in player.get_children():
@@ -988,8 +939,8 @@ func _marker_between(marker_zs: Array[float], near: Dictionary, far: Dictionary)
 
 func _marker_zs() -> Array[float]:
 	var zs: Array[float] = []
-	for i in Slice.MARKER_PROGRESSES.size():
-		zs.append(_slice.respawn_position(i).z)
+	for i in _course.marker_progresses.size():
+		zs.append(_course.respawn_position(i).z)
 	return zs
 
 
@@ -998,8 +949,8 @@ func _marker_zs() -> Array[float]:
 ## than the one that placed it.
 func _markers(floor_boxes: Array[Dictionary]) -> Array[Dictionary]:
 	var markers: Array[Dictionary] = []
-	for i in Slice.MARKER_PROGRESSES.size():
-		var at := _slice.respawn_position(i)
+	for i in _course.marker_progresses.size():
+		var at := _course.respawn_position(i)
 		var hit := 0
 		for dz in MARKER_OFFSETS:
 			if _standable(floor_boxes, at.x, at.z + dz, at.y):
@@ -1123,7 +1074,7 @@ func _lane(lane_id: String, tiles: Array[Dictionary]) -> Dictionary:
 ## than read off the declaration, so a mis-authored seam cannot certify itself.
 func _chasms(floors: Array[Dictionary], boxes: Array[Dictionary]) -> Array[Dictionary]:
 	var chasms: Array[Dictionary] = []
-	var loop := _slice.loop_logic.loop_count
+	var loop := _course.loop_logic.loop_count
 
 	for floor_row in floors:
 		var lanes := floor_row["lanes"] as Array

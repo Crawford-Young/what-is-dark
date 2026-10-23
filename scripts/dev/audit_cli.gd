@@ -1,18 +1,51 @@
 extends SceneTree
-## just audit — walks the course against its declared intent at every loop 0..plateau,
+## just audit [course] — walks a course against its declared intent at every loop 0..plateau,
 ## both survey methods. Prints a sample count per pass, then findings, then a verdict.
-## Exit 0 when the finding set equals CourseAudit.BASELINE_FINDINGS, 1 otherwise.
+## Exit 0 when the finding set equals the course's `CourseSpec.baseline`, 1 when it does not,
+## 2 when the audit cannot run (unknown course, invalid spec, failed setup).
+
+const DEFAULT_COURSE := "slice"
+
+
+## Course name -> its spec, resolved lazily so one course's missing data never blocks another's
+## audit. Wave 2 of #23 registers the kitchen zone here.
+static func courses() -> Dictionary:
+	return {
+		"slice": func() -> CourseSpec: return Slice.spec(),
+	}
 
 
 func _initialize() -> void:
-	root.call_deferred("add_child", (load("res://scenes/slice.tscn") as PackedScene).instantiate())
-	_run.call_deferred()
+	var args := OS.get_cmdline_user_args()
+	var registry := courses()
+	var known := ", ".join(PackedStringArray(registry.keys()))
+	if args.size() > 1:
+		printerr("usage: just audit [course] — one course name, got %d args (known: %s)" % [
+			args.size(), known
+		])
+		quit(2)
+		return
+	var course_name: String = args[0] if args.size() == 1 else DEFAULT_COURSE
+	if not registry.has(course_name):
+		printerr("unknown course \"%s\" — known: %s" % [course_name, known])
+		quit(2)
+		return
+	var spec: CourseSpec = (registry[course_name] as Callable).call()
+	var spec_errors := spec.validate()
+	if not spec_errors.is_empty():
+		for e in spec_errors:
+			printerr("SPEC FAILURE (%s): %s" % [course_name, e])
+		quit(2)
+		return
+	root.call_deferred("add_child", (load(spec.scene_path) as PackedScene).instantiate())
+	_run.call_deferred(spec)
 
 
-func _run() -> void:
-	await process_frame  # _ready has now run on the slice and its children
-	var slice := root.get_child(root.get_child_count() - 1) as Slice
-	var audit := CourseAudit.new(slice)
+## `spec` is the registry spec validated above — the ONE source for the scene and the gate.
+func _run(spec: CourseSpec) -> void:
+	await process_frame  # _ready has now run on the course and its children
+	var course := root.get_child(root.get_child_count() - 1) as Course
+	var audit := CourseAudit.new(course)
 	var setup_errors := audit.assert_setup()
 	if not setup_errors.is_empty():
 		for e in setup_errors:
@@ -40,7 +73,7 @@ func _run() -> void:
 		if not keys.has(key):
 			keys.append(key)
 	keys.sort()
-	var baseline: Array[String] = CourseAudit.BASELINE_FINDINGS.duplicate()
+	var baseline: Array[String] = spec.baseline.duplicate()
 	baseline.sort()
 	print("findings=%d unique=%d baseline=%d" % [findings.size(), keys.size(), baseline.size()])
 	quit(0 if keys == baseline else 1)

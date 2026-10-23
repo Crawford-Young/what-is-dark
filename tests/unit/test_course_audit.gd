@@ -84,6 +84,23 @@ func test_setup_assertion_fails_on_a_slice_that_never_entered_the_tree() -> void
 	assert_true("\n".join(errors).contains("erod"), "\n".join(errors))
 
 
+## The `erodable` group is tree-wide. A second course in the tree must cache only its OWN bodies,
+## or eroding it would resize the first course's floors too.
+func test_a_second_course_in_the_tree_caches_only_its_own_erodables() -> void:
+	var second := load("res://scenes/slice.tscn").instantiate() as Slice
+	add_child_autofree(second)
+	await wait_physics_frames(2)
+	assert_gt(_slice.erodable_count(), 0)
+	assert_eq(second.erodable_count(), _slice.erodable_count())
+
+
+## A manifest that is not a Dictionary is a caller bug, never a silent empty manifest.
+func test_a_non_dictionary_manifest_is_reported_not_dropped() -> void:
+	var audit := CourseAudit.new(_slice, ["not", "a", "manifest"])
+	assert_push_error("manifest")
+	assert_eq(audit.declarations(), {})
+
+
 func test_the_capsule_diameter_is_read_from_the_player_not_assumed() -> void:
 	assert_almost_eq(float(_audit().survey_boxes(0)["capsule_diameter"]), 0.70, CourseLaw.EPS)
 
@@ -570,7 +587,7 @@ func test_audit_findings_match_the_pinned_baseline() -> void:
 			if not keys.has(key):
 				keys.append(key)
 	keys.sort()
-	var baseline: Array[String] = CourseAudit.BASELINE_FINDINGS.duplicate()
+	var baseline: Array[String] = _slice.course_spec().baseline.duplicate()
 	baseline.sort()
 	assert_eq(keys, baseline, "a NEW finding fails the gate; the baselined ones do not")
 

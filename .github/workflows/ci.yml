@@ -15,7 +15,7 @@ env:
   # A CI run on a different patch release is not the gate the local runs were.
   GODOT_VERSION: 4.7.1
   # Floor for the GUT suite-size guard below. BUMP THIS when adding a test script.
-  EXPECTED_SCRIPTS: 17
+  EXPECTED_SCRIPTS: 18
 
 jobs:
   test:

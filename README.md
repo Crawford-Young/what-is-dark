@@ -45,14 +45,14 @@ Wall traversal has no dedicated bind. Hitting a side wall while airborne and abo
 The shipped course is audited against its own declared intent. `just audit` instantiates the live course scene headlessly and walks it at every erosion loop (0–5) with two independent survey methods — a box-metadata read and a physics ray grid — then applies the course laws (reach, chasm growth/plateau/runout, precision chains, ride budgets, shell breaks) and prints per-pass sample counts, every finding, and a verdict.
 
 - **Declaration contract** — every traversal span names its intended verb in `data/course_declarations.json` (`bare_run`, `carried_speed`, `wall_ride`, `chasm`, `surf_transfer`; `gate_deploy` is reserved for phase 4.1). An undeclared span is itself a finding: the harness checks geometry against an intent, and absent an intent there is nothing to check.
-- **Baseline pin** — `CourseAudit.BASELINE_FINDINGS` pins the 46 adjudicated findings the audit is allowed to report, each inline-commented with an issue number or a named ruling. `just audit` exits 0 only when the live finding set equals the pin, so a new defect fails loudly — and a silently fixed one fails loudly too (stale baseline).
+- **Baseline pin** — each course's spec pins its baseline; for the slice, `Slice.BASELINE_FINDINGS` pins the 46 adjudicated findings the audit is allowed to report, each inline-commented with an issue number or a named ruling. `just audit` exits 0 only when the live finding set equals the pin, so a new defect fails loudly — and a silently fixed one fails loudly too (stale baseline).
 
 ## How to run / test
 
 - `just run` — play
 - `just edit` — open the Godot editor
 - `just test` — headless GUT unit tests
-- `just audit` — course-law audit: walk the live course against its declared intent (see the harness section above)
+- `just audit [course]` — course-law audit (default `slice`): walk the live course against its declared intent (see the harness section above)
 - `just launch` — 600-frame headless launch smoke, fails on any error or warning (the same gate CI runs)
 - `just import` — import assets headlessly (after adding new assets, or after any `.tscn` edit)
 - `just momentum-lab` — run the momentum lab scene directly
