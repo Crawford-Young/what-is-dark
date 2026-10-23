@@ -20,6 +20,9 @@ const PATH_NODE := "CoursePath"
 const COL_NODE := "Col"
 const MESH_NODE := "Mesh"
 
+## Parsed ONCE, by `_parse_zone()` from the subclass's `_build_spec()` — which `Course` runs in a
+## member initializer, before this class's own. So this member must carry NO initializer: GDScript
+## would run it after `_build_spec()` and reset the parsed spec to null.
 var _zone: ZoneSpec
 
 
@@ -29,13 +32,14 @@ var _zone: ZoneSpec
 @abstract func _art_path() -> String
 
 
-## A place's `CourseSpec`: the sidecar's line plus the place's own scene, declarations, void start
-## and audit baseline. Sidecar defects ride along as `load_errors`, so `validate()` fails on them.
+## A place's `CourseSpec`: the parsed sidecar's line plus the place's own scene, declarations,
+## void start and audit baseline. Sidecar defects ride along as `load_errors`, so `validate()`
+## fails on them.
 static func spec_for(
-	sidecar_path: String, declarations_path: String, scene_path: String, void_start: float,
+	zone: ZoneSpec, declarations_path: String, scene_path: String, void_start: float,
 	baseline: Array[String]
 ) -> CourseSpec:
-	var spec := ZoneSpec.load_files(sidecar_path, declarations_path).course_spec()
+	var spec := zone.course_spec()
 	spec.scene_path = scene_path
 	spec.declarations_path = declarations_path
 	spec.void_start = void_start
@@ -43,8 +47,19 @@ static func spec_for(
 	return spec
 
 
+## For the subclass's `_build_spec()`: parses the sidecar + declarations and keeps the result for
+## the build in `_init`.
+func _parse_zone(declarations_path: String) -> ZoneSpec:
+	_zone = ZoneSpec.load_files(_sidecar_path(), declarations_path)
+	return _zone
+
+
 func _init() -> void:
-	_zone = ZoneSpec.load_files(_sidecar_path(), _spec.declarations_path)
+	if _zone == null:
+		push_error(
+			"%s: _build_spec() must parse through _parse_zone()" % get_script().resource_path
+		)
+		_parse_zone(_spec.declarations_path)
 	var materials := _build_art()
 	_build_play(materials)
 	_build_path()

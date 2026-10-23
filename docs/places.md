@@ -121,6 +121,19 @@ The birthday card is on the fridge above it.
 **Fade.** The fridge magnets and the card's writing go first, then the cooker-hood bulb.
 At plateau only the fridge light is left: cold, blue and open.
 
+**The course as built (#23).** The hob run (Godot −x) and the sink run (+x) face each other
+across the chasm, worktop top at 9 m. Each run is a fixed back slab (|x| 4.0–9.6, where the
+markers stand) and a front strip that erodes on x toward it, pinned at the seam. That makes
+the chasm **3.0 m at loop 0 and 7.5 m at plateau** (0.9 m a loop). Both crossings run
+straight across (z −24 and −34.5), so neither is ever longer than the chasm. Six gaps are
+**barriers**, built never to be crossed on foot: wider than the 8.31 m reach at every loop
+(hob run 8.5 m and 12.5 m, the broken sink run 8.5 m; slab and strip each). The 12.5 m one is
+crossed only by the cupboard-face wall ride off the microwave. Behind those three gaps the
+back wall is **open** from the floor to the cupboards' underside (each gap ±1.05 m), so no low
+wall ride crosses a barrier: a rider who flies in falls and resets. Markers stand 0 / 40.3 /
+56.3 m along the line, and the door at 89.6 m is the landing by the rack. The calendar hangs on
+the sink-side wall across the first crossing.
+
 ---
 
 ## 3 · Blame: The car, night road
