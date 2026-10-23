@@ -16,7 +16,16 @@ The fade is visual only (places.md, "The fade, every loop"):
     invisible;
   - dominant lamps (and their panels) brighten per loop by DOMINANT_GAIN while the scene's
     exposure lifts by EXPOSURE_LIFT: the void stays black, the ridden line stays lit.
+
+Erosion is not visual: it is the geometry Godot plays. Every PLAY box carries a record in its
+object's `wid_boxes` custom prop (a JSON list, one entry per box, in mesh order): its role
+(course_decl.gd ROLES), its loop-0 world centre and size, and an optional erode
+(axis, min, anchor) in the Blender frame. apply_loop(n) re-sizes the eroding boxes with
+erosion_logic.gd's formula, so a render at loop n shows the course Godot builds at loop n.
+export.py turns the records into the Godot sidecar. They are the collider source: the mesh is
+only read to check the records against it.
 """
+import json
 import math
 import random
 
@@ -38,7 +47,12 @@ SCATTER = [0.004, 0.0045, 0.005, 0.006, 0.007, 0.008]
 DOMINANT_GAIN = [1.0, 1.1, 1.3, 1.7, 2.2, 2.8]
 EXPOSURE_LIFT = [0.0, 0.05, 0.15, 0.3, 0.45, 0.6]
 
-COLLECTIONS = ("PLAY", "DRESS", "MEMORY", "LIGHT", "CAM")
+# erosion_logic.gd: world_scale(loop) = clamp(loop / PLATEAU_LOOP, 0, 1)
+PLATEAU_LOOP = 5
+
+# COURSE holds what the exporter reads besides boxes: the SPAWN, MARKER_n and DOOR empties and
+# the LINE curve. It is never exported to the glb.
+COLLECTIONS = ("PLAY", "DRESS", "MEMORY", "LIGHT", "CAM", "COURSE")
 
 
 # ---------------------------------------------------------------- scene
@@ -309,17 +323,49 @@ def world_tex_coord(N, L, scale=1.0):
 
 # ---------------------------------------------------------------- geometry
 
-def boxes_object(name, boxes, mats, collection, bevel=0.0):
-    """One mesh object from many axis-aligned boxes: boxes = [(center, size, mat_index)]."""
+# a box's 8 corners in mesh order (x slowest), and its 6 faces by the side they look at
+_CORNERS = [(sx, sy, sz) for sx in (-1, 1) for sy in (-1, 1) for sz in (-1, 1)]
+_FACES = {"-x": (0, 1, 3, 2), "+x": (4, 6, 7, 5), "-y": (0, 4, 5, 1), "+y": (2, 3, 7, 6),
+          "-z": (0, 2, 6, 4), "+z": (1, 5, 7, 3)}
+
+
+def _corners(center, size, origin):
+    """A box's corners relative to its object's origin. apply_loop rebuilds them the same way,
+    so loop 0 lands on the shipped vertices bit for bit."""
+    return [(center[0] - origin[0] + sx * (size[0] / 2), center[1] - origin[1] + sy * (size[1] / 2),
+             center[2] - origin[2] + sz * (size[2] / 2)) for sx, sy, sz in _CORNERS]
+
+
+def boxes_object(name, boxes, mats, collection, bevel=0.0, role=None, erode=None, origin=(0, 0, 0)):
+    """One mesh object from many axis-aligned boxes in world coords, boxes =
+    [(center, size, mat_index[, opts])], with the object's origin at `origin`.
+
+    role tags every box for the exporter (a course_decl.gd role), or "none" marks the whole
+    object visual-only. Untagged boxes in PLAY fail the export. erode = (axis, min, anchor) in
+    the Blender frame: axis 0 = x or 1 = y, min the plateau size, anchor -1 / 0 / +1 pins the
+    low edge / centre / high edge. opts overrides "role" and "erode" per box. Its "flush" names
+    the faces (e.g. ("+x",)) that abut a neighbour box: their edges stay unbevelled, so a
+    floor split into two boxes still reads as one surface."""
     bm = bmesh.new()
-    for c, s, mi in boxes:
-        hx, hy, hz = s[0] / 2, s[1] / 2, s[2] / 2
-        vs = [bm.verts.new((c[0] + sx * hx, c[1] + sy * hy, c[2] + sz * hz))
-              for sx in (-1, 1) for sy in (-1, 1) for sz in (-1, 1)]
-        faces = [(0, 1, 3, 2), (4, 6, 7, 5), (0, 4, 5, 1), (2, 3, 7, 6), (0, 2, 6, 4), (1, 5, 7, 3)]
-        for f in faces:
+    bw = bm.edges.layers.float.new("bevel_weight_edge")
+    flush_edges = set()
+    records = []
+    for b in boxes:
+        c, s, mi = b[:3]
+        opts = b[3] if len(b) > 3 else {}
+        vs = [bm.verts.new(p) for p in _corners(c, s, origin)]
+        for side, f in _FACES.items():
             face = bm.faces.new([vs[i] for i in f])
             face.material_index = mi
+            if side in opts.get("flush", ()):
+                flush_edges.update(face.edges)
+        rec = {"role": opts.get("role", role), "center": list(c), "size": list(s)}
+        e = opts.get("erode", erode)
+        if e is not None:
+            rec["erode"] = list(e)
+        records.append(rec)
+    for e in bm.edges:
+        e[bw] = 0.0 if e in flush_edges else 1.0
     bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
     me = bpy.data.meshes.new(name)
     bm.to_mesh(me)
@@ -327,21 +373,36 @@ def boxes_object(name, boxes, mats, collection, bevel=0.0):
     for m in mats:
         me.materials.append(m)
     ob = bpy.data.objects.new(name, me)
+    ob.location = origin
     coll(collection).objects.link(ob)
+    if role == "none":
+        ob["wid_role"] = "none"
+    elif any(r["role"] for r in records):
+        ob["wid_boxes"] = json.dumps(records)
+        ob["wid_origin"] = list(origin)
     if bevel:
         mod = ob.modifiers.new("Bevel", "BEVEL")
         mod.width = bevel
         mod.segments = 2
-        mod.limit_method = "ANGLE"
+        # every edge weighs 1 but the flush ones, so a weight limit bevels boxes as an angle one does
+        mod.limit_method = "WEIGHT" if flush_edges else "ANGLE"
         mod.harden_normals = True
     return ob
 
 
-def box(name, center, size, mat, collection, bevel=0.0):
-    """One box with its origin at its centre, so rotations turn it in place."""
-    ob = boxes_object(name, [((0, 0, 0), size, 0)], [mat], collection, bevel)
-    ob.location = center
+def explicit_colliders(ob, boxes, role):
+    """Give a PLAY mesh that is no axis-aligned box (a door ajar at 45 degrees) hand-laid
+    collider boxes, boxes = [(center, size)] in world coords. The mesh stays visual; the
+    exporter checks each box lies inside the mesh's world bounds instead of matching an
+    island, and such boxes may never erode."""
+    ob["wid_boxes"] = json.dumps([{"role": role, "center": list(c), "size": list(s)} for c, s in boxes])
+    ob["wid_explicit"] = 1
     return ob
+
+
+def box(name, center, size, mat, collection, bevel=0.0, role=None, erode=None):
+    """One box with its origin at its centre, so rotations turn it in place."""
+    return boxes_object(name, [(center, size, 0)], [mat], collection, bevel, role, erode, origin=center)
 
 
 def text(name, body, loc, rot, size, mat, collection, align="CENTER", extrude=0.0):
@@ -410,9 +471,41 @@ def camera(name, loc, yaw_deg, pitch_deg=0.0):
 
 # ---------------------------------------------------------------- loops
 
+def eroded_box(center, size, erode, scale):
+    """erosion_logic.gd, mirrored: eroded_size lerps one axis toward min by the world scale (a
+    min at or above the size means no erosion), and anchored_origin holds the pinned edge."""
+    if not erode:
+        return list(center), list(size)
+    axis, mn, anchor = erode
+    base = size[axis]
+    new = base if mn >= base else base + (mn - base) * min(max(scale, 0.0), 1.0)
+    c, s = list(center), list(size)
+    s[axis] = new
+    c[axis] = center[axis] + anchor * (base - new) * 0.5
+    return c, s
+
+
+def _erode(ob, scale):
+    recs = json.loads(ob["wid_boxes"])
+    if not any(r.get("erode") for r in recs):
+        return
+    origin = ob["wid_origin"]
+    verts = ob.data.vertices
+    for i, r in enumerate(recs):
+        if r.get("erode"):
+            c, s = eroded_box(r["center"], r["size"], r["erode"], scale)
+            for k, p in enumerate(_corners(c, s, origin)):
+                verts[8 * i + k].co = p
+    ob.data.update()
+
+
 def apply_loop(n):
-    """Put the place in its loop-n state (0..5)."""
+    """Put the place in its loop-n state (0..5): the fade, and the erosion Godot plays."""
     sc = bpy.context.scene
+    world_scale = min(max(n / PLATEAU_LOOP, 0.0), 1.0)
+    for ob in bpy.data.objects:
+        if "wid_boxes" in ob and not ob.get("wid_explicit"):
+            _erode(ob, world_scale)
     sc["wid_loop"] = n
     sc["wid_desat"] = DESAT[n]
     sc["wid_mem_desat"] = MEM_DESAT[n]

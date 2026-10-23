@@ -4,10 +4,11 @@ Run in background Blender against art/course/02-kitchen.blend:
     exec(open(BUILD + "/kitchen.py").read())
 A galley kitchen at ten times scale: the rider is a child on a giant's counters. Two worktop
 runs face each other down -y from the spawn at y = 0: the sink run at -x (on the rider's
-right, looking down the galley) and the hob run at +x, with a 7.2 m chasm between them and
-the floor 9 m below. The fridge stands across the far end, door ajar, a wedge of cold light
-pouring out of it down the galley; the cooker-hood bulb burns amber over the hob, so the
-racing line (laid out with the run tables below) rides out of the amber into the blue.
+right, looking down the galley) and the hob run at +x, with a chasm between them and the floor
+9 m below. The chasm grows: 3.0 m at loop 0, 7.5 m at plateau, as each worktop's front strip
+erodes back toward the wall (#23). The fridge stands across the far end, door ajar, a wedge of
+cold light pouring out of it down the galley; the cooker-hood bulb burns amber over the hob, so
+the racing line (LINE, laid out with the run tables below) rides out of the amber into the blue.
 """
 import math
 import os
@@ -20,25 +21,30 @@ exec(open(os.path.join(BUILD, "wid_common.py")).read(), globals())
 
 WT = 9.0                   # worktop top (a real 0.9 m counter)
 WT_TH = 0.4                # worktop thickness
-XF, XB = 3.6, 9.6          # worktop front edge and back wall, |x|: the chasm is 2 * XF = 7.2 m
-XD = 3.9                   # base unit door faces, set back under the worktop's nosing
+XF, XB = 1.5, 9.6          # worktop front edge at loop 0 and back wall, |x|: the chasm is 2 * XF = 3.0 m
+XP = XF + 2.25             # the front edge at plateau: the chasm is 2 * XP = 7.5 m, the hard ceiling
+XS = 4.0                   # seam between a worktop's eroding front strip and its fixed back slab
+XD = 4.3                   # base unit door faces: everything under the worktop sits behind XP
 XU = 6.1                   # upper cupboard carcass front, |x| (3.5 m deep)
 UP_Z0, UP_Z1 = 13.5, 20.5  # upper cupboards: 4.5 m clear over the worktop, 7 m tall
 CEIL = 24.0
 Y0, Y1 = 8.0, -70.5        # near wall behind the spawn, far wall behind the fridge
-# The line: spawn on the hob run, past the hob under the hood; cross the chasm diagonally to
-# the sink run (7.4 m, the hob run has an 8.5 m gap you cannot clear along it); cross back
-# before the sink (7.2 m); bread bin, microwave, up onto the cupboard faces (a 23.5 m bank) and
-# a wall ride over the second gap (12.5 m); land in the fridge light by the rack.
-SINK_RUNS = [(8.0, -19.0), (-26.3, -70.5)]                   # the hall doorway breaks the sink run
+# The line: spawn on the hob run, past the hob under the hood; cross the chasm to the sink run
+# where the two runs overlap (the hob run has an 8.5 m gap you cannot clear along it); cross back
+# before the sink; bread bin, microwave, up onto the cupboard faces (a 23.5 m bank) and a wall
+# ride over the second gap (12.5 m); land in the fridge light by the rack, through the door.
+# Both crossings are straight across, so neither is longer than the chasm: 7.5 m at plateau.
+# The sink run breaks opposite the wall-ride gap (8.5 m, past the 8.31 m reach), so the climb and
+# the wall ride are the only way to the fridge.
+SINK_RUNS = [(8.0, -16.0), (-23.3, -47.0), (-55.5, -70.5)]   # the hall doorway, then the uncrossable gap
 HOB_RUNS = [(8.0, -24.5), (-33.0, -45.0), (-57.5, -70.5)]    # a crossing gap, then the wall-ride gap
-DOORWAY = (-19.5, -25.8)
+DOORWAY = (-16.5, -22.8)   # the sink run restarts 1.2 m before the hob run ends: the first crossing
 WINDOW = (-30.0, -43.0)    # over the sink
 SINK = (-33.5, -39.5)
 SINK_X = (-8.8, -4.6)
 HOB = (-13.0, -19.0)
 HOOD = (-10.5, -21.5)
-SINK_UPPERS = [(8.0, -17.0), (-45.0, -57.5), (-58.0, -70.5)]
+SINK_UPPERS = [(8.0, -14.0), (-45.0, -57.5), (-58.0, -70.5)]
 HOB_UPPERS = [(8.0, -10.5), (-21.5, -35.0), (-35.5, -59.0), (-59.5, -70.5)]  # third bank = the ride wall
 FR_Y, FR_W = -64.0, 6.0     # fridge front and width; it stands 18.6 m, to the top of its box
 DOOR_OPEN = 45.0           # degrees the fridge door stands ajar, hinged on its -x edge: the slit
@@ -445,16 +451,16 @@ FACE_Y = (math.radians(90), 0, math.radians(180))   # facing +y, back up the gal
 
 box("Floor", (0, (Y0 + Y1) / 2, -0.1), (2 * XB + 0.8, Y0 - Y1, 0.2), M["floor"], "DRESS")
 box("Ceiling", (0, (Y0 + Y1) / 2, CEIL + 0.15), (2 * XB + 0.8, Y0 - Y1, 0.3), M["ceil"], "DRESS")
-box("WallNear", (0, Y0 + 0.2, CEIL / 2), (2 * XB + 0.8, 0.4, CEIL), M["paint"], "PLAY")
-box("WallEnd", (0, Y1 - 0.2, CEIL / 2), (2 * XB + 0.8, 0.4, CEIL), M["paint"], "PLAY")
-box("WallR", (XB + 0.2, (Y0 + Y1) / 2, CEIL / 2), (0.4, Y0 - Y1, CEIL), M["paint"], "PLAY")
+box("WallNear", (0, Y0 + 0.2, CEIL / 2), (2 * XB + 0.8, 0.4, CEIL), M["paint"], "PLAY", role="ride_wall")
+box("WallEnd", (0, Y1 - 0.2, CEIL / 2), (2 * XB + 0.8, 0.4, CEIL), M["paint"], "PLAY", role="ride_wall")
+box("WallR", (XB + 0.2, (Y0 + Y1) / 2, CEIL / 2), (0.4, Y0 - Y1, CEIL), M["paint"], "PLAY", role="ride_wall")
 # sink-side wall: cut for the hall doorway and the window over the sink
 lw = []
 spans = [(Y0, DOORWAY[0], 0.0, CEIL), (DOORWAY[0], DOORWAY[1], 20.5, CEIL), (DOORWAY[1], WINDOW[0], 0.0, CEIL),
          (WINDOW[0], WINDOW[1], 0.0, 11.0), (WINDOW[0], WINDOW[1], 20.5, CEIL), (WINDOW[1], Y1, 0.0, CEIL)]
 for ya, yb, za, zb in spans:
     lw.append(((-XB - 0.2, (ya + yb) / 2, (za + zb) / 2), (0.4, ya - yb, zb - za), 0))
-boxes_object("WallL", lw, [M["paint"]], "PLAY")
+boxes_object("WallL", lw, [M["paint"]], "PLAY", role="ride_wall")
 
 # splashback tiles between the worktops and the wall cupboards
 tl = []
@@ -468,26 +474,48 @@ for ya, yb, za, zb in ([(Y0, HOOD[0], WT, UP_Z0), (HOOD[0], HOOD[1], WT, 15.5), 
 boxes_object("Splashback", tl, [M["tile"]], "DRESS")
 te = []
 for sx in (-1, 1):
-    te.append(((sx * (XF + XB) / 2, Y1 + 0.03, (WT + UP_Z0) / 2), (XB - XF, 0.06, UP_Z0 - WT), 0))
+    # from the fridge's side, where the worktop meets the end wall at every loop
+    te.append(((sx * (FR_W / 2 + XB) / 2, Y1 + 0.03, (WT + UP_Z0) / 2), (XB - FR_W / 2, 0.06, UP_Z0 - WT), 0))
 boxes_object("SplashbackEnd", te, [M["tile_end"]], "DRESS")
-sk = [((XB - 0.1, (a[1] + b[0]) / 2, 0.6), (0.2, a[1] - b[0], 1.2), 0) for a, b in zip(HOB_RUNS, HOB_RUNS[1:])]
+sk = [((sx * (XB - 0.1), (a[1] + b[0]) / 2, 0.6), (0.2, a[1] - b[0], 1.2), 0)   # bare wall in a run's gap
+      for sx, runs in ((1, HOB_RUNS), (-1, SINK_RUNS[1:])) for a, b in zip(runs, runs[1:])]
 boxes_object("Skirting", sk, [M["skirting"]], "DRESS")
 
 # ---------------------------------------------------------------- worktops and base units
 
 
-def worktop(name, sx, ya, yb, cut=None):
-    """One worktop run, ridden: a box, or four around the sink's cut-out."""
-    cx, dx = sx * (XF + XB) / 2, XB - XF
+def worktop(name, sx, ya, yb, cut=None, marker=False):
+    """One worktop run, ridden, from y = ya down to yb on the side sx (+1 hob, -1 sink).
+
+    A back slab (|x| XS..XB) that never erodes, so it can hold a marker's respawn, and a
+    front strip along the chasm (|x| XF..XS) that erodes on x toward the slab: its front edge
+    runs from XF at loop 0 to XP at plateau. Past the fridge's front the strip only reaches the
+    fridge's side, and does not erode. cut = the sink's (y, x) ranges: the slab opens round it,
+    the strip runs on."""
     z = WT - WT_TH / 2
+    to_wall, to_chasm = ("+x", "-x") if sx > 0 else ("-x", "+x")
+    slab = {"role": "marker_floor" if marker else "floor", "flush": (to_chasm,)}
+
+    def piece(ax0, ax1, y0, y1, opts):   # |x| from ax0 to ax1, y from y0 down to y1
+        return ((sx * (ax0 + ax1) / 2, (y0 + y1) / 2, z), (ax1 - ax0, y0 - y1, WT_TH), 0, opts)
+
+    def strip(*flush):   # pinned at the seam (anchor sx = its wall-side edge), front at XP at plateau
+        return {"role": "floor", "erode": (0, XS - XP, sx), "flush": (to_wall, *flush)}
+
+    # beside the fridge the strip never erodes: it fills fridge side to slab, so no slot opens there
+    fill = {"role": "floor", "flush": (to_wall, "+y")}
+
     if cut is None:
-        bx = [((cx, (ya + yb) / 2, z), (dx, ya - yb, WT_TH), 0)]
+        bx = [piece(XS, XB, ya, yb, slab)]
     else:
         (cy0, cy1), (cx0, cx1) = cut
-        bx = [((cx, (ya + cy0) / 2, z), (dx, ya - cy0, WT_TH), 0),
-              ((cx, (cy1 + yb) / 2, z), (dx, cy1 - yb, WT_TH), 0),
-              (((-XB + cx0) / 2, (cy0 + cy1) / 2, z), (cx0 + XB, cy0 - cy1, WT_TH), 0),
-              (((cx1 - XF) / 2, (cy0 + cy1) / 2, z), (-XF - cx1, cy0 - cy1, WT_TH), 0)]
+        bx = [piece(XS, XB, ya, cy0, slab), piece(XS, XB, cy1, yb, slab),
+              piece(-cx0, XB, cy0, cy1, dict(slab, flush=())),   # behind the sink
+              piece(XS, -cx1, cy0, cy1, slab)]                   # in front of it
+    if yb < FR_Y:
+        bx += [piece(XF, XS, ya, FR_Y, strip("-y")), piece(FR_W / 2, XS, FR_Y, yb, fill)]
+    else:
+        bx.append(piece(XF, XS, ya, yb, strip()))
     ob = boxes_object(name, bx, [M["worktop"]], "PLAY", bevel=0.06)
     ob["solid"] = 1.0
     return ob
@@ -497,8 +525,8 @@ def base_units(name, sx, ya, yb, skip=()):
     """Carcass, plinth, doors and drawers facing the chasm, a bar handle on each front. Every
     door's handle sits on the same side, so no pair of them reads as eyes."""
     L_ = ya - yb
-    bx = [((sx * (4.1 + XB) / 2, (ya + yb) / 2, (1.5 + WT - WT_TH) / 2), (XB - 4.1, L_, WT - WT_TH - 1.5), 1),
-          ((sx * (4.5 + XB) / 2, (ya + yb) / 2, 0.75), (XB - 4.5, L_, 1.5), 2)]
+    bx = [((sx * (XD + 0.2 + XB) / 2, (ya + yb) / 2, (1.5 + WT - WT_TH) / 2), (XB - XD - 0.2, L_, WT - WT_TH - 1.5), 1),
+          ((sx * (XD + 0.6 + XB) / 2, (ya + yb) / 2, 0.75), (XB - XD - 0.6, L_, 1.5), 2)]
     for y in (ya, yb):  # end panels where the run stops over the void
         bx.append(((sx * (XD + XB) / 2, y - 0.1 if y == ya else y + 0.1, (WT - WT_TH) / 2),
                    (XB - XD, 0.2, WT - WT_TH), 0))
@@ -520,11 +548,11 @@ def base_units(name, sx, ya, yb, skip=()):
     return boxes_object(name, bx, [M["unit"], M["carcass"], M["plinth"], M["handle"]], "DRESS", bevel=0.03)
 
 
-for i, (ya, yb) in enumerate(SINK_RUNS):
-    worktop(f"WorktopL{i}", -1, ya, yb, cut=(SINK, SINK_X) if i == 1 else None)
+for i, (ya, yb) in enumerate(SINK_RUNS):   # MARKER_1 stands on L1, MARKER_0 and MARKER_2 on R0 and R1
+    worktop(f"WorktopL{i}", -1, ya, yb, cut=(SINK, SINK_X) if i == 1 else None, marker=i == 1)
     base_units(f"BaseL{i}", -1, ya, yb)
 for i, (ya, yb) in enumerate(HOB_RUNS):
-    worktop(f"WorktopR{i}", 1, ya, yb)
+    worktop(f"WorktopR{i}", 1, ya, yb, marker=i < 2)
     base_units(f"BaseR{i}", 1, ya, yb, skip=(HOB,) if i == 0 else ())
 
 # ---------------------------------------------------------------- wall cupboards (ride walls)
@@ -542,7 +570,7 @@ def uppers(name, sx, ya, yb):
         y0 = ya - k * w
         bx.append(((sx * (XU - 0.12), y0 - w / 2, (UP_Z0 + UP_Z1) / 2), (0.24, w - 0.08, UP_Z1 - UP_Z0 - 0.08), 0))
         knobs.append(((sx * (XU - 0.38), y0 - 0.6, UP_Z0 + 0.7), (0.3, 0.32, 0.32), 0))
-    ob = boxes_object(name, bx, [M["unit"], M["carcass"]], "PLAY", bevel=0.03)
+    ob = boxes_object(name, bx, [M["unit"], M["carcass"]], "PLAY", bevel=0.03, role="ride_wall")
     ob["solid"] = 1.0
     kn = boxes_object(name + "_knobs", knobs, [M["handle"]], "DRESS", bevel=0.14)
     return ob, kn
@@ -693,12 +721,14 @@ for k, (th, tw_) in enumerate(((2.5, 0.45), (2.2, 0.55), (2.7, 0.38), (2.35, 0.5
              0.22, M["book_ink"], "DRESS")
     t["gone_at"] = 2
 # the climb: bread bin (1.8 m), microwave (3 m, pulled forward of the cupboards), cupboard faces
-box("BreadBin", (7.9, -36.3, WT + 0.9), (3.0, 4.0, 1.8), M["breadbin"], "DRESS", 0.45)
+bin_ = box("BreadBin", (7.9, -36.3, WT + 0.9), (3.0, 4.0, 1.8), M["breadbin"], "PLAY", 0.45, role="prop")
+bin_["solid"] = 1.0
 box("BreadBinLid", (6.42, -36.3, WT + 1.25), (0.08, 2.6, 0.12), M["brushed"], "DRESS", 0.03)
-mw = [((7.1, -41.6, WT + 1.5), (4.2, 5.5, 3.0), 0),        # its front stays out of the line's sight of the rack
-      ((4.98, -40.95, WT + 1.5), (0.04, 3.6, 2.2), 1),
-      ((4.98, -43.75, WT + 1.5), (0.04, 0.9, 2.5), 2)]
-boxes_object("Microwave", mw, [M["black"], M["dark_glass"], M["brushed"]], "DRESS", bevel=0.08)
+# its front stays out of the line's sight of the rack; the door and panel are dressing on the body
+mw = box("Microwave", (7.1, -41.6, WT + 1.5), (4.2, 5.5, 3.0), M["black"], "PLAY", 0.08, role="prop")
+mw["solid"] = 1.0
+mf = [((4.98, -40.95, WT + 1.5), (0.04, 3.6, 2.2), 0), ((4.98, -43.75, WT + 1.5), (0.04, 0.9, 2.5), 1)]
+boxes_object("MicrowaveFront", mf, [M["dark_glass"], M["brushed"]], "DRESS", bevel=0.08)
 
 # ---------------------------------------------------------------- the hall doorway (sink side)
 
@@ -744,7 +774,7 @@ fb = [((0, -70.15, 9.7), (FR_W, 0.5, 17.8), 0),
       ((0, FR_Y - 0.3, 4.0), (FR_W, 0.6, 6.1), 0),                       # freezer door, shut
       ((-2.55, FR_Y + 0.12, 6.3), (0.5, 0.25, 0.9), 0),                  # its handle lip
       ((0, FR_Y - 0.65, 0.45), (5.6, 0.2, 0.7), 1)]                      # kick grille
-fridge = boxes_object("Fridge", fb, [M["fridge"], M["grille"]], "PLAY", bevel=0.12)
+fridge = boxes_object("Fridge", fb, [M["fridge"], M["grille"]], "PLAY", bevel=0.12, role="prop")
 fridge["solid"] = 1.0
 inner = []
 for z in (10.3, 12.9, 15.5):
@@ -753,7 +783,7 @@ boxes_object("FridgeShelves", inner, [M["shelf"]], "DRESS")
 trims = [((0, -64.95, z), (5.0, 0.12, 0.25), 0) for z in (10.3, 12.9, 15.5)]
 trims += [((-1.25, -67.0, 8.7), (2.3, 4.6, 2.2), 1), ((1.25, -67.0, 8.7), (2.3, 4.6, 2.2), 1)]
 boxes_object("FridgeTrims", trims, [M["liner"], M["crisper"]], "DRESS", bevel=0.05)
-glow = box("FridgeGlow", (0, -69.85, 12.9), (4.8, 0.06, 10.4), M["fridge_glow"], "PLAY")
+glow = box("FridgeGlow", (0, -69.85, 12.9), (4.8, 0.06, 10.4), M["fridge_glow"], "DRESS")
 glow["solid"] = 1.0
 # what was put away: the milk, a foil-covered plate (dinner), a jar, a carton
 cyl("Milk", (1.5, -66.0, 11.35), 0.48, 2.0, M["milk"], "DRESS")
@@ -775,6 +805,18 @@ for z in (9.4, 11.9, 14.4):                                             # door b
     dl.append(((FR_W / 2, -1.2, z), (FR_W - 0.9, 0.9, 0.12), 2))
     dl.append(((FR_W / 2, -1.62, z + 0.35), (FR_W - 0.9, 0.06, 0.7), 2))
 leaf = child(boxes_object("FridgeDoorLeaf", dl, [M["fridge"], M["gasket"], M["liner"]], "PLAY", bevel=0.1), door)
+# ajar, the leaf is no axis-aligned box, so its colliders are a staircase of boxes along it: each
+# step bounds one eighth of the leaf's width (its 0.6 m thickness, its full height); the mesh is
+# exported as drawn
+DOOR_STEPS = 8
+ca, sa = math.cos(math.radians(DOOR_OPEN)), math.sin(math.radians(DOOR_OPEN))
+steps = []
+for k in range(DOOR_STEPS):
+    corners = [(-FR_W / 2 + u * ca - v * sa, FR_Y + u * sa + v * ca)
+               for u in (k * FR_W / DOOR_STEPS, (k + 1) * FR_W / DOOR_STEPS) for v in (-0.6, 0.0)]
+    xs, ys = [p[0] for p in corners], [p[1] for p in corners]
+    steps.append((((min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2, 12.9), (max(xs) - min(xs), max(ys) - min(ys), 11.4)))
+explicit_colliders(leaf, steps, "prop")
 leaf["solid"] = 1.0
 child(cyl("DoorBottle", (4.2, -1.2, 10.4), 0.4, 1.9, M["juice"], "DRESS"), door)
 child(cyl("DoorBottle2", (2.0, -1.2, 12.9), 0.35, 1.8, M["soap"], "DRESS"), door)
@@ -806,7 +848,8 @@ for k, item in enumerate(("milk", "eggs", "candles", "cream")):
 
 # ---------------------------------------------------------------- memory: the rack and the burnt pan
 
-RX, RY, RW, RL = 5.0, -60.6, 3.0, 5.2     # rack centre, depth (x), length (y): beside the fridge, in its light
+RX, RY, RW, RL = 5.8, -60.6, 3.0, 5.2     # rack centre, depth (x), length (y): beside the fridge, in its
+                                          # light; its towel ends just behind XP, never over the void
 box("TowelUnderRack", (RX, RY + 0.4, WT + 0.03), (RW + 1.0, RL + 1.6, 0.06), M["towel_flat"], "MEMORY", 0.02)
 box("RackTray", (RX, RY, WT + 0.21), (RW + 0.4, RL + 0.4, 0.3), M["tray"], "MEMORY", 0.1)
 wires = []
@@ -913,6 +956,37 @@ fl.rotation_euler = (math.radians(90), 0, 0)
 # the hood bulb: amber, dies at loop 3
 hl = point_lamp("HoodLight", (5.75, -16.0, 15.2), 4500.0, AMBER, radius=0.35, keep=True)
 hl["light_r"] = 0.4
+
+# ---------------------------------------------------------------- the course (exporter: spawn, line, markers, door)
+
+
+def course_point(name, loc):
+    e = bpy.data.objects.new(name, None)
+    e.location = loc
+    coll("COURSE").objects.link(e)
+    return e
+
+
+# The racing line, on the surface ridden: markers stand on the worktops' fixed back slabs
+# (|x| >= XS), so a respawn never lands on a strip that erodes.
+LINE = [(5.0, 4.0, WT),            # spawn, MARKER_0
+        (4.25, -2.0, WT), (4.25, -24.0, WT),         # past the hob, under the hood, to the overlap
+        (-4.5, -24.0, WT), (-4.5, -27.5, WT),        # first crossing, straight across; MARKER_1
+        (-4.5, -33.5, WT), (4.5, -33.5, WT),         # second crossing, before the sink; MARKER_2
+        (6.8, -36.5, WT + 1.8), (5.4, -41.0, WT + 3.0),   # bread bin, microwave
+        (5.3, -45.0, 15.5), (5.3, -57.5, 15.5),      # the cupboard faces over the wall-ride gap
+        (4.25, -60.0, WT), (4.25, -63.0, WT)]        # land by the rack: the DOOR, then the fridge
+cu = bpy.data.curves.new("LINE", "CURVE")
+cu.dimensions = "3D"
+sp = cu.splines.new("POLY")
+sp.points.add(len(LINE) - 1)
+for p, c in zip(sp.points, LINE):
+    p.co = (*c, 1)
+coll("COURSE").objects.link(bpy.data.objects.new("LINE", cu))
+course_point("SPAWN", (5.0, 4.0, WT + 1.0))   # the player stands 1 m up, as respawns do
+for k, i in enumerate((0, 4, 6)):
+    course_point(f"MARKER_{k}", LINE[i])
+course_point("DOOR", LINE[11])
 
 # ---------------------------------------------------------------- cameras
 

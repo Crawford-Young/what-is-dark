@@ -1,0 +1,1300 @@
+{
+ "version": 1,
+ "place": "02-kitchen",
+ "frame": "godot",
+ "boxes": [
+  {
+   "name": "WallNear_0",
+   "object": "WallNear",
+   "role": "ride_wall",
+   "center": [
+    0.0,
+    3.0,
+    8.2
+   ],
+   "size": [
+    20.0,
+    24.0,
+    0.4
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallEnd_0",
+   "object": "WallEnd",
+   "role": "ride_wall",
+   "center": [
+    0.0,
+    3.0,
+    -70.7
+   ],
+   "size": [
+    20.0,
+    24.0,
+    0.4
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_0",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -9.8,
+    3.0,
+    -31.25
+   ],
+   "size": [
+    0.4,
+    24.0,
+    78.5
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallL_0",
+   "object": "WallL",
+   "role": "ride_wall",
+   "center": [
+    9.8,
+    3.0,
+    -4.25
+   ],
+   "size": [
+    0.4,
+    24.0,
+    24.5
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallL_1",
+   "object": "WallL",
+   "role": "ride_wall",
+   "center": [
+    9.8,
+    13.25,
+    -19.65
+   ],
+   "size": [
+    0.4,
+    3.5,
+    6.3
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallL_2",
+   "object": "WallL",
+   "role": "ride_wall",
+   "center": [
+    9.8,
+    3.0,
+    -26.4
+   ],
+   "size": [
+    0.4,
+    24.0,
+    7.2
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallL_3",
+   "object": "WallL",
+   "role": "ride_wall",
+   "center": [
+    9.8,
+    -3.5,
+    -36.5
+   ],
+   "size": [
+    0.4,
+    11.0,
+    13.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallL_4",
+   "object": "WallL",
+   "role": "ride_wall",
+   "center": [
+    9.8,
+    13.25,
+    -36.5
+   ],
+   "size": [
+    0.4,
+    3.5,
+    13.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallL_5",
+   "object": "WallL",
+   "role": "ride_wall",
+   "center": [
+    9.8,
+    3.0,
+    -56.75
+   ],
+   "size": [
+    0.4,
+    24.0,
+    27.5
+   ],
+   "solid": false
+  },
+  {
+   "name": "WorktopL0_0",
+   "object": "WorktopL0",
+   "role": "floor",
+   "center": [
+    6.8,
+    -0.2,
+    -4.0
+   ],
+   "size": [
+    5.6,
+    0.4,
+    24.0
+   ],
+   "solid": true
+  },
+  {
+   "name": "WorktopL0_1",
+   "object": "WorktopL0",
+   "role": "floor",
+   "center": [
+    2.75,
+    -0.2,
+    -4.0
+   ],
+   "size": [
+    2.5,
+    0.4,
+    24.0
+   ],
+   "solid": true,
+   "erode": {
+    "axis": 0,
+    "min": 0.25,
+    "anchor": 1
+   }
+  },
+  {
+   "name": "WorktopL1_0",
+   "object": "WorktopL1",
+   "role": "marker_floor",
+   "center": [
+    6.8,
+    -0.2,
+    -28.4
+   ],
+   "size": [
+    5.6,
+    0.4,
+    10.2
+   ],
+   "solid": true
+  },
+  {
+   "name": "WorktopL1_1",
+   "object": "WorktopL1",
+   "role": "marker_floor",
+   "center": [
+    6.8,
+    -0.2,
+    -43.25
+   ],
+   "size": [
+    5.6,
+    0.4,
+    7.5
+   ],
+   "solid": true
+  },
+  {
+   "name": "WorktopL1_2",
+   "object": "WorktopL1",
+   "role": "marker_floor",
+   "center": [
+    9.2,
+    -0.2,
+    -36.5
+   ],
+   "size": [
+    0.8,
+    0.4,
+    6.0
+   ],
+   "solid": true
+  },
+  {
+   "name": "WorktopL1_3",
+   "object": "WorktopL1",
+   "role": "marker_floor",
+   "center": [
+    4.3,
+    -0.2,
+    -36.5
+   ],
+   "size": [
+    0.6,
+    0.4,
+    6.0
+   ],
+   "solid": true
+  },
+  {
+   "name": "WorktopL1_4",
+   "object": "WorktopL1",
+   "role": "floor",
+   "center": [
+    2.75,
+    -0.2,
+    -35.15
+   ],
+   "size": [
+    2.5,
+    0.4,
+    23.7
+   ],
+   "solid": true,
+   "erode": {
+    "axis": 0,
+    "min": 0.25,
+    "anchor": 1
+   }
+  },
+  {
+   "name": "WorktopL2_0",
+   "object": "WorktopL2",
+   "role": "floor",
+   "center": [
+    6.8,
+    -0.2,
+    -63.0
+   ],
+   "size": [
+    5.6,
+    0.4,
+    15.0
+   ],
+   "solid": true
+  },
+  {
+   "name": "WorktopL2_1",
+   "object": "WorktopL2",
+   "role": "floor",
+   "center": [
+    2.75,
+    -0.2,
+    -59.75
+   ],
+   "size": [
+    2.5,
+    0.4,
+    8.5
+   ],
+   "solid": true,
+   "erode": {
+    "axis": 0,
+    "min": 0.25,
+    "anchor": 1
+   }
+  },
+  {
+   "name": "WorktopL2_2",
+   "object": "WorktopL2",
+   "role": "floor",
+   "center": [
+    3.5,
+    -0.2,
+    -67.25
+   ],
+   "size": [
+    1.0,
+    0.4,
+    6.5
+   ],
+   "solid": true
+  },
+  {
+   "name": "WorktopR0_0",
+   "object": "WorktopR0",
+   "role": "marker_floor",
+   "center": [
+    -6.8,
+    -0.2,
+    -8.25
+   ],
+   "size": [
+    5.6,
+    0.4,
+    32.5
+   ],
+   "solid": true
+  },
+  {
+   "name": "WorktopR0_1",
+   "object": "WorktopR0",
+   "role": "floor",
+   "center": [
+    -2.75,
+    -0.2,
+    -8.25
+   ],
+   "size": [
+    2.5,
+    0.4,
+    32.5
+   ],
+   "solid": true,
+   "erode": {
+    "axis": 0,
+    "min": 0.25,
+    "anchor": -1
+   }
+  },
+  {
+   "name": "WorktopR1_0",
+   "object": "WorktopR1",
+   "role": "marker_floor",
+   "center": [
+    -6.8,
+    -0.2,
+    -39.0
+   ],
+   "size": [
+    5.6,
+    0.4,
+    12.0
+   ],
+   "solid": true
+  },
+  {
+   "name": "WorktopR1_1",
+   "object": "WorktopR1",
+   "role": "floor",
+   "center": [
+    -2.75,
+    -0.2,
+    -39.0
+   ],
+   "size": [
+    2.5,
+    0.4,
+    12.0
+   ],
+   "solid": true,
+   "erode": {
+    "axis": 0,
+    "min": 0.25,
+    "anchor": -1
+   }
+  },
+  {
+   "name": "WorktopR2_0",
+   "object": "WorktopR2",
+   "role": "floor",
+   "center": [
+    -6.8,
+    -0.2,
+    -64.0
+   ],
+   "size": [
+    5.6,
+    0.4,
+    13.0
+   ],
+   "solid": true
+  },
+  {
+   "name": "WorktopR2_1",
+   "object": "WorktopR2",
+   "role": "floor",
+   "center": [
+    -2.75,
+    -0.2,
+    -60.75
+   ],
+   "size": [
+    2.5,
+    0.4,
+    6.5
+   ],
+   "solid": true,
+   "erode": {
+    "axis": 0,
+    "min": 0.25,
+    "anchor": -1
+   }
+  },
+  {
+   "name": "WorktopR2_2",
+   "object": "WorktopR2",
+   "role": "floor",
+   "center": [
+    -3.5,
+    -0.2,
+    -67.25
+   ],
+   "size": [
+    1.0,
+    0.4,
+    6.5
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperL0_0",
+   "object": "UpperL0",
+   "role": "ride_wall",
+   "center": [
+    7.85,
+    8.0,
+    -3.0
+   ],
+   "size": [
+    3.5,
+    7.0,
+    22.0
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperL0_1",
+   "object": "UpperL0",
+   "role": "ride_wall",
+   "center": [
+    5.98,
+    8.0,
+    5.25
+   ],
+   "size": [
+    0.24,
+    6.92,
+    5.42
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperL0_2",
+   "object": "UpperL0",
+   "role": "ride_wall",
+   "center": [
+    5.98,
+    8.0,
+    -0.25
+   ],
+   "size": [
+    0.24,
+    6.92,
+    5.42
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperL0_3",
+   "object": "UpperL0",
+   "role": "ride_wall",
+   "center": [
+    5.98,
+    8.0,
+    -5.75
+   ],
+   "size": [
+    0.24,
+    6.92,
+    5.42
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperL0_4",
+   "object": "UpperL0",
+   "role": "ride_wall",
+   "center": [
+    5.98,
+    8.0,
+    -11.25
+   ],
+   "size": [
+    0.24,
+    6.92,
+    5.42
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperL1_0",
+   "object": "UpperL1",
+   "role": "ride_wall",
+   "center": [
+    7.85,
+    8.0,
+    -51.25
+   ],
+   "size": [
+    3.5,
+    7.0,
+    12.5
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperL1_1",
+   "object": "UpperL1",
+   "role": "ride_wall",
+   "center": [
+    5.98,
+    8.0,
+    -48.125
+   ],
+   "size": [
+    0.24,
+    6.92,
+    6.17
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperL1_2",
+   "object": "UpperL1",
+   "role": "ride_wall",
+   "center": [
+    5.98,
+    8.0,
+    -54.375
+   ],
+   "size": [
+    0.24,
+    6.92,
+    6.17
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperL2_0",
+   "object": "UpperL2",
+   "role": "ride_wall",
+   "center": [
+    7.85,
+    8.0,
+    -64.25
+   ],
+   "size": [
+    3.5,
+    7.0,
+    12.5
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperL2_1",
+   "object": "UpperL2",
+   "role": "ride_wall",
+   "center": [
+    5.98,
+    8.0,
+    -61.125
+   ],
+   "size": [
+    0.24,
+    6.92,
+    6.17
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperL2_2",
+   "object": "UpperL2",
+   "role": "ride_wall",
+   "center": [
+    5.98,
+    8.0,
+    -67.375
+   ],
+   "size": [
+    0.24,
+    6.92,
+    6.17
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperR0_0",
+   "object": "UpperR0",
+   "role": "ride_wall",
+   "center": [
+    -7.85,
+    8.0,
+    -1.25
+   ],
+   "size": [
+    3.5,
+    7.0,
+    18.5
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperR0_1",
+   "object": "UpperR0",
+   "role": "ride_wall",
+   "center": [
+    -5.98,
+    8.0,
+    5.6875
+   ],
+   "size": [
+    0.24,
+    6.92,
+    4.545
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperR0_2",
+   "object": "UpperR0",
+   "role": "ride_wall",
+   "center": [
+    -5.98,
+    8.0,
+    1.0625
+   ],
+   "size": [
+    0.24,
+    6.92,
+    4.545
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperR0_3",
+   "object": "UpperR0",
+   "role": "ride_wall",
+   "center": [
+    -5.98,
+    8.0,
+    -3.5625
+   ],
+   "size": [
+    0.24,
+    6.92,
+    4.545
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperR0_4",
+   "object": "UpperR0",
+   "role": "ride_wall",
+   "center": [
+    -5.98,
+    8.0,
+    -8.1875
+   ],
+   "size": [
+    0.24,
+    6.92,
+    4.545
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperR1_0",
+   "object": "UpperR1",
+   "role": "ride_wall",
+   "center": [
+    -7.85,
+    8.0,
+    -28.25
+   ],
+   "size": [
+    3.5,
+    7.0,
+    13.5
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperR1_1",
+   "object": "UpperR1",
+   "role": "ride_wall",
+   "center": [
+    -5.98,
+    8.0,
+    -23.75
+   ],
+   "size": [
+    0.24,
+    6.92,
+    4.42
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperR1_2",
+   "object": "UpperR1",
+   "role": "ride_wall",
+   "center": [
+    -5.98,
+    8.0,
+    -28.25
+   ],
+   "size": [
+    0.24,
+    6.92,
+    4.42
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperR1_3",
+   "object": "UpperR1",
+   "role": "ride_wall",
+   "center": [
+    -5.98,
+    8.0,
+    -32.75
+   ],
+   "size": [
+    0.24,
+    6.92,
+    4.42
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperR2_0",
+   "object": "UpperR2",
+   "role": "ride_wall",
+   "center": [
+    -7.85,
+    8.0,
+    -47.25
+   ],
+   "size": [
+    3.5,
+    7.0,
+    23.5
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperR2_1",
+   "object": "UpperR2",
+   "role": "ride_wall",
+   "center": [
+    -5.98,
+    8.0,
+    -37.85
+   ],
+   "size": [
+    0.24,
+    6.92,
+    4.62
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperR2_2",
+   "object": "UpperR2",
+   "role": "ride_wall",
+   "center": [
+    -5.98,
+    8.0,
+    -42.55
+   ],
+   "size": [
+    0.24,
+    6.92,
+    4.62
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperR2_3",
+   "object": "UpperR2",
+   "role": "ride_wall",
+   "center": [
+    -5.98,
+    8.0,
+    -47.25
+   ],
+   "size": [
+    0.24,
+    6.92,
+    4.62
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperR2_4",
+   "object": "UpperR2",
+   "role": "ride_wall",
+   "center": [
+    -5.98,
+    8.0,
+    -51.95
+   ],
+   "size": [
+    0.24,
+    6.92,
+    4.62
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperR2_5",
+   "object": "UpperR2",
+   "role": "ride_wall",
+   "center": [
+    -5.98,
+    8.0,
+    -56.65
+   ],
+   "size": [
+    0.24,
+    6.92,
+    4.62
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperR3_0",
+   "object": "UpperR3",
+   "role": "ride_wall",
+   "center": [
+    -7.85,
+    8.0,
+    -65.0
+   ],
+   "size": [
+    3.5,
+    7.0,
+    11.0
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperR3_1",
+   "object": "UpperR3",
+   "role": "ride_wall",
+   "center": [
+    -5.98,
+    8.0,
+    -62.25
+   ],
+   "size": [
+    0.24,
+    6.92,
+    5.42
+   ],
+   "solid": true
+  },
+  {
+   "name": "UpperR3_2",
+   "object": "UpperR3",
+   "role": "ride_wall",
+   "center": [
+    -5.98,
+    8.0,
+    -67.75
+   ],
+   "size": [
+    0.24,
+    6.92,
+    5.42
+   ],
+   "solid": true
+  },
+  {
+   "name": "BreadBin_0",
+   "object": "BreadBin",
+   "role": "prop",
+   "center": [
+    -7.9,
+    0.9,
+    -36.3
+   ],
+   "size": [
+    3.0,
+    1.8,
+    4.0
+   ],
+   "solid": true
+  },
+  {
+   "name": "Microwave_0",
+   "object": "Microwave",
+   "role": "prop",
+   "center": [
+    -7.1,
+    1.5,
+    -41.6
+   ],
+   "size": [
+    4.2,
+    3.0,
+    5.5
+   ],
+   "solid": true
+  },
+  {
+   "name": "Fridge_0",
+   "object": "Fridge",
+   "role": "prop",
+   "center": [
+    0.0,
+    0.7,
+    -70.15
+   ],
+   "size": [
+    6.0,
+    17.8,
+    0.5
+   ],
+   "solid": true
+  },
+  {
+   "name": "Fridge_1",
+   "object": "Fridge",
+   "role": "prop",
+   "center": [
+    2.75,
+    0.7,
+    -67.25
+   ],
+   "size": [
+    0.5,
+    17.8,
+    5.3
+   ],
+   "solid": true
+  },
+  {
+   "name": "Fridge_2",
+   "object": "Fridge",
+   "role": "prop",
+   "center": [
+    -2.75,
+    0.7,
+    -67.25
+   ],
+   "size": [
+    0.5,
+    17.8,
+    5.3
+   ],
+   "solid": true
+  },
+  {
+   "name": "Fridge_3",
+   "object": "Fridge",
+   "role": "prop",
+   "center": [
+    0.0,
+    9.3,
+    -67.25
+   ],
+   "size": [
+    5.0,
+    0.6,
+    5.3
+   ],
+   "solid": true
+  },
+  {
+   "name": "Fridge_4",
+   "object": "Fridge",
+   "role": "prop",
+   "center": [
+    0.0,
+    -2.0,
+    -67.25
+   ],
+   "size": [
+    5.0,
+    0.8,
+    5.3
+   ],
+   "solid": true
+  },
+  {
+   "name": "Fridge_5",
+   "object": "Fridge",
+   "role": "prop",
+   "center": [
+    0.0,
+    -7.9,
+    -67.25
+   ],
+   "size": [
+    5.0,
+    0.6,
+    5.3
+   ],
+   "solid": true
+  },
+  {
+   "name": "Fridge_6",
+   "object": "Fridge",
+   "role": "prop",
+   "center": [
+    0.0,
+    -5.0,
+    -64.3
+   ],
+   "size": [
+    6.0,
+    6.1,
+    0.6
+   ],
+   "solid": true
+  },
+  {
+   "name": "Fridge_7",
+   "object": "Fridge",
+   "role": "prop",
+   "center": [
+    2.55,
+    -2.7,
+    -63.88
+   ],
+   "size": [
+    0.5,
+    0.9,
+    0.25
+   ],
+   "solid": true
+  },
+  {
+   "name": "Fridge_8",
+   "object": "Fridge",
+   "role": "prop",
+   "center": [
+    0.0,
+    -8.55,
+    -64.65
+   ],
+   "size": [
+    5.6,
+    0.7,
+    0.2
+   ],
+   "solid": true
+  },
+  {
+   "name": "FridgeDoorLeaf_0",
+   "object": "FridgeDoorLeaf",
+   "role": "prop",
+   "center": [
+    2.522703,
+    3.9,
+    -63.946967
+   ],
+   "size": [
+    0.954594,
+    11.4,
+    0.954594
+   ],
+   "solid": true
+  },
+  {
+   "name": "FridgeDoorLeaf_1",
+   "object": "FridgeDoorLeaf",
+   "role": "prop",
+   "center": [
+    1.992373,
+    3.9,
+    -63.416637
+   ],
+   "size": [
+    0.954594,
+    11.4,
+    0.954594
+   ],
+   "solid": true
+  },
+  {
+   "name": "FridgeDoorLeaf_2",
+   "object": "FridgeDoorLeaf",
+   "role": "prop",
+   "center": [
+    1.462043,
+    3.9,
+    -62.886307
+   ],
+   "size": [
+    0.954594,
+    11.4,
+    0.954594
+   ],
+   "solid": true
+  },
+  {
+   "name": "FridgeDoorLeaf_3",
+   "object": "FridgeDoorLeaf",
+   "role": "prop",
+   "center": [
+    0.931713,
+    3.9,
+    -62.355977
+   ],
+   "size": [
+    0.954594,
+    11.4,
+    0.954594
+   ],
+   "solid": true
+  },
+  {
+   "name": "FridgeDoorLeaf_4",
+   "object": "FridgeDoorLeaf",
+   "role": "prop",
+   "center": [
+    0.401383,
+    3.9,
+    -61.825647
+   ],
+   "size": [
+    0.954594,
+    11.4,
+    0.954594
+   ],
+   "solid": true
+  },
+  {
+   "name": "FridgeDoorLeaf_5",
+   "object": "FridgeDoorLeaf",
+   "role": "prop",
+   "center": [
+    -0.128948,
+    3.9,
+    -61.295317
+   ],
+   "size": [
+    0.954594,
+    11.4,
+    0.954594
+   ],
+   "solid": true
+  },
+  {
+   "name": "FridgeDoorLeaf_6",
+   "object": "FridgeDoorLeaf",
+   "role": "prop",
+   "center": [
+    -0.659278,
+    3.9,
+    -60.764986
+   ],
+   "size": [
+    0.954594,
+    11.4,
+    0.954594
+   ],
+   "solid": true
+  },
+  {
+   "name": "FridgeDoorLeaf_7",
+   "object": "FridgeDoorLeaf",
+   "role": "prop",
+   "center": [
+    -1.189608,
+    3.9,
+    -60.234656
+   ],
+   "size": [
+    0.954594,
+    11.4,
+    0.954594
+   ],
+   "solid": true
+  }
+ ],
+ "path": [
+  [
+   -5.0,
+   0.0,
+   4.0
+  ],
+  [
+   -4.25,
+   0.0,
+   -2.0
+  ],
+  [
+   -4.25,
+   0.0,
+   -24.0
+  ],
+  [
+   4.5,
+   0.0,
+   -24.0
+  ],
+  [
+   4.5,
+   0.0,
+   -27.5
+  ],
+  [
+   4.5,
+   0.0,
+   -33.5
+  ],
+  [
+   -4.5,
+   0.0,
+   -33.5
+  ],
+  [
+   -6.8,
+   1.8,
+   -36.5
+  ],
+  [
+   -5.4,
+   3.0,
+   -41.0
+  ],
+  [
+   -5.3,
+   6.5,
+   -45.0
+  ],
+  [
+   -5.3,
+   6.5,
+   -57.5
+  ],
+  [
+   -4.25,
+   0.0,
+   -60.0
+  ],
+  [
+   -4.25,
+   0.0,
+   -63.0
+  ]
+ ],
+ "spawn": [
+  -5.0,
+  1.0,
+  4.0
+ ],
+ "markers": [
+  0.0,
+  40.296693,
+  55.296693
+ ],
+ "door_progress": 89.205622,
+ "fall_y": -6.0
+}
