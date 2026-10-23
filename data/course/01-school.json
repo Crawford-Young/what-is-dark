@@ -1,0 +1,3295 @@
+{
+ "version": 1,
+ "place": "01-school",
+ "frame": "godot",
+ "boxes": [
+  {
+   "name": "Floor_0",
+   "object": "Floor",
+   "role": "floor",
+   "center": [
+    0.0,
+    -0.15,
+    -87.0
+   ],
+   "size": [
+    37.0,
+    0.3,
+    206.0
+   ],
+   "solid": true
+  },
+  {
+   "name": "WallL_dado0_0",
+   "object": "WallL_dado0",
+   "role": "ride_wall",
+   "center": [
+    3.6,
+    0.6,
+    -12.0
+   ],
+   "size": [
+    0.2,
+    1.2,
+    40.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallL_up0_0",
+   "object": "WallL_up0",
+   "role": "ride_wall",
+   "center": [
+    3.6,
+    2.7,
+    -12.0
+   ],
+   "size": [
+    0.2,
+    3.0,
+    40.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallL_dado1_0",
+   "object": "WallL_dado1",
+   "role": "ride_wall",
+   "center": [
+    3.6,
+    0.6,
+    -48.8
+   ],
+   "size": [
+    0.2,
+    1.2,
+    26.4
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallL_up1_0",
+   "object": "WallL_up1",
+   "role": "ride_wall",
+   "center": [
+    3.6,
+    2.7,
+    -48.8
+   ],
+   "size": [
+    0.2,
+    3.0,
+    26.4
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallL_dado2_0",
+   "object": "WallL_dado2",
+   "role": "ride_wall",
+   "center": [
+    3.6,
+    0.6,
+    -125.0
+   ],
+   "size": [
+    0.2,
+    1.2,
+    114.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallL_up2_0",
+   "object": "WallL_up2",
+   "role": "ride_wall",
+   "center": [
+    3.6,
+    2.7,
+    -125.0
+   ],
+   "size": [
+    0.2,
+    3.0,
+    114.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_0",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    7.7
+   ],
+   "size": [
+    0.2,
+    1.1,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_1",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    1.2
+   ],
+   "size": [
+    0.2,
+    1.1,
+    10.4
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_2",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    2.35,
+    6.9
+   ],
+   "size": [
+    0.2,
+    0.3,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_3",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    3.35,
+    2.0
+   ],
+   "size": [
+    0.2,
+    1.7,
+    12.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_4",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    7.7
+   ],
+   "size": [
+    0.2,
+    1.4,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_5",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    5.9
+   ],
+   "size": [
+    0.2,
+    1.4,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_6",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    5.35
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_7",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    3.95
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_8",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    2.55
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_9",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    1.15
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_10",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -0.25
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_11",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -1.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_12",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -3.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_13",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -4.3
+   ],
+   "size": [
+    0.2,
+    1.1,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_14",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -10.8
+   ],
+   "size": [
+    0.2,
+    1.1,
+    10.4
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_15",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    2.35,
+    -5.1
+   ],
+   "size": [
+    0.2,
+    0.3,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_16",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    3.35,
+    -10.0
+   ],
+   "size": [
+    0.2,
+    1.7,
+    12.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_17",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -4.3
+   ],
+   "size": [
+    0.2,
+    1.4,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_18",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -6.1
+   ],
+   "size": [
+    0.2,
+    1.4,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_19",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -6.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_20",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -8.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_21",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -9.45
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_22",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -10.85
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_23",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -12.25
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_24",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -13.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_25",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -15.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_26",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -16.3
+   ],
+   "size": [
+    0.2,
+    1.1,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_27",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -22.8
+   ],
+   "size": [
+    0.2,
+    1.1,
+    10.4
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_28",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    2.35,
+    -17.1
+   ],
+   "size": [
+    0.2,
+    0.3,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_29",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    3.35,
+    -22.0
+   ],
+   "size": [
+    0.2,
+    1.7,
+    12.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_30",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -16.3
+   ],
+   "size": [
+    0.2,
+    1.4,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_31",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -18.1
+   ],
+   "size": [
+    0.2,
+    1.4,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_32",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -18.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_33",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -20.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_34",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -21.45
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_35",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -22.85
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_36",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -24.25
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_37",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -25.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_38",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -27.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_39",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -28.3
+   ],
+   "size": [
+    0.2,
+    1.1,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_40",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -34.8
+   ],
+   "size": [
+    0.2,
+    1.1,
+    10.4
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_41",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    2.35,
+    -29.1
+   ],
+   "size": [
+    0.2,
+    0.3,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_42",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    3.35,
+    -34.0
+   ],
+   "size": [
+    0.2,
+    1.7,
+    12.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_43",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -28.3
+   ],
+   "size": [
+    0.2,
+    1.4,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_44",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -30.1
+   ],
+   "size": [
+    0.2,
+    1.4,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_45",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -30.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_46",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -32.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_47",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -33.45
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_48",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -34.85
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_49",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -36.25
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_50",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -37.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_51",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -39.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_52",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -40.3
+   ],
+   "size": [
+    0.2,
+    1.1,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_53",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -46.8
+   ],
+   "size": [
+    0.2,
+    1.1,
+    10.4
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_54",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    2.35,
+    -41.1
+   ],
+   "size": [
+    0.2,
+    0.3,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_55",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    3.35,
+    -46.0
+   ],
+   "size": [
+    0.2,
+    1.7,
+    12.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_56",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -40.3
+   ],
+   "size": [
+    0.2,
+    1.4,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_57",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -42.1
+   ],
+   "size": [
+    0.2,
+    1.4,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_58",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -42.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_59",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -44.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_60",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -45.45
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_61",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -46.85
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_62",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -48.25
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_63",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -49.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_64",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -51.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_65",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -52.3
+   ],
+   "size": [
+    0.2,
+    1.1,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_66",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -58.8
+   ],
+   "size": [
+    0.2,
+    1.1,
+    10.4
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_67",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    2.35,
+    -53.1
+   ],
+   "size": [
+    0.2,
+    0.3,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_68",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    3.35,
+    -58.0
+   ],
+   "size": [
+    0.2,
+    1.7,
+    12.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_69",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -52.3
+   ],
+   "size": [
+    0.2,
+    1.4,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_70",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -54.1
+   ],
+   "size": [
+    0.2,
+    1.4,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_71",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -54.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_72",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -56.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_73",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -57.45
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_74",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -58.85
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_75",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -60.25
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_76",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -61.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_77",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -63.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_78",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -64.3
+   ],
+   "size": [
+    0.2,
+    1.1,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_79",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -70.8
+   ],
+   "size": [
+    0.2,
+    1.1,
+    10.4
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_80",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    2.35,
+    -65.1
+   ],
+   "size": [
+    0.2,
+    0.3,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_81",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    3.35,
+    -70.0
+   ],
+   "size": [
+    0.2,
+    1.7,
+    12.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_82",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -64.3
+   ],
+   "size": [
+    0.2,
+    1.4,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_83",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -66.1
+   ],
+   "size": [
+    0.2,
+    1.4,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_84",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -66.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_85",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -68.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_86",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -69.45
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_87",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -70.85
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_88",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -72.25
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_89",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -73.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_90",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -75.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_91",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -76.3
+   ],
+   "size": [
+    0.2,
+    1.1,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_92",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -82.8
+   ],
+   "size": [
+    0.2,
+    1.1,
+    10.4
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_93",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    2.35,
+    -77.1
+   ],
+   "size": [
+    0.2,
+    0.3,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_94",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    3.35,
+    -82.0
+   ],
+   "size": [
+    0.2,
+    1.7,
+    12.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_95",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -76.3
+   ],
+   "size": [
+    0.2,
+    1.4,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_96",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -78.1
+   ],
+   "size": [
+    0.2,
+    1.4,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_97",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -78.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_98",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -80.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_99",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -81.45
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_100",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -82.85
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_101",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -84.25
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_102",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -85.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_103",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -87.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_104",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -88.3
+   ],
+   "size": [
+    0.2,
+    1.1,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_105",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -94.8
+   ],
+   "size": [
+    0.2,
+    1.1,
+    10.4
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_106",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    2.35,
+    -89.1
+   ],
+   "size": [
+    0.2,
+    0.3,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_107",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    3.35,
+    -94.0
+   ],
+   "size": [
+    0.2,
+    1.7,
+    12.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_108",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -88.3
+   ],
+   "size": [
+    0.2,
+    1.4,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_109",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -90.1
+   ],
+   "size": [
+    0.2,
+    1.4,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_110",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -90.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_111",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -92.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_112",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -93.45
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_113",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -94.85
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_114",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -96.25
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_115",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -97.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_116",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -99.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_117",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -100.3
+   ],
+   "size": [
+    0.2,
+    1.1,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_118",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -106.8
+   ],
+   "size": [
+    0.2,
+    1.1,
+    10.4
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_119",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    2.35,
+    -101.1
+   ],
+   "size": [
+    0.2,
+    0.3,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_120",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    3.35,
+    -106.0
+   ],
+   "size": [
+    0.2,
+    1.7,
+    12.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_121",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -100.3
+   ],
+   "size": [
+    0.2,
+    1.4,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_122",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -102.1
+   ],
+   "size": [
+    0.2,
+    1.4,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_123",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -102.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_124",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -104.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_125",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -105.45
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_126",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -106.85
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_127",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -108.25
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_128",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -109.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_129",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -111.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_130",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -112.3
+   ],
+   "size": [
+    0.2,
+    1.1,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_131",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -118.8
+   ],
+   "size": [
+    0.2,
+    1.1,
+    10.4
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_132",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    2.35,
+    -113.1
+   ],
+   "size": [
+    0.2,
+    0.3,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_133",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    3.35,
+    -118.0
+   ],
+   "size": [
+    0.2,
+    1.7,
+    12.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_134",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -112.3
+   ],
+   "size": [
+    0.2,
+    1.4,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_135",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -114.1
+   ],
+   "size": [
+    0.2,
+    1.4,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_136",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -114.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_137",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -116.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_138",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -117.45
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_139",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -118.85
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_140",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -120.25
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_141",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -121.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_142",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -123.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_143",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -124.3
+   ],
+   "size": [
+    0.2,
+    1.1,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_144",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -130.8
+   ],
+   "size": [
+    0.2,
+    1.1,
+    10.4
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_145",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    2.35,
+    -125.1
+   ],
+   "size": [
+    0.2,
+    0.3,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_146",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    3.35,
+    -130.0
+   ],
+   "size": [
+    0.2,
+    1.7,
+    12.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_147",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -124.3
+   ],
+   "size": [
+    0.2,
+    1.4,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_148",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -126.1
+   ],
+   "size": [
+    0.2,
+    1.4,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_149",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -126.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_150",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -128.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_151",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -129.45
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_152",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -130.85
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_153",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -132.25
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_154",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -133.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_155",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -135.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_156",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -136.3
+   ],
+   "size": [
+    0.2,
+    1.1,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_157",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -142.8
+   ],
+   "size": [
+    0.2,
+    1.1,
+    10.4
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_158",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    2.35,
+    -137.1
+   ],
+   "size": [
+    0.2,
+    0.3,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_159",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    3.35,
+    -142.0
+   ],
+   "size": [
+    0.2,
+    1.7,
+    12.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_160",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -136.3
+   ],
+   "size": [
+    0.2,
+    1.4,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_161",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -138.1
+   ],
+   "size": [
+    0.2,
+    1.4,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_162",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -138.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_163",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -140.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_164",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -141.45
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_165",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -142.85
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_166",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -144.25
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_167",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -145.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_168",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -147.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_169",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -148.3
+   ],
+   "size": [
+    0.2,
+    1.1,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_170",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -154.8
+   ],
+   "size": [
+    0.2,
+    1.1,
+    10.4
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_171",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    2.35,
+    -149.1
+   ],
+   "size": [
+    0.2,
+    0.3,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_172",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    3.35,
+    -154.0
+   ],
+   "size": [
+    0.2,
+    1.7,
+    12.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_173",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -148.3
+   ],
+   "size": [
+    0.2,
+    1.4,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_174",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -150.1
+   ],
+   "size": [
+    0.2,
+    1.4,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_175",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -150.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_176",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -152.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_177",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -153.45
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_178",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -154.85
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_179",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -156.25
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_180",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -157.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_181",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -159.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_182",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -160.3
+   ],
+   "size": [
+    0.2,
+    1.1,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_183",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    0.55,
+    -166.8
+   ],
+   "size": [
+    0.2,
+    1.1,
+    10.4
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_184",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    2.35,
+    -161.1
+   ],
+   "size": [
+    0.2,
+    0.3,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_185",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    3.35,
+    -166.0
+   ],
+   "size": [
+    0.2,
+    1.7,
+    12.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_186",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -160.3
+   ],
+   "size": [
+    0.2,
+    1.4,
+    0.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_187",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -162.1
+   ],
+   "size": [
+    0.2,
+    1.4,
+    1.0
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_188",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -162.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_189",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -164.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_190",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -165.45
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_191",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -166.85
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_192",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -168.25
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_193",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -169.65
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "WallR_194",
+   "object": "WallR",
+   "role": "ride_wall",
+   "center": [
+    -3.6,
+    1.8,
+    -171.05
+   ],
+   "size": [
+    0.22,
+    1.4,
+    0.1
+   ],
+   "solid": false
+  },
+  {
+   "name": "Alcove_back_0",
+   "object": "Alcove_back",
+   "role": "ride_wall",
+   "center": [
+    5.6,
+    2.1,
+    -33.8
+   ],
+   "size": [
+    0.2,
+    4.2,
+    3.6
+   ],
+   "solid": false
+  },
+  {
+   "name": "Alcove_side0_0",
+   "object": "Alcove_side0",
+   "role": "ride_wall",
+   "center": [
+    4.5,
+    2.1,
+    -31.9
+   ],
+   "size": [
+    2.0,
+    4.2,
+    0.2
+   ],
+   "solid": false
+  },
+  {
+   "name": "Alcove_side1_0",
+   "object": "Alcove_side1",
+   "role": "ride_wall",
+   "center": [
+    4.5,
+    2.1,
+    -35.7
+   ],
+   "size": [
+    2.0,
+    4.2,
+    0.2
+   ],
+   "solid": false
+  }
+ ],
+ "path": [],
+ "spawn": [
+  0.0,
+  1.0,
+  4.0
+ ],
+ "markers": [],
+ "fall_y": -6.0
+}

@@ -20,6 +20,10 @@ test:
 import:
     "{{godot}}" --headless --path . --import
 
+# rebuild every Blender place from its builder, then export glb + sidecar JSON (issue #23)
+export-course:
+    sh art/course/build/export_all.sh
+
 # audit a course against its declared intent (course-law harness); course names live in audit_cli.gd
 audit course="slice":
     "{{godot}}" --headless --path . -s scripts/dev/audit_cli.gd -- {{course}}

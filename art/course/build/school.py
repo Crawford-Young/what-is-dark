@@ -200,7 +200,7 @@ POSTER_M = [material(f"Paper{i}", c, rough=0.75) for i, c in enumerate(POSTER_CO
 
 # ---------------------------------------------------------------- shell (PLAY)
 
-floor = box("Floor", (0, -LEN / 2 + 8, -0.15), (W + 30, LEN + 16, 0.3), M["lino"], "PLAY")
+floor = box("Floor", (0, -LEN / 2 + 8, -0.15), (W + 30, LEN + 16, 0.3), M["lino"], "PLAY", role="floor")
 floor["solid"] = 1.0  # ridden: never dissolves
 box("Ceiling", (0, -LEN / 2 + 8, H + 0.05), (W, LEN + 16, 0.1), M["ceil"], "DRESS")
 
@@ -214,8 +214,8 @@ for top, bot in cuts:
 left.append((y, -LEN + 8))
 for i, (y0, y1) in enumerate(left):
     cy, ly = (y0 + y1) / 2, abs(y0 - y1)
-    box(f"WallL_dado{i}", (XL - 0.1, cy, 0.6), (0.2, ly, 1.2), M["dado"], "PLAY")
-    box(f"WallL_up{i}", (XL - 0.1, cy, (1.2 + H) / 2), (0.2, ly, H - 1.2), M["wall"], "PLAY")
+    box(f"WallL_dado{i}", (XL - 0.1, cy, 0.6), (0.2, ly, 1.2), M["dado"], "PLAY", role="ride_wall")
+    box(f"WallL_up{i}", (XL - 0.1, cy, (1.2 + H) / 2), (0.2, ly, H - 1.2), M["wall"], "PLAY", role="ride_wall")
 for top, bot in cuts:  # lintels over the openings: the hall doors stop at 2.2 m
     z0 = 2.2 if (top, bot) == HALL else 2.5
     box(f"Lintel{top}", (XL - 0.1, (top + bot) / 2, (z0 + H) / 2), (0.2, abs(top - bot), H - z0), M["wall"], "DRESS")
@@ -234,7 +234,9 @@ for s in range(n_seg):
     right.append(((XR + 0.1, y0 - 2.1, 1.8), (0.2, 1.0, 1.4), 0))
     for k in range(7):  # mullions every 1.4 m over the window band
         right.append(((XR + 0.1, y0 - 2.6 - k * 1.4 - 0.05, 1.8), (0.22, 0.1, 1.4), 2))
-boxes_object("WallR", right, [M["wall"], M["dado"], M["frame"]], "PLAY", bevel=0.01)
+# its colliders are its own boxes, one record each (the 1560 vertices are 195 boxes); the window
+# glass and the doors are dressing, so the window band and the doorways stay open to a rider
+boxes_object("WallR", right, [M["wall"], M["dado"], M["frame"]], "PLAY", bevel=0.01, role="ride_wall")
 
 # window glass + half-dropped blinds (DRESS)
 glass, blinds = [], []
@@ -449,10 +451,10 @@ AW = abs(ay0 - ay1)
 AY = (ay0 + ay1) / 2
 AD = 2.0          # alcove depth
 BX = XL - AD      # back wall face
-box("Alcove_back", (BX - 0.1, AY, H / 2), (0.2, AW, H), M["wall"], "PLAY")
+box("Alcove_back", (BX - 0.1, AY, H / 2), (0.2, AW, H), M["wall"], "PLAY", role="ride_wall")
 box("Alcove_dado", (BX + 0.011, AY, 0.6), (0.02, AW, 1.2), M["dado"], "DRESS")
 for k, (sy, face) in enumerate(((ay0, -1), (ay1, 1))):
-    box(f"Alcove_side{k}", (XL - AD / 2, sy - 0.1 * face, H / 2), (AD, 0.2, H), M["wall"], "PLAY")
+    box(f"Alcove_side{k}", (XL - AD / 2, sy - 0.1 * face, H / 2), (AD, 0.2, H), M["wall"], "PLAY", role="ride_wall")
     box(f"Alcove_sdado{k}", (XL - AD / 2, sy + 0.011 * face, 0.6), (AD, 0.02, 1.2), M["dado"], "DRESS")
 box("Alcove_ceil", (XL - AD / 2, AY, H + 0.05), (AD, AW, 0.1), M["ceil"], "DRESS")
 
@@ -649,6 +651,14 @@ for i, line in enumerate(("PLEASE HANG UP", "YOUR COAT")):
     t["gone_at"] = 2
 abox = box("AlcoveLamp", (XL - AD / 2, AY, H - 0.02), (0.5, 0.5, 0.02), M["alcove_lamp"], "MEMORY")
 point_lamp("AlcoveLight", (BX + 1.0, coat_hook[0] + 0.3, 2.7), 55.0, (1.0, 0.85, 0.62), radius=0.25, keep=True)
+
+# ---------------------------------------------------------------- the course (exporter)
+
+# the school is not playable yet (#23 ships the kitchen): a spawn, and no line, markers or door
+sp = bpy.data.objects.new("SPAWN", None)
+sp.location = (0.0, 4.0, 1.0)
+coll("COURSE").objects.link(sp)
+bpy.context.scene["wid_line"] = False
 
 # ---------------------------------------------------------------- cameras
 
