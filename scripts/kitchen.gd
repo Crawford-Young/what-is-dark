@@ -19,7 +19,7 @@ const VOID_START := -20.0
 ## floors. Six floor samples leave the box pass, and the strip spans leave both passes (80 rays
 ## each). Loops 0-4 audit those spans in full.
 const BASELINE_FINDINGS: Array[String] = [
-	# Tooling false positive: each worktop run is a fixed back slab plus an eroding front strip
+	# User ruling (#23): baselined as a tooling false positive (audit fix tracked in #25). Each worktop run is a fixed back slab plus an eroding front strip
 	# abutting it at |x| 4.0, and the span model pairs boxes by x overlap, so the strip-to-strip
 	# span reads the strip's width alone (1.15 m at loop 3). The real landing is strip + slab,
 	# >= 5.6 m wide at every loop.
@@ -37,11 +37,15 @@ const BASELINE_FINDINGS: Array[String] = [
 
 ## Static so `just audit kitchen` can resolve the kitchen before its scene is instantiated.
 static func spec() -> CourseSpec:
-	return Zone.spec_for(SIDECAR_PATH, DECL_PATH, SCENE_PATH, VOID_START, BASELINE_FINDINGS)
+	return _spec_with(ZoneSpec.load_files(SIDECAR_PATH, DECL_PATH))
+
+
+static func _spec_with(zone: ZoneSpec) -> CourseSpec:
+	return Zone.spec_for(zone, DECL_PATH, SCENE_PATH, VOID_START, BASELINE_FINDINGS)
 
 
 func _build_spec() -> CourseSpec:
-	return spec()
+	return _spec_with(_parse_zone(DECL_PATH))
 
 
 func _sidecar_path() -> String:

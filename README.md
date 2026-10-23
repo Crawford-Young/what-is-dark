@@ -53,6 +53,7 @@ The shipped course is audited against its own declared intent. `just audit` inst
 - `just edit` — open the Godot editor
 - `just test` — headless GUT unit tests
 - `just kitchen` — run the kitchen zone (place 2, built from its Blender export)
+- `just export-course` — rebuild every Blender place from its builder and export its glb + sidecar (needs Blender; see the pipeline section of `CLAUDE.md`)
 - `just audit [course]` — course-law audit (default `slice`; also `kitchen`): walk the live course against its declared intent (see the harness section above)
 - `just launch` — 600-frame headless launch smoke, fails on any error or warning (the same gate CI runs)
 - `just import` — import assets headlessly (after adding new assets, or after any `.tscn` edit)

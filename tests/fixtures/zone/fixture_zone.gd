@@ -9,7 +9,8 @@ const VOID_START := -5.0
 
 
 func _build_spec() -> CourseSpec:
-	return Zone.spec_for(SIDECAR_PATH, DECL_PATH, SCENE_PATH, VOID_START, [] as Array[String])
+	var zone := _parse_zone(DECL_PATH)
+	return Zone.spec_for(zone, DECL_PATH, SCENE_PATH, VOID_START, [] as Array[String])
 
 
 func _sidecar_path() -> String:

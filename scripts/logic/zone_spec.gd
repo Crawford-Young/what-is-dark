@@ -256,16 +256,20 @@ func _parse_erode(
 		box_errors.append("erode axis must be 0 (x) or 2 (z), got %s" % str(axis))
 		return {}
 	var anchor: Variant = erode.get("anchor")
-	if not _is_number(anchor) or not ERODE_ANCHORS.has(float(anchor)):
+	var anchor_ok := _is_number(anchor) and ERODE_ANCHORS.has(float(anchor))
+	if not anchor_ok:
 		box_errors.append("erode anchor must be -1, 0 or 1, got %s" % str(anchor))
 	var min_size: Variant = erode.get("min")
-	if not _is_number(min_size):
+	var min_ok := _is_number(min_size)
+	if not min_ok:
 		box_errors.append("erode min must be a number, got %s" % str(min_size))
 	elif size != null and (min_size <= 0.0 or min_size > (size as Vector3)[int(axis)]):
 		box_errors.append(
 			"erode min %s must lie in (0, %s], the box's size on its axis"
 			% [str(min_size), str((size as Vector3)[int(axis)])]
 		)
+	if not (anchor_ok and min_ok):
+		return {}
 	return {"axis": int(axis), "min": float(min_size), "anchor": float(anchor)}
 
 
@@ -286,30 +290,82 @@ func _parse_declarations(raw: Dictionary) -> void:
 			var expected := TYPE_ARRAY if key == "landing_bands" else TYPE_DICTIONARY
 			if typeof(raw[key]) != expected:
 				errors.append("declarations: \"%s\" has the wrong type" % key)
-			else:
-				_declarations[key] = raw[key]
+	# Every entry is type-checked before it is read, and only well-formed entries reach the
+	# manifest: the audit casts them without looking.
+	_declarations["spans"] = _parse_spans(_section(raw, "spans", {}), names)
+	_declarations["surfaces"] = _parse_surfaces(_section(raw, "surfaces", {}), names)
+	_declarations["floors"] = _parse_floors(_section(raw, "floors", {}), names)
+	var bands: Array = []
+	for i in (_section(raw, "landing_bands", []) as Array).size():
+		var band: Variant = raw["landing_bands"][i]
+		if band is Dictionary:
+			bands.append(band)
+		else:
+			errors.append("declarations: landing band %d is not an object" % i)
+	_declarations["landing_bands"] = bands
 
-	for span_id in _declarations["spans"] as Dictionary:
+
+## The section if it has the expected container type, else the empty default (already reported).
+static func _section(raw: Dictionary, key: String, empty: Variant) -> Variant:
+	var value: Variant = raw.get(key, empty)
+	return value if typeof(value) == typeof(empty) else empty
+
+
+func _parse_spans(raw: Dictionary, names: Dictionary) -> Dictionary:
+	var spans := {}
+	for span_id in raw:
+		if raw[span_id] is not Dictionary:
+			errors.append("declarations: span \"%s\" is not an object" % span_id)
+			continue
 		for end in str(span_id).split(">"):
 			if not names.has(end):
 				errors.append("declarations: span \"%s\" names unknown box \"%s\"" % [span_id, end])
-	for surface_name in _declarations["surfaces"] as Dictionary:
+		spans[span_id] = raw[span_id]
+	return spans
+
+
+func _parse_surfaces(raw: Dictionary, names: Dictionary) -> Dictionary:
+	var surfaces := {}
+	for surface_name in raw:
 		if not names.has(surface_name):
 			errors.append("declarations: surface \"%s\" is not a sidecar box" % surface_name)
-		elif ((_declarations["surfaces"] as Dictionary)[surface_name] as Dictionary).has("role"):
+		elif raw[surface_name] is not Dictionary:
+			errors.append("declarations: surface \"%s\" is not an object" % surface_name)
+		elif (raw[surface_name] as Dictionary).has("role"):
 			errors.append(
 				"declarations: %s declares a role — roles come only from the sidecar"
 				% surface_name
 			)
-	var floors: Dictionary = _declarations["floors"]
-	for floor_id in floors:
-		for lane_id in floors[floor_id] as Dictionary:
-			for tile in floors[floor_id][lane_id] as Array:
+		else:
+			surfaces[surface_name] = raw[surface_name]
+	return surfaces
+
+
+func _parse_floors(raw: Dictionary, names: Dictionary) -> Dictionary:
+	var floors := {}
+	for floor_id in raw:
+		if raw[floor_id] is not Dictionary:
+			errors.append("declarations: floor \"%s\" is not an object of lanes" % floor_id)
+			continue
+		var lanes := {}
+		for lane_id in raw[floor_id] as Dictionary:
+			var tiles: Variant = raw[floor_id][lane_id]
+			if tiles is not Array:
+				errors.append(
+					"declarations: floor \"%s\" lane \"%s\" is not a list of boxes"
+					% [floor_id, lane_id]
+				)
+				continue
+			for tile in tiles as Array:
 				if not names.has(str(tile)):
 					errors.append(
 						"declarations: floor %s lane %s names unknown box \"%s\""
 						% [floor_id, lane_id, tile]
 					)
+			lanes[lane_id] = tiles
+		if not lanes.is_empty():
+			floors[floor_id] = lanes
+	return floors
 
 
 # --- shared ----------------------------------------------------------------------------------

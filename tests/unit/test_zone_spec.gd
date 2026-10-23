@@ -236,6 +236,50 @@ func test_a_declaration_naming_an_unknown_box_is_an_error() -> void:
 		assert_string_contains(_joined(spec), unknown)
 
 
+## Hand-authored values are type-checked before any cast: a malformed entry is a listed error,
+## never a script error that leaves `errors` empty (GUT fails a case on an engine error).
+func test_an_erode_record_missing_a_field_is_listed_not_raised() -> void:
+	for case in [
+		[{"axis": 0, "anchor": -1}, "min"],
+		[{"axis": 0, "min": 0.25}, "anchor"],
+		[{"axis": 0, "min": "x", "anchor": -1}, "min"],
+	]:
+		var sidecar := _sidecar()
+		(sidecar["boxes"][1] as Dictionary)["erode"] = case[0]
+		var spec := ZoneSpec.parse(sidecar, {})
+		assert_string_contains(_joined(spec), str(case[1]), str(case[0]))
+		assert_eq(spec.boxes.size(), 2, "the malformed box is dropped: %s" % str(case[0]))
+
+
+func test_a_non_dictionary_surface_entry_is_listed() -> void:
+	var declarations := _declarations()
+	declarations["surfaces"] = {"Slab_1": 5, "Wall_0": {"role": "ride_wall"}}
+	var spec := ZoneSpec.parse(_sidecar(), declarations)
+	assert_string_contains(_joined(spec), "surface \"Slab_1\"")
+	assert_string_contains(_joined(spec), "Wall_0 declares a role", "the other entries still check")
+	assert_false((spec.manifest()["surfaces"]["Slab_1"] as Dictionary).has("5"))
+
+
+func test_malformed_floor_and_lane_entries_are_listed() -> void:
+	var declarations := _declarations()
+	declarations["floors"] = {"F": 3, "G": {"L": 4}}
+	var spec := ZoneSpec.parse(_sidecar(), declarations)
+	assert_string_contains(_joined(spec), "floor \"F\"")
+	assert_string_contains(_joined(spec), "lane \"L\"")
+	assert_eq(spec.manifest()["floors"], {})
+
+
+func test_malformed_span_and_landing_band_entries_are_listed() -> void:
+	var declarations := _declarations()
+	declarations["spans"]["Slab_1>Wall_0"] = "bare_run"
+	declarations["landing_bands"] = [{"id": "B"}, 7]
+	var spec := ZoneSpec.parse(_sidecar(), declarations)
+	assert_string_contains(_joined(spec), "span \"Slab_1>Wall_0\"")
+	assert_string_contains(_joined(spec), "landing band 1")
+	assert_eq((spec.manifest()["spans"] as Dictionary).keys(), ["Slab_0>Slab_1"])
+	assert_eq(spec.manifest()["landing_bands"], [{"id": "B"}])
+
+
 func test_an_unknown_declarations_key_is_an_error() -> void:
 	var declarations := _declarations()
 	declarations["roles"] = {}
