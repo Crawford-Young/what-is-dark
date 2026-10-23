@@ -19,71 +19,71 @@ const LOOP_FLASH_IN := 0.3
 var _loop_active := false
 
 
-func begin_swallow(slice: Slice, player: Player) -> void:
+func begin_swallow(course: Course, player: Player) -> void:
 	player.frozen = true
 	var tween := create_tween()
 	tween.tween_property(_black, "color:a", 1.0, FADE_OUT)
 	tween.tween_interval(HOLD)
-	tween.tween_callback(_respawn.bind(slice, player))
+	tween.tween_callback(_respawn.bind(course, player))
 	tween.tween_property(_black, "color:a", 0.0, FADE_IN)
-	tween.tween_callback(_release.bind(slice, player))
+	tween.tween_callback(_release.bind(course, player))
 
 
-func begin_fall_reset(slice: Slice, player: Player) -> void:
+func begin_fall_reset(course: Course, player: Player) -> void:
 	if player.frozen:
 		return
 	player.frozen = true
 	var tween := create_tween()
 	tween.tween_property(_black, "color:a", 1.0, FALL_FADE_OUT)
-	tween.tween_callback(_fall_respawn.bind(slice, player))
+	tween.tween_callback(_fall_respawn.bind(course, player))
 	tween.tween_property(_black, "color:a", 0.0, FALL_FADE_IN)
 	tween.tween_callback(_release_fall.bind(player))
 
 
-func _fall_respawn(slice: Slice, player: Player) -> void:
-	var idx := maxi(slice.course.nearest_passed_marker(slice.player_progress()), 0)
-	var offset: float = slice.course.marker_progresses[idx]
-	player.teleport(slice.respawn_position(idx), slice.course_direction_at(offset))
-	slice.void_logic.limit_behind(offset, FALL_VOID_GAP)
-	slice.sync_void_wall()
+func _fall_respawn(course: Course, player: Player) -> void:
+	var idx := maxi(course.marker_logic.nearest_passed_marker(course.player_progress()), 0)
+	var offset: float = course.marker_progresses[idx]
+	player.teleport(course.respawn_position(idx), course.course_direction_at(offset))
+	course.void_logic.limit_behind(offset, FALL_VOID_GAP)
+	course.sync_void_wall()
 
 
 func _release_fall(player: Player) -> void:
 	player.frozen = false
 
 
-func _respawn(slice: Slice, player: Player) -> void:
-	var idx := slice.course.setback_index(slice.player_progress(), SETBACK_MARKERS)
-	var offset: float = slice.course.marker_progresses[idx]
-	player.teleport(slice.respawn_position(idx), slice.course_direction_at(offset))
-	slice.void_logic.reset_behind(offset)
-	slice.sync_void_wall()
+func _respawn(course: Course, player: Player) -> void:
+	var idx := course.marker_logic.setback_index(course.player_progress(), SETBACK_MARKERS)
+	var offset: float = course.marker_progresses[idx]
+	player.teleport(course.respawn_position(idx), course.course_direction_at(offset))
+	course.void_logic.reset_behind(offset)
+	course.sync_void_wall()
 
 
-func _release(slice: Slice, player: Player) -> void:
+func _release(course: Course, player: Player) -> void:
 	player.frozen = false
-	slice.catch_armed = true
+	course.catch_armed = true
 
 
-func begin_loop(slice: Slice, player: Player) -> void:
+func begin_loop(course: Course, player: Player) -> void:
 	if _loop_active or player.frozen:
 		return
 	_loop_active = true
 	var tween := create_tween()
 	tween.tween_property(_white, "color:a", 1.0, LOOP_FLASH_OUT)
-	tween.tween_callback(_loop_respawn.bind(slice, player))
+	tween.tween_callback(_loop_respawn.bind(course, player))
 	tween.tween_property(_white, "color:a", 0.0, LOOP_FLASH_IN)
 	tween.tween_callback(_end_loop)
 
 
-func _loop_respawn(slice: Slice, player: Player) -> void:
+func _loop_respawn(course: Course, player: Player) -> void:
 	if player.frozen:
 		return
-	player.shift_to(slice.respawn_position(0))
-	slice.loop_logic.advance_loop()
-	slice.apply_erosion()
-	slice.void_logic.progress = Slice.VOID_START
-	slice.sync_void_wall()
+	player.shift_to(course.respawn_position(0))
+	course.loop_logic.advance_loop()
+	course.apply_erosion()
+	course.void_logic.progress = course.void_start
+	course.sync_void_wall()
 
 
 func _end_loop() -> void:

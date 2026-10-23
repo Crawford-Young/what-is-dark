@@ -20,9 +20,9 @@ test:
 import:
     "{{godot}}" --headless --path . --import
 
-# audit the course against its declared intent (course-law harness)
-audit:
-    "{{godot}}" --headless --path . -s scripts/dev/audit_cli.gd
+# audit a course against its declared intent (course-law harness); course names live in audit_cli.gd
+audit course="slice":
+    "{{godot}}" --headless --path . -s scripts/dev/audit_cli.gd -- {{course}}
 
 # headless launch smoke — 600 frames, the gate CI runs
 launch:
