@@ -40,6 +40,11 @@ back in the second person, and its swallow lines come from these events.
 - **Room for lingering** (spec, Carried forward). Each place gets one **memory object**
   in a quiet pocket off the racing line. It stays visible from the line, and stopping
   there costs time.
+- **Ant scale, 3–5 minutes** (user rulings, 2026-10-23, #23 feel-ride). Every place is
+  built at ant scale (≥ 100×; the rider's movement is unchanged, the world grows) and
+  takes 3–5 minutes to ride. This replaces the ten-minute-lap spec's ~90 s per place. The
+  school (corridor scale) and the kitchen as built below (10×) predate the ruling; the
+  kitchen is rebuilt in #26.
 
 ## The fade, every loop
 
