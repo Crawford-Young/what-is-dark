@@ -7,6 +7,9 @@ const FLOOR_LIMIT_DEG := 38.0  ## must classify the pitched ramps' peak-side edg
 ## y = sin(51.34°)·cos(12°) ≈ 0.764) as WALLS; cos(38°) ≈ 0.788 gives margin; nothing legit in
 ## the lab slopes between 0° and 45° — all real floors are flat, normal y = 1.0
 
+## is_on_floor() reports the last move_and_slide, so after a teleport it still
+## describes where the body WAS (issue #20). Cleared by the next slide.
+var _floor_stale := false
 var _yaw := 0.0
 var _pitch := 0.0
 var _yaw_drain := YawDrain.new()  ## drains render-rate mouse yaw across physics ticks in a
@@ -46,11 +49,12 @@ func _physics_process(delta: float) -> void:
 		wish_dir = wish_dir.normalized()
 
 	var air_wish_speed := minf(SourceMove.RUN_SPEED, SourceMove.AIR_CAP)
-	if is_on_floor() and Input.is_action_pressed(&"jump"):
+	var on_floor := is_on_floor() and not _floor_stale
+	if on_floor and Input.is_action_pressed(&"jump"):
 		# Auto-hop: jump fires on the landing frame, friction never bites.
 		velocity = SourceMove.jump(velocity)
 		velocity = SourceMove.accelerate(velocity, wish_dir, air_wish_speed, SourceMove.AIR_ACCEL, delta)
-	elif is_on_floor():
+	elif on_floor:
 		velocity = SourceMove.apply_friction(velocity, delta)
 		velocity = SourceMove.accelerate(velocity, wish_dir, SourceMove.RUN_SPEED, SourceMove.GROUND_ACCEL, delta)
 	else:
@@ -59,6 +63,7 @@ func _physics_process(delta: float) -> void:
 
 	var pre_slide_velocity := velocity
 	move_and_slide()
+	_floor_stale = false
 	var steep: Array[Vector3] = []
 	for i in get_slide_collision_count():
 		var normal := get_slide_collision(i).get_normal()
@@ -74,6 +79,7 @@ func _physics_process(delta: float) -> void:
 func teleport(pos: Vector3, face_dir: Vector3) -> void:
 	global_position = pos
 	velocity = Vector3.ZERO
+	_floor_stale = true
 	_yaw = atan2(-face_dir.x, -face_dir.z)
 	rotation.y = _yaw
 	_pitch = 0.0

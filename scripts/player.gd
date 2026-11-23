@@ -14,6 +14,10 @@ var frozen := false
 var glancing := false
 var _jump_was_down := false
 var _rays_stale := false
+## is_on_floor() reports the last move_and_slide, so after a teleport it still
+## describes where the body WAS: a grounded restart would apply one tick of
+## ground friction to the spawn velocity (issue #20). Cleared by the next slide.
+var _floor_stale := false
 
 var _yaw := 0.0
 var _pitch := 0.0
@@ -64,16 +68,17 @@ func _physics_process(delta: float) -> void:
 	var on_wall := WallrunLogic.is_rideable_normal(wall_normal)
 	var air_wish_speed := minf(SourceMove.RUN_SPEED, SourceMove.AIR_CAP)
 
-	if WallrunLogic.can_wallrun(is_on_floor(), on_wall, forward_speed):
+	var on_floor := is_on_floor() and not _floor_stale
+	if WallrunLogic.can_wallrun(on_floor, on_wall, forward_speed):
 		velocity = SourceMove.apply_gravity(velocity, delta)
 		velocity = WallrunLogic.ride_velocity(velocity, wall_normal)
 		if WallrunLogic.jump_pressed(_jump_was_down, jump_down):
 			velocity = WallrunLogic.kick_velocity(velocity, wall_normal)
-	elif is_on_floor() and jump_down:
+	elif on_floor and jump_down:
 		# Auto-hop: jump fires on the landing frame, friction never bites.
 		velocity = SourceMove.jump(velocity)
 		velocity = SourceMove.accelerate(velocity, wish_dir, air_wish_speed, SourceMove.AIR_ACCEL, delta)
-	elif is_on_floor():
+	elif on_floor:
 		velocity = SourceMove.apply_friction(velocity, delta)
 		velocity = SourceMove.accelerate(velocity, wish_dir, SourceMove.RUN_SPEED, SourceMove.GROUND_ACCEL, delta)
 	else:
@@ -82,6 +87,7 @@ func _physics_process(delta: float) -> void:
 
 	var pre_slide_velocity := velocity
 	move_and_slide()
+	_floor_stale = false
 	var steep: Array[Vector3] = []
 	for i in get_slide_collision_count():
 		var normal := get_slide_collision(i).get_normal()
@@ -112,6 +118,7 @@ func camera_forward() -> Vector3:
 func teleport(pos: Vector3, face_dir: Vector3) -> void:
 	global_position = pos
 	velocity = Vector3.ZERO
+	_floor_stale = true
 	_yaw = atan2(-face_dir.x, -face_dir.z)
 	rotation.y = _yaw
 	_pitch = 0.0
